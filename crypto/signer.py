@@ -21,9 +21,8 @@ class Signer(object):
         self.ssl_bin = seekout_openssl()
 
     @abstractmethod
-    def sign(self, xml_str, xid):
-        """
-        """
+    def sign(self, str2sign):
+        """signs an string and returns base64 string"""
 
 class SignerError(Exception):
     def __init__(self, message = None):
