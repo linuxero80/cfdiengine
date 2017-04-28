@@ -3,8 +3,8 @@ import os
 import json
 
 class ProfileTree:
-    """
-    """
+    """object to chain other config nodes"""
+
     def __init__(self, data):
         self.data=data
 
@@ -45,6 +45,8 @@ class ProfileTree:
 
 class ProfileReader(object):
     """
+    create a profile tree as per
+    a determined config profile
     """
 
     PNODE_UNIQUE, PNODE_MANY = range(2)
