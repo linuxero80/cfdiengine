@@ -20,7 +20,7 @@ class LocalExec(object):
             output = ''
             while time.time() < tend and rc == None:
                 rc = p.poll()
-                if not rc:
+                if rc == None:
                     try:
                         outs, errs = p.communicate(timeout = 1)
                         output += outs
@@ -28,17 +28,17 @@ class LocalExec(object):
                         pass
             return (output, rc)
 
-        output, rc = monitor(
+        (output, rc) = monitor(
             subprocess.Popen(
                 cmd_tokens,
                 universal_newlines = True,
                 stdout = subprocess.PIPE,
                 stderr = subprocess.STDOUT
             ),
-            time_gap(cmd_timeout)
+            *time_gap(cmd_timeout)
         )
 
-        if not rc:
+        if rc == None:
             raise subprocess.TimeoutExpired(
                 cmd = cmd_tokens,
                 output = output,

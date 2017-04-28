@@ -1,54 +1,64 @@
-from crypto.signer import OpenSslSigner
+from crypto.signer import Signer
+from misc.helperstr import HelperStr
+import os
+import subprocess
 import tempfile
 
-class Sha256rsa(OpenSslSigner):
+class Sha256rsa(Signer):
     """
     """
 
-    __init__(self, priv_key):
-        super().__init__(priv_key)
+    def __init__(self, logger, pem_privkey):
+        super().__init__(logger, pem_privkey)
 
     def sign(self, str2sign):
 
-        def create_pivots():
-            return (
-                tempfile.TemporaryFile(),
-                tempfile.TemporaryFile(),
-                tempfile.TemporaryFile()
-            )
+        def touch(path):
+            with open(path, 'a'):
+                os.utime(path, None)
 
-        def perform(s, sealbin_f, input_f, result_f):
+        sealbin_f = '/tmp/{0}'.format(HelperStr.random_str(8))
+        input_f = '/tmp/{0}'.format(HelperStr.random_str(8))
+        result_f = '/tmp/{0}'.format(HelperStr.random_str(8))
 
-            with input_f as cf:
-                cf.write(s)
+        touch(sealbin_f)
+        touch(input_f)
+        touch(result_f)
 
-            dgst_args = [
-                'dgst',
-                '-sha256',
-                '-sign',
-                self.pk,
-                input_f,
-                '-out',
-                sealbin_f
-            ]
+        with open(input_f, 'a') as cf:
+            cf.write(str2sign)
 
-            base64_args = [
-                'base64',
-                '-in',
-                sealbin_f,
-                '-out',
-                result_f
-            ]
+        dgst_args = [
+            'dgst',
+            '-sha256',
+            '-sign',
+            self.pk,
+            '-out',
+            sealbin_f,
+            input_f
+        ]
 
-            try:
-                self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10)
-                self.le([self.ssl_bin] + base64_args, cmd_timeout = 10)
-            except subprocess.CalledProcessError as e:
-                self.logger.error("Command raised exception: " + str(e))
-                raise SignerError("Output: " + str(e.output))
+        base64_args = [
+            'base64',
+            '-in',
+            sealbin_f,
+            '-out',
+            result_f
+        ]
 
-            t = result_f.readline()
-            os.remove(sealbin_f, input_f, result_f)
-            return t
+        t = None
+        try:
+            self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10, ign_rcs = None)
+            self.le([self.ssl_bin] + base64_args, cmd_timeout = 10, ign_rcs = None)
+        except subprocess.CalledProcessError as e:
+            self.logger.error("Command raised exception: " + str(e))
+            raise SignerError("Output: " + str(e.output))
 
-        return perform(str2sign, create_pivots())
+        t = None
+        with open(result_f, 'r') as rf:
+            t = rf.readline()
+
+        os.remove(sealbin_f)
+        os.remove(input_f)
+        os.remove(result_f)
+        return t

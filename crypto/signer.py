@@ -1,14 +1,14 @@
 from misc.localexec import LocalExec
 from abc import ABCMeta, abstractmethod
 from distutils.spawn import find_executable
-import tempfile
+import tempfile, os
 
-class OpenSslSigner(object):
+class Signer(object):
     """
     """
     __SSL_BIN = "openssl"
 
-    __init__(self, logger, fullpath_pk):
+    def __init__(self, logger, fullpath_pk):
 
         def seekout_openssl():
             executable = find_executable(self.__SSL_BIN)
