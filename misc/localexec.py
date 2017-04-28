@@ -10,9 +10,9 @@ class LocalExec(object):
     def __call__(self, cmd_tokens, cmd_timeout, ign_rcs):
         """Execute a command on local machine."""
 
-        def time_gap():
+        def time_gap(delta):
             t = time.time()
-            return (t, t + cmd_timeout)
+            return (t, t + delta)
 
         def monitor(p, tbegin, tend):
             """Loop until process returns or timeout expires"""
@@ -22,48 +22,44 @@ class LocalExec(object):
                 rc = p.poll()
                 if not rc:
                     try:
-                        outs, errs = proc.communicate(timeout = 1)
+                        outs, errs = p.communicate(timeout = 1)
                         output += outs
                     except subprocess.TimeoutExpired:
                         pass
             return (output, rc)
 
-        def scan_rcs(output, rc):
+        output, rc = monitor(
+            subprocess.Popen(
+                cmd_tokens,
+                universal_newlines = True,
+                stdout = subprocess.PIPE,
+                stderr = subprocess.STDOUT
+            ),
+            time_gap(cmd_timeout)
+        )
 
-            if not rc:
-                raise subprocess.TimeoutExpired(
-                    cmd = cmd_tokens,
-                    output = output,
-                    timeout = cmd_timeout
-                )
+        if not rc:
+            raise subprocess.TimeoutExpired(
+                cmd = cmd_tokens,
+                output = output,
+                timeout = cmd_timeout
+            )
 
-            if rc == 0:
-                return output
+        if rc == 0:
+            return output
 
-            if not ign_rcs:
-                raise subprocess.CalledProcessError(
-                    returncode = rc,
-                    cmd = command,
-                    output = output
-                )
-
-            if rc in ign_rcs:
-                return output
-
+        if not ign_rcs:
             raise subprocess.CalledProcessError(
                 returncode = rc,
-                cmd = command,
+                cmd = cmd_tokens,
                 output = output
             )
 
-        scan_rcs(
-            monitor(
-                subprocess.Popen(
-                    cmd_tokens,
-                    universal_newlines = True,
-                    stdout = subprocess.PIPE,
-                    stderr = subprocess.STDOUT
-                ),
-                time_gap()
-            )
+        if rc in ign_rcs:
+            return output
+
+        raise subprocess.CalledProcessError(
+            returncode = rc,
+            cmd = cmd_tokens,
+            output = output
         )
