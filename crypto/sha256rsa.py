@@ -13,14 +13,26 @@ class Sha256rsa(Signer):
 
     def sign(self, str2sign):
 
+        def fetch_result(path):
+            rs = None
+            statinfo = os.stat(path)
+            if statinfo.st_size > 0:
+                with open(path, 'r') as rf:
+                    rs = rf.readline().replace("\n", "")
+            if rs == None:
+                SignerError("Unexpected ssl output!!!")
+            return rs
+
         def touch(path):
             with open(path, 'a'):
                 os.utime(path, None)
 
+        SIZE_RANDOM_STR = 8
+
         tmp_dir = tempfile.gettempdir()
-        sealbin_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(8))
-        input_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(8))
-        result_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(8))
+        sealbin_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(SIZE_RANDOM_STR))
+        input_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(SIZE_RANDOM_STR))
+        result_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(SIZE_RANDOM_STR))
 
         touch(sealbin_f)
         touch(input_f)
@@ -55,11 +67,10 @@ class Sha256rsa(Signer):
             self.logger.error("Command raised exception: " + str(e))
             raise SignerError("Output: " + str(e.output))
 
-        t = None
-        with open(result_f, 'r') as rf:
-            t = rf.readline().replace("\n", "")
+        rs = fetch_result(result_f)
 
         os.remove(sealbin_f)
         os.remove(input_f)
         os.remove(result_f)
-        return t
+
+        return rs
