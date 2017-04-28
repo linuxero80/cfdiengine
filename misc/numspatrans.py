@@ -187,7 +187,7 @@ def __transdec6(n, flag = False):
     return __transdec5(n, flag)
 
 
-def transnum_spa(n):
+def numspatrans(n):
     """
     translates int to spanish phrase
     """
