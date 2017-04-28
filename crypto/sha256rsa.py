@@ -17,9 +17,10 @@ class Sha256rsa(Signer):
             with open(path, 'a'):
                 os.utime(path, None)
 
-        sealbin_f = '/tmp/{0}'.format(HelperStr.random_str(8))
-        input_f = '/tmp/{0}'.format(HelperStr.random_str(8))
-        result_f = '/tmp/{0}'.format(HelperStr.random_str(8))
+        tmp_dir = tempfile.gettempdir()
+        sealbin_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(8))
+        input_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(8))
+        result_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(8))
 
         touch(sealbin_f)
         touch(input_f)
@@ -56,7 +57,7 @@ class Sha256rsa(Signer):
 
         t = None
         with open(result_f, 'r') as rf:
-            t = rf.readline()
+            t = rf.readline().replace("\n", "")
 
         os.remove(sealbin_f)
         os.remove(input_f)

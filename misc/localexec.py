@@ -28,7 +28,7 @@ class LocalExec(object):
                         pass
             return (output, rc)
 
-        (output, rc) = monitor(
+        output, rc = monitor(
             subprocess.Popen(
                 cmd_tokens,
                 universal_newlines = True,
@@ -45,17 +45,10 @@ class LocalExec(object):
                 timeout = cmd_timeout
             )
 
-        if rc == 0:
-            return output
+        if ign_rcs == None:
+            ign_rcs = []
 
-        if not ign_rcs:
-            raise subprocess.CalledProcessError(
-                returncode = rc,
-                cmd = cmd_tokens,
-                output = output
-            )
-
-        if rc in ign_rcs:
+        if rc in ign_rcs or rc == 0:
             return output
 
         raise subprocess.CalledProcessError(
