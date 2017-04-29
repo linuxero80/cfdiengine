@@ -64,7 +64,7 @@ class ProfileReader(object):
             try:
                 json_lines = open(p_file_path).read()
                 parsed_json = json.loads(json_lines)
-                return parsed_json['abft_profile']
+                return parsed_json['cfdi_engine_profile']
             except (KeyError, OSError, IOError) as e:
                 self.__logger.error(e)
                 self.__logger.fatal(

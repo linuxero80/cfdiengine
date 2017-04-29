@@ -52,7 +52,7 @@ def dmcli(s_file, args, logger):
 
     logging.basicConfig(level=logging.DEBUG if args.dm_debug else logging.INFO)
     logger.debug(args)
-    config = read_settings()
+    pt = read_settings()
 
     if not args.dm_output:
         raise Exception("not defined output file")
@@ -74,7 +74,9 @@ def dmcli(s_file, args, logger):
         except ValueError:
             raise Exception("input variables bad conformed")
 
-        dpl = DocPipeLine(logger, rdirs_conf = None, pgsql_conf = None)
+        dpl = DocPipeLine(logger,
+            rdirs_conf = pt.res.dirs,
+            pgsql_conf = pt.dbms.pgsql_conn)
         dpl.run(self, args.dm_builder, args.dm_output, **kwargs)
     else:
         raise Exception("builder module not define")

@@ -9,20 +9,26 @@
                 "port" : " 5432"
             }           
         },
-        "rdirs_skeleton":[
-            {
-                "name": "images",
-                "value": "images"
-            },
-            {
-                "name": "cfdi_output",
-                "value": "cfdi/timbre/emitidos"
-            },
-            {
-                "name": "cfdi_xslt",
-                "value": "schemas/xsl"
-            }
-        ]
+        "res":{
+            "dirs":[
+                {
+                    "name": "images",
+                    "value": "images"
+                },
+                {
+                    "name": "ssl",
+                    "value": "ssl"
+                },
+                {
+                    "name": "cfdi_output",
+                    "value": "cfdi/timbre/emitidos"
+                },
+                {
+                    "name": "cfdi_xslt",
+                    "value": "schemas/xsl"
+                }
+            ]
+        }
     }
 }
 
