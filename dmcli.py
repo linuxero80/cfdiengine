@@ -6,19 +6,24 @@ import traceback
 import argparse
 import configparser
 import logging
-from docmaker.pipeline import build_document
+from docmaker.pipeline import DocPipeLine
+from custom.profile import ProfileReader
 
 def __set_cmdargs_up():
     """parses the cmd line arguments at the call"""
 
     psr_desc='Document maker command line control interface'
-    psr_epi='The file config.ini is used to specify defaults'
+    psr_epi='The config profile is used to specify defaults'
 
     psr = argparse.ArgumentParser(description=psr_desc, epilog=psr_epi)
 
     psr.add_argument(
         '-d', '--debug', action='store_true',
         dest='dm_debug', help='print debug information'
+    )
+    psr.add_argument(
+        '-c', '--config', action='store',
+        dest='config', help='load an specific config profile'
     )
     psr.add_argument(
         '-b', '--builder',
@@ -31,10 +36,6 @@ def __set_cmdargs_up():
     psr.add_argument(
         '-o', '--output',
         dest='dm_output', help='specify the output file'
-    )
-    psr.add_argument(
-        '-l', '--list', action='store_true',
-        dest='dm_show', help='list builder supported modules'
     )
 
     return psr.parse_args()
@@ -56,13 +57,6 @@ def dmcli(s_file, args, logger):
     logger.debug(args)
     config = read_settings()
 
-    if args.dm_show:
-        print('list of builder supported modules')
-        supported_ones = config['doc builders']['supported'].split(' ')
-        for m in supported_ones:
-            print("> %s" % (m))
-        return
-
     if not args.dm_output:
         raise Exception("not defined output file")
 
@@ -83,24 +77,24 @@ def dmcli(s_file, args, logger):
         except ValueError:
             raise Exception("input variables bad conformed")
 
-        file_path = build_document(
-            args.dm_builder,
-            logger,
-            read_settings(),
-            args.dm_output,
-            **kwargs
-        )
+        dpl = DocPipeLine(logger, rdirs_conf = None, pgsql_conf = None)
+        dpl.run(self, args.dm_builder, args.dm_output, **kwargs)
     else:
         raise Exception("builder module not define")
 
 if __name__ == "__main__":
 
-    __CONFIG_FILE = 'config.ini'
+    RESOURCES_DIR = '{}/resources'.format(expanduser("~"))
+    PROFILES_DIR = '{}/profiles'.format(RESOURCES_DIR)
+    DEFAULT_PROFILE = 'default.json'
+
+    prof = '{}/{}'.format(PROFILES_DIR,
+        args.config if args.config else DEFAULT_PROFILE)
 
     logger = logging.getLogger(__name__)
     args = __set_cmdargs_up()
     try:
-        dmcli(__CONFIG_FILE, args, logger)
+        dmcli(prof, args, logger)
         logger.info('successful builder execution')
     except:
         if args.dm_debug:
