@@ -18,7 +18,7 @@ public final class DatFrame {
         this();
         this.actionLength = DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH
             + action.getData().length;
-        this.header = SDUTools.encodeDatFrameHeader(actionLength);
+        this.header = DatFrame.encodeDatFrameHeader(actionLength);
         this.body[0] = action.getId();
         this.body[1] = action.getTransaction();
         System.arraycopy(action.getData(), 0, this.body,
@@ -73,7 +73,7 @@ public final class DatFrame {
         return header;
     }
 
-    public static int decodeSDUFrameHeader(final byte header[]) {
+    public static int decodeDatFrameHeader(final byte header[]) {
         int rc = 0;
 
         if (header.length == DatFrame.DAT_FRAME_HEADER_LENGTH) {
