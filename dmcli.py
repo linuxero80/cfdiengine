@@ -74,10 +74,13 @@ def dmcli(s_file, args, logger):
         except ValueError:
             raise Exception("input variables bad conformed")
 
-        dpl = DocPipeLine(logger,
-            rdirs_conf = pt.res.dirs,
-            pgsql_conf = pt.dbms.pgsql_conn)
-        dpl.run(self, args.dm_builder, args.dm_output, **kwargs)
+        try:
+            dpl = DocPipeLine(logger,
+                rdirs_conf = pt.res.dirs,
+                pgsql_conf = pt.dbms.pgsql_conn)
+            dpl.run(self, args.dm_builder, args.dm_output, **kwargs)
+        except:
+            raise Exception("problems in document pipeline")
     else:
         raise Exception("builder module not define")
 
