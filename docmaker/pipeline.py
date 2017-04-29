@@ -64,7 +64,7 @@ class DocPipeLine(object):
         )
 
     def __create(conn, d_rdirs, output_file, **kwargs):
-
+        """runs pipeline's steps"""
         dat = None
 
         if len(d_rdirs) > 0:
@@ -97,7 +97,7 @@ class DocPipeLine(object):
                 ProfileReader.get_content(self.pgsql_conf.user, ProfileReader.PNODE_UNIQUE)
                 ProfileReader.get_content(self.pgsql_conf.host, ProfileReader.PNODE_UNIQUE)
                 ProfileReader.get_content(self.pgsql_conf.passwd, ProfileReader.PNODE_UNIQUE)
-                ProfileReader.get_content(self.pgsql_conf.port ProfileReader.PNODE_UNIQUE)
+                ProfileReader.get_content(self.pgsql_conf.port, ProfileReader.PNODE_UNIQUE)
             )
 
             return psycopg2.connect(conn_str)
