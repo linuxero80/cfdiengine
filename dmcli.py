@@ -4,7 +4,6 @@ import os
 import sys
 import traceback
 import argparse
-import configparser
 import logging
 from docmaker.pipeline import DocPipeLine
 from custom.profile import ProfileReader
@@ -44,14 +43,12 @@ def __set_cmdargs_up():
 def dmcli(s_file, args, logger):
 
     def read_settings():
-        c = configparser.ConfigParser()
-        logger.debug("looking for settings file in:\n{0}".format(
+        logger.debug("looking for config profile file in:\n{0}".format(
             os.path.abspath(s_file)))
         if os.path.isfile(s_file):
-            c.read(s_file)
-        else:
-            raise Exception("unable to locate the settings file")
-        return c
+            reader = ProfileReader(logger)
+            return reader(s_file)
+        raise Exception("unable to locate the config profile file")
 
     logging.basicConfig(level=logging.DEBUG if args.dm_debug else logging.INFO)
     logger.debug(args)

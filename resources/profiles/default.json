@@ -1,0 +1,28 @@
+{
+    "cfdi_engine_profile": {
+        "dbms": {
+            "pgsql_conn": {
+                "host" : "localhost",
+                "db" : "instance01",
+                "user" : "instance01",
+                "passwd" : "instance01",
+                "port" : " 5432"
+            }           
+        },
+        "rdirs_skeleton":[
+            {
+                "name": "images",
+                "value": "images"
+            },
+            {
+                "name": "cfdi_output",
+                "value": "cfdi/timbre/emitidos"
+            },
+            {
+                "name": "cfdi_xslt",
+                "value": "schemas/xsl"
+            }
+        ]
+    }
+}
+
