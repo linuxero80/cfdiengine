@@ -14,6 +14,9 @@ public final class DatFrame {
     public static final int DAT_ACTION_DATA_SEGMENT_MAX_LENGTH = DAT_FRAME_BODY_MAX_LENGTH - DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH;
     public static final int C_NULL_CHARACTER = 0;
 
+    public static final byte DAT_ACK = (byte) 0x06;
+    public static final byte DAT_NAK = (byte) 0x15;
+
     public DatFrame(DatAction action) {
         this();
         this.actionLength = DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH
@@ -82,10 +85,11 @@ public final class DatFrame {
             rc = Integer.parseInt(strHeader.trim());
 
             if (rc > DatFrame.DAT_FRAME_BODY_MAX_LENGTH) {
+                // we should throw an exception here
                 return rc = -1201;
             }
         } else {
-            rc = -1200;
+            rc = -1200; // we should throw an exception here
         }
 
         return rc;
