@@ -1,5 +1,7 @@
-from api.service import CfdiEngine, CfdiEngineError
+#!/usr/bin/python3
 
+from api.service import CfdiEngine, CfdiEngineError
+from os.path import expanduser
 import os
 import inspect
 import traceback
@@ -38,8 +40,8 @@ def setup_log(debug=False):
 
 def go_service(args):
 
-    RESOURCES_DIR = 'resources'
-    PROFILES_DIR = '{0}/profiles'.format(RESOURCES_DIR)
+    RESOURCES_DIR = '{}/resources'.format(expanduser("~"))
+    PROFILES_DIR = '{}/profiles'.format(RESOURCES_DIR)
     DEFAULT_PORT = 10080
     DEFAULT_PROFILE = 'default.json'
 
