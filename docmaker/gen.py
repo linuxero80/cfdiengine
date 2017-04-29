@@ -5,7 +5,7 @@ class BuilderGen(metaclass=ABCMeta):
     Builder interface base class.
     """
 
-    def  __init__(self, logger, *args, **kwargs):
+    def  __init__(self, logger):
         self.logger = logger
 
     def __str__(self):

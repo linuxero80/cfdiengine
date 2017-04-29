@@ -44,7 +44,7 @@ class DocPipeLine(object):
                 msg = "module {0} has no {1} class implemented".format(b, cname)
                 raise DocBuilderImptError(msg)
 
-            self.builder = getattr(hw_mod, cname)(self.logger, **kwargs)
+            self.builder = getattr(hw_mod, cname)(self.logger)
 
             if not isinstance(self.builder, BuilderGen) and not issubclass(self.builder.__class__, BuilderGen):
                 msg = "unknown support library specification in {0}".format(self.builder)
