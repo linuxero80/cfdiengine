@@ -12,10 +12,12 @@ class Session extends Thread {
     private Socket socket;
     private Deque<DatFrame> writeChunks;
     private Object outGoingMutex;
+    private Monitor monitor;
 
     public Session(final String serverAddress, final int port) throws IOException {
         this(new Socket(serverAddress, port));
     }
+
     public Session(Socket socket) {
         this.socket = socket;
         this.writeChunks = new LinkedList<>();
@@ -72,5 +74,7 @@ class Session extends Thread {
             this.release();
         }
     }
+
+    
 }
 

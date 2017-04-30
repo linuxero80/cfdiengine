@@ -2,6 +2,16 @@ package com.maxima.bbgum;
 
 public class EventBlackBox implements EventElem {
 
+    private final Monitor mon;
+
+    public EventBlackBox(Monitor mon) {
+        this.mon = mon;
+    }
+
+    public Monitor getMonitor() {
+        return this.mon;
+    }
+
     @Override
     public void inComming(EventController v, DatAction action) {
         v.handlerInComming(this, action);
