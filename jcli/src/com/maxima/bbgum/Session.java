@@ -6,7 +6,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Deque;
 import java.util.LinkedList;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class Session extends Thread {
 
@@ -26,6 +27,7 @@ class Session extends Thread {
         this.mon = new Monitor(this);
     }
 
+    @Override
     public void run() {
         try {
             InputStream is = this.socket.getInputStream();
@@ -33,35 +35,43 @@ class Session extends Thread {
                 if (this.readHeadHandler(is) < 0) break;
             }
             is.close();
-        } catch (IOException e) {
-            // we should capture e info upon logger
+        } catch (Exception ex) {
+            Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public void deliver(Action action) throws IOException {
+    public void deliver(Action action) throws SessionError {
 
-        Frame frame = new Frame(action);
+        Frame f = null;
+
+        try {
+            f = new Frame(action);
+        } catch (FrameError ex) {
+            throw new SessionError(ex.getMessage());
+        }
+
         boolean writeInProgress;
 
         synchronized (outGoingMutex) {
             writeInProgress = !this.writeChunks.isEmpty();
-            this.writeChunks.addLast(frame);
+            this.writeChunks.addLast(f);
         }
 
         if (!writeInProgress) {
-
             byte[] data = this.writeChunks.getFirst().getDatFrame();
-            OutputStream os = this.socket.getOutputStream();
-
-            os.write(data, 0,
-                Frame.FRAME_HEADER_LENGTH +
-                Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH +
-                action.getData().length);
-
-            os.flush();
-            this.release();
+            OutputStream os;
+            try {
+                os = this.socket.getOutputStream();
+                os.write(data, 0,
+                    Frame.FRAME_HEADER_LENGTH +
+                    Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH +
+                    action.getData().length);
+                os.flush();
+                this.release();
+            } catch (IOException ex) {
+                throw new SessionError(ex.getMessage());
+            }
         }
-
     }
 
     private void release() throws IOException {
@@ -104,12 +114,19 @@ class Session extends Thread {
         return rc;
     }
 
-    private int readHeadHandler(InputStream is) throws IOException {
+    private int readHeadHandler(InputStream is) throws FrameError {
         int rc = 0;
 
         byte[] receivedBytes = new byte[Frame.FRAME_HEADER_LENGTH];
-        int res = is.read(receivedBytes, 0,
+        int res = 0;
+        try {
+            res = is.read(receivedBytes, 0,
                 Frame.FRAME_HEADER_LENGTH);
+        } catch (IOException ex) {
+            String msg = "Problems ocurried when reading"
+                    + " frame header from socket";
+            throw new FrameError(msg);
+        }
 
         if (res < 0) rc = res;
         else {
@@ -117,7 +134,13 @@ class Session extends Thread {
 
             if (size < 0) rc = size;
             else {
-                res = this.readBodyHandler(is, size);
+                try {
+                    res = this.readBodyHandler(is, size);
+                } catch (IOException ex) {
+                    String msg = "Problems ocurried when reading"
+                        + " frame body from socket";
+                    throw new FrameError(msg);
+                }
                 if (res < 0) rc = res;
             }
         }
