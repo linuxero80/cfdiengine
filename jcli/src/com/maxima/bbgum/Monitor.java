@@ -22,4 +22,8 @@ public final class Monitor {
 
         this.blackBox = new EventBlackBox(this);
     }
+
+    public void reciveActionFromReceiver(DatAction action) {
+
+    }
 }
