@@ -62,6 +62,10 @@ public final class Frame {
         return action;
     }
 
+    public static byte calcIdForACKorNAK(byte id) {
+        return (byte)(id + 1);
+    }
+
     public static byte[] encodeDatFrameHeader(final int actionLength) {
         byte[] header = new byte[Frame.DAT_FRAME_HEADER_LENGTH];
         byte[] ascii;

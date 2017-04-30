@@ -53,11 +53,11 @@ public abstract class EventMachineSWR implements EventController {
 
                 dataForAck[1] = (byte)result;
                 Monitor mc = v.getMonitor();
-                Action newSduActionToAssemble = new Action();
-                newSduActionToAssemble.setId(Frame.calcActionIdForACKorNAK(action.getId()));
-                newSduActionToAssemble.setTransaction(action.getTransaction());
-                newSduActionToAssemble.setData(dataForAck);
-                mc.sendToDeliver(newSduActionToAssemble);
+                Action a = new Action();
+                a.setId(Frame.calcIdForACKorNAK(action.getId()));
+                a.setTransaction(action.getTransaction());
+                a.setData(dataForAck);
+                mc.sendToDeliver(a);
                 this.endFlowFlag = true;
                 break;
             }
