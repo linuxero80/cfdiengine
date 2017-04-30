@@ -1,5 +1,8 @@
 package com.maxima.bbgum;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+
 public final class DatFrame {
 
     private byte[] header;

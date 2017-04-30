@@ -6,11 +6,15 @@ public class DatAction {
     private byte transaction;
     private byte[] data;
 
+    public DatAction() {
+
+    }
+
     public DatAction(final byte[] data) {
 
         if (data.length > DatFrame.DAT_FRAME_BODY_MAX_LENGTH) {
             // we should throw an exception here
-            System.out.println(" DatAction can not be bigger than " + DatFrame.SDU_FRAME_BODY_MAX_LENGTH + " " + "bytes");
+            System.out.println(" DatAction can not be bigger than " + DatFrame.DAT_FRAME_BODY_MAX_LENGTH + " " + "bytes");
         }
 
         this.setId(data[0]);
