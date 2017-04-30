@@ -1,5 +1,7 @@
 package com.maxima.bbgum;
 
+import java.io.IOException;
+
 public final class Monitor {
 
     static final int TRANSACTION_NUM_START_VALUE = 1;
@@ -23,11 +25,11 @@ public final class Monitor {
         this.blackBox = new EventBlackBox(this);
     }
 
-    public void reciveActionFromSession(DatAction action) {
+    public void reciveActionFromSession(Action action) {
 
     }
 
-    public void sendToDeliver(DatAction action) {
+    public void sendToDeliver(Action action) throws IOException {
         this.session.deliver(action);
     }
 }

@@ -13,17 +13,17 @@ public class EventBlackBox implements EventElem {
     }
 
     @Override
-    public void inComming(EventController v, DatAction action) {
+    public void inComming(EventController v, Action action) {
         v.handlerInComming(this, action);
     }
 
     @Override
-    public void outComming(EventController v, DatAction action) {
+    public void outComming(EventController v, Action action) {
         v.handlerOutComming(this, action);
     }
 
     @Override
-    public void timeOut(EventController v, DatAction action) {
+    public void timeOut(EventController v, Action action) {
         v.handlerTimeOut(this, action);
     }
 

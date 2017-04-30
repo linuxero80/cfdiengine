@@ -27,7 +27,7 @@ public abstract class EventMachineSWR implements EventController {
 
     @SuppressWarnings("incomplete-switch")
     @Override
-    public void handlerInComming(EventBlackBox v, DatAction action) {
+    public void handlerInComming(EventBlackBox v, Action action) {
         switch (this.p) {
             case RECIVE_ACK: {
                 int response = analyzeAck(action);
@@ -41,20 +41,20 @@ public abstract class EventMachineSWR implements EventController {
                 break;
             }
             case RECIVE_RESPONSE: {
-                byte[] dataForAck = new byte[DatFrame.DAT_ACTION_ACK_DATA_SIZE];
+                byte[] dataForAck = new byte[Frame.DAT_ACTION_ACK_DATA_SIZE];
                 int result = analyzeData(action);
 
                 if (result == 0) {
-                    dataForAck[0] = DatFrame.DAT_ACK;
+                    dataForAck[0] = Frame.DAT_ACK;
                 } else {
                     this.conclusion = result;
-                    dataForAck[0] = DatFrame.DAT_NAK;
+                    dataForAck[0] = Frame.DAT_NAK;
                 }
 
                 dataForAck[1] = (byte)result;
                 Monitor mc = v.getMonitor();
-                DatAction newSduActionToAssemble = new DatAction();
-                newSduActionToAssemble.setId(DatFrame.calcActionIdForACKorNAK(action.getId()));
+                Action newSduActionToAssemble = new Action();
+                newSduActionToAssemble.setId(Frame.calcActionIdForACKorNAK(action.getId()));
                 newSduActionToAssemble.setTransaction(action.getTransaction());
                 newSduActionToAssemble.setData(dataForAck);
                 mc.sendToDeliver(newSduActionToAssemble);
@@ -65,14 +65,14 @@ public abstract class EventMachineSWR implements EventController {
     }
 
     @Override
-    public void handlerOutComming(EventBlackBox v, DatAction action) {
+    public void handlerOutComming(EventBlackBox v, Action action) {
         this.p = Progress.RECIVE_ACK;
         Monitor mc = v.getMonitor();
         mc.sendToDeliver(action);
     }
 
     @Override
-    public void handlerTimeOut(EventBlackBox v, DatAction action) {
+    public void handlerTimeOut(EventBlackBox v, Action action) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -81,7 +81,7 @@ public abstract class EventMachineSWR implements EventController {
         return this.conclusion;
     }
 
-    public abstract int analyzeAck(DatAction action);
+    public abstract int analyzeAck(Action action);
 
-    public abstract int analyzeData(DatAction action);
+    public abstract int analyzeData(Action action);
 }

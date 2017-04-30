@@ -16,17 +16,17 @@ public abstract class EventMachineSS implements EventController {
     }
 
     @Override
-    public void handlerOutComming(EventBlackBox v, DatAction action) {
+    public void handlerOutComming(EventBlackBox v, Action action) {
 
     }
 
     @Override
-    public void handlerInComming(EventBlackBox v, DatAction action) {
+    public void handlerInComming(EventBlackBox v, Action action) {
 
     }
 
     @Override
-    public void handlerTimeOut(EventBlackBox v, DatAction action) {
+    public void handlerTimeOut(EventBlackBox v, Action action) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -35,5 +35,5 @@ public abstract class EventMachineSS implements EventController {
         return this.conclusion;
     }
 
-    public abstract int analyzeAck(DatAction action);
+    public abstract int analyzeAck(Action action);
 }

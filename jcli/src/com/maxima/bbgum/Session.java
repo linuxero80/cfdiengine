@@ -11,7 +11,7 @@ import java.util.LinkedList;
 class Session extends Thread {
 
     private Socket socket;
-    private Deque<DatFrame> writeChunks;
+    private Deque<Frame> writeChunks;
     private Object outGoingMutex;
     private Monitor mon;
 
@@ -21,7 +21,7 @@ class Session extends Thread {
 
     public Session(Socket socket) {
         this.socket = socket;
-        this.writeChunks = new LinkedList<>();
+        this.writeChunks = new LinkedList<Frame>();
         this.outGoingMutex = new Object();
         this.mon = new Monitor(this);
     }
@@ -38,9 +38,9 @@ class Session extends Thread {
         }
     }
 
-    public void deliver(DatAction action) throws IOException {
+    public void deliver(Action action) throws IOException {
 
-        DatFrame frame = new DatFrame(action);
+        Frame frame = new Frame(action);
         boolean writeInProgress;
 
         synchronized (outGoingMutex) {
@@ -54,8 +54,8 @@ class Session extends Thread {
             OutputStream os = this.socket.getOutputStream();
 
             os.write(data, 0,
-                DatFrame.DAT_FRAME_HEADER_LENGTH +
-                DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH +
+                Frame.DAT_FRAME_HEADER_LENGTH +
+                Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH +
                 action.getData().length);
 
             os.flush();
@@ -73,15 +73,15 @@ class Session extends Thread {
         }
 
         if (isNotEmpty) {
-            DatFrame frame = this.writeChunks.getFirst();
+            Frame frame = this.writeChunks.getFirst();
             int lengthActionData = frame.getDatAction().getData().length;
             byte[] data = frame.getDatFrame();
 
             OutputStream os = this.socket.getOutputStream();
 
             os.write(data, 0,
-                DatFrame.DAT_FRAME_HEADER_LENGTH +
-                DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH +
+                Frame.DAT_FRAME_HEADER_LENGTH +
+                Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH +
                 lengthActionData);
 
             os.flush();
@@ -97,7 +97,7 @@ class Session extends Thread {
 
         if (res < 0) rc = res;
         else {
-            DatAction action = new DatAction(receivedBytes);
+            Action action = new Action(receivedBytes);
             this.mon.reciveActionFromSession(action);
         }
 
@@ -107,13 +107,13 @@ class Session extends Thread {
     private int readHeadHandler(InputStream is) throws IOException {
         int rc = 0;
 
-        byte[] receivedBytes = new byte[DatFrame.DAT_FRAME_HEADER_LENGTH];
+        byte[] receivedBytes = new byte[Frame.DAT_FRAME_HEADER_LENGTH];
         int res = is.read(receivedBytes, 0,
-                DatFrame.DAT_FRAME_HEADER_LENGTH);
+                Frame.DAT_FRAME_HEADER_LENGTH);
 
         if (res < 0) rc = res;
         else {
-            int size = DatFrame.decodeDatFrameHeader(receivedBytes);
+            int size = Frame.decodeDatFrameHeader(receivedBytes);
 
             if (size < 0) rc = size;
             else {

@@ -3,7 +3,7 @@ package com.maxima.bbgum;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
-public final class DatFrame {
+public final class Frame {
 
     private byte[] header;
     private byte[] body;
@@ -20,39 +20,39 @@ public final class DatFrame {
     public static final byte DAT_ACK = (byte) 0x06;
     public static final byte DAT_NAK = (byte) 0x15;
 
-    public DatFrame(DatAction action) {
+    public Frame(Action action) {
         this();
-        this.actionLength = DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH
+        this.actionLength = Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH
             + action.getData().length;
-        this.header = DatFrame.encodeDatFrameHeader(actionLength);
+        this.header = Frame.encodeDatFrameHeader(actionLength);
         this.body[0] = action.getId();
         this.body[1] = action.getTransaction();
         System.arraycopy(action.getData(), 0, this.body,
-            DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH,
+            Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH,
             action.getData().length);
     }
 
-    private DatFrame() {
-        this.header = new byte[DatFrame.DAT_FRAME_HEADER_LENGTH];
-        this.body = new byte[DatFrame.DAT_FRAME_BODY_MAX_LENGTH];
+    private Frame() {
+        this.header = new byte[Frame.DAT_FRAME_HEADER_LENGTH];
+        this.body = new byte[Frame.DAT_FRAME_BODY_MAX_LENGTH];
         this.actionLength = 0;
     }
 
     public byte[] getDatFrame() {
-        byte[] data = new byte[DatFrame.DAT_FRAME_FULL_MAX_LENGTH];
+        byte[] data = new byte[Frame.DAT_FRAME_FULL_MAX_LENGTH];
         System.arraycopy(this.header, 0, data, 0, this.header.length);
         System.arraycopy(this.body, 0, data, this.header.length, this.body.length);
         return data;
     }
 
-    public final DatAction getDatAction() {
-        DatAction action = new DatAction();
+    public final Action getDatAction() {
+        Action action = new Action();
         int dataBufferSize = this.actionLength
-            - DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH;
+            - Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH;
         byte[] data = new byte[dataBufferSize];
 
         System.arraycopy(this.body,
-            DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH, data, 0,
+            Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH, data, 0,
             data.length);
 
         action.setId(this.body[0]);
@@ -63,7 +63,7 @@ public final class DatFrame {
     }
 
     public static byte[] encodeDatFrameHeader(final int actionLength) {
-        byte[] header = new byte[DatFrame.DAT_FRAME_HEADER_LENGTH];
+        byte[] header = new byte[Frame.DAT_FRAME_HEADER_LENGTH];
         byte[] ascii;
 
         try {
@@ -82,12 +82,12 @@ public final class DatFrame {
     public static int decodeDatFrameHeader(final byte header[]) {
         int rc = 0;
 
-        if (header.length == DatFrame.DAT_FRAME_HEADER_LENGTH) {
+        if (header.length == Frame.DAT_FRAME_HEADER_LENGTH) {
             Charset charset = Charset.forName("US-ASCII");
             String strHeader = new String(header, 0, header.length, charset);
             rc = Integer.parseInt(strHeader.trim());
 
-            if (rc > DatFrame.DAT_FRAME_BODY_MAX_LENGTH) {
+            if (rc > Frame.DAT_FRAME_BODY_MAX_LENGTH) {
                 // we should throw an exception here
                 return rc = -1201;
             }
