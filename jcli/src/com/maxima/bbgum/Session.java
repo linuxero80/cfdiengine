@@ -25,6 +25,18 @@ class Session extends Thread {
         this.outGoingMutex = new Object();
     }
 
+    public void run() {
+        try {
+            InputStream is = this.socket.getInputStream();
+            for (;;) {
+                if (this.readHeadHandler(is) < 0) break;
+            }
+            is.close();
+        } catch (IOException e) {
+            // we should capture e info upon logger
+        }
+    }
+
     public void deliver(DatAction action) throws IOException {
 
         DatFrame frame = new DatFrame(action);
