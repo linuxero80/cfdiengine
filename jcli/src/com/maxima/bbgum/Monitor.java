@@ -26,4 +26,8 @@ public final class Monitor {
     public void reciveActionFromSession(DatAction action) {
 
     }
+
+    public void sendToDeliver(DatAction action) {
+        this.session.deliver(action);
+    }
 }

@@ -15,7 +15,7 @@ public abstract class EventMachineSWR implements EventController {
 
     Progress p;
 
-    public SendWithResponse() {
+    public EventMachineSWR() {
         this.p = Progress.SEND;
         this.endFlowFlag = false;
     }
@@ -47,7 +47,7 @@ public abstract class EventMachineSWR implements EventController {
                 if (result == 0) {
                     dataForAck[0] = DatFrame.DAT_ACK;
                 } else {
-                    this.lifeResume = result;
+                    this.conclusion = result;
                     dataForAck[0] = DatFrame.DAT_NAK;
                 }
 
@@ -57,7 +57,7 @@ public abstract class EventMachineSWR implements EventController {
                 newSduActionToAssemble.setId(DatFrame.calcActionIdForACKorNAK(action.getId()));
                 newSduActionToAssemble.setTransaction(action.getTransaction());
                 newSduActionToAssemble.setData(dataForAck);
-                mc.sendActionToDeliver(newSduActionToAssemble);
+                mc.sendToDeliver(newSduActionToAssemble);
                 this.endFlowFlag = true;
                 break;
             }

@@ -27,7 +27,7 @@ public abstract class EventMachineSS implements EventController {
 
     @Override
     public void handlerTimeOut(EventBlackBox v, DatAction action) {
-
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
