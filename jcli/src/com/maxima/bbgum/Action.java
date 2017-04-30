@@ -10,11 +10,11 @@ public class Action {
 
     }
 
-    public Action(final byte[] data) {
+    public Action(final byte[] data) throws FrameError {
 
         if (data.length > Frame.FRAME_BODY_MAX_LENGTH) {
-            // we should throw an exception here
-            System.out.println(" DatAction can not be bigger than " + Frame.FRAME_BODY_MAX_LENGTH + " " + "bytes");
+            String msg = "Action can not be bigger than " + Frame.FRAME_BODY_MAX_LENGTH + " " + "bytes";
+            throw new FrameError(msg);
         }
 
         this.setId(data[0]);
