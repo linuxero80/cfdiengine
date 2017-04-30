@@ -18,6 +18,32 @@ class ProtocolSession {
         this.outGoingMutex = new Object();
     }
 
+    public void deliver(DatAction action) throws IOException {
+
+        DatFrame frame = new DatFrame(action);
+        boolean writeInProgress;
+
+        synchronized (outGoingMutex) {
+            writeInProgress = !this.writeChunks.isEmpty();
+            this.writeChunks.addLast(frame);
+        }
+
+        if (!writeInProgress) {
+
+            byte[] data = this.writeChunks.getFirst().getDatFrame();
+            OutputStream os = this.socket.getOutputStream();
+
+            os.write(data, 0,
+                DatFrame.DAT_FRAME_HEADER_LENGTH +
+                DatFrame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH +
+                action.getData().length);
+
+            os.flush();
+            this.release();
+        }
+
+    }
+
     private void release() throws IOException {
 
         boolean isNotEmpty;
@@ -39,7 +65,6 @@ class ProtocolSession {
                 lengthActionData);
 
             os.flush();
-
             this.release();
         }
     }
