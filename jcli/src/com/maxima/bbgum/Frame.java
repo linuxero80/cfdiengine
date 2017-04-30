@@ -9,37 +9,37 @@ public final class Frame {
     private byte[] body;
     int actionLength;
 
-    public static final int DAT_FRAME_HEADER_LENGTH = 4;
-    public static final int DAT_FRAME_BODY_MAX_LENGTH = 512;
-    public static final int DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH = 2;
-    public static final int DAT_ACTION_ACK_DATA_SIZE = 2;
-    public static final int DAT_FRAME_FULL_MAX_LENGTH = DAT_FRAME_HEADER_LENGTH + DAT_FRAME_BODY_MAX_LENGTH;
-    public static final int DAT_ACTION_DATA_SEGMENT_MAX_LENGTH = DAT_FRAME_BODY_MAX_LENGTH - DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH;
+    public static final int FRAME_HEADER_LENGTH = 4;
+    public static final int FRAME_BODY_MAX_LENGTH = 512;
+    public static final int ACTION_FLOW_INFO_SEGMENT_LENGTH = 2;
+    public static final int ACTION_ACK_DATA_SIZE = 2;
+    public static final int FRAME_FULL_MAX_LENGTH = FRAME_HEADER_LENGTH + FRAME_BODY_MAX_LENGTH;
+    public static final int ACTION_DATA_SEGMENT_MAX_LENGTH = FRAME_BODY_MAX_LENGTH - ACTION_FLOW_INFO_SEGMENT_LENGTH;
     public static final int C_NULL_CHARACTER = 0;
 
     public static final byte DAT_ACK = (byte) 0x06;
     public static final byte DAT_NAK = (byte) 0x15;
 
-    public Frame(Action action) {
+    public Frame(Action action) throws FrameError {
         this();
-        this.actionLength = Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH
+        this.actionLength = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
             + action.getData().length;
         this.header = Frame.encodeDatFrameHeader(actionLength);
         this.body[0] = action.getId();
         this.body[1] = action.getTransaction();
         System.arraycopy(action.getData(), 0, this.body,
-            Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH,
+            Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH,
             action.getData().length);
     }
 
     private Frame() {
-        this.header = new byte[Frame.DAT_FRAME_HEADER_LENGTH];
-        this.body = new byte[Frame.DAT_FRAME_BODY_MAX_LENGTH];
+        this.header = new byte[Frame.FRAME_HEADER_LENGTH];
+        this.body = new byte[Frame.FRAME_BODY_MAX_LENGTH];
         this.actionLength = 0;
     }
 
     public byte[] getDatFrame() {
-        byte[] data = new byte[Frame.DAT_FRAME_FULL_MAX_LENGTH];
+        byte[] data = new byte[Frame.FRAME_FULL_MAX_LENGTH];
         System.arraycopy(this.header, 0, data, 0, this.header.length);
         System.arraycopy(this.body, 0, data, this.header.length, this.body.length);
         return data;
@@ -48,11 +48,11 @@ public final class Frame {
     public final Action getDatAction() {
         Action action = new Action();
         int dataBufferSize = this.actionLength
-            - Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH;
+            - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH;
         byte[] data = new byte[dataBufferSize];
 
         System.arraycopy(this.body,
-            Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH, data, 0,
+            Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH, data, 0,
             data.length);
 
         action.setId(this.body[0]);
@@ -66,8 +66,8 @@ public final class Frame {
         return (byte)(id + 1);
     }
 
-    public static byte[] encodeDatFrameHeader(final int actionLength) {
-        byte[] header = new byte[Frame.DAT_FRAME_HEADER_LENGTH];
+    public static byte[] encodeDatFrameHeader(final int actionLength) throws FrameError {
+        byte[] header = new byte[Frame.FRAME_HEADER_LENGTH];
         byte[] ascii;
 
         try {
@@ -77,26 +77,27 @@ public final class Frame {
             for (int index = 0; index < ascii.length; ++index) header[index] = ascii[index];
 
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            throw new FrameError(e.getMessage());
         }
 
         return header;
     }
 
-    public static int decodeDatFrameHeader(final byte header[]) {
+    public static int decodeDatFrameHeader(final byte header[]) throws FrameError {
         int rc = 0;
 
-        if (header.length == Frame.DAT_FRAME_HEADER_LENGTH) {
+        if (header.length == Frame.FRAME_HEADER_LENGTH) {
             Charset charset = Charset.forName("US-ASCII");
             String strHeader = new String(header, 0, header.length, charset);
             rc = Integer.parseInt(strHeader.trim());
 
-            if (rc > Frame.DAT_FRAME_BODY_MAX_LENGTH) {
-                // we should throw an exception here
-                return rc = -1201;
+            if (rc > Frame.FRAME_BODY_MAX_LENGTH) {
+                String msg = "Detected a frame body's length violiation!!";
+                throw new FrameError(msg);
             }
         } else {
-            rc = -1200; // we should throw an exception here
+            String msg = "Detected a frame header's length violiation!!";
+            throw new FrameError(msg);
         }
 
         return rc;

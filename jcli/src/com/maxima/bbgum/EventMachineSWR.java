@@ -41,7 +41,7 @@ public abstract class EventMachineSWR implements EventController {
                 break;
             }
             case RECIVE_RESPONSE: {
-                byte[] dataForAck = new byte[Frame.DAT_ACTION_ACK_DATA_SIZE];
+                byte[] dataForAck = new byte[Frame.ACTION_ACK_DATA_SIZE];
                 int result = analyzeData(action);
 
                 if (result == 0) {

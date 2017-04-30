@@ -54,8 +54,8 @@ class Session extends Thread {
             OutputStream os = this.socket.getOutputStream();
 
             os.write(data, 0,
-                Frame.DAT_FRAME_HEADER_LENGTH +
-                Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH +
+                Frame.FRAME_HEADER_LENGTH +
+                Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH +
                 action.getData().length);
 
             os.flush();
@@ -80,8 +80,8 @@ class Session extends Thread {
             OutputStream os = this.socket.getOutputStream();
 
             os.write(data, 0,
-                Frame.DAT_FRAME_HEADER_LENGTH +
-                Frame.DAT_ACTION_FLOW_INFO_SEGMENT_LENGTH +
+                Frame.FRAME_HEADER_LENGTH +
+                Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH +
                 lengthActionData);
 
             os.flush();
@@ -107,9 +107,9 @@ class Session extends Thread {
     private int readHeadHandler(InputStream is) throws IOException {
         int rc = 0;
 
-        byte[] receivedBytes = new byte[Frame.DAT_FRAME_HEADER_LENGTH];
+        byte[] receivedBytes = new byte[Frame.FRAME_HEADER_LENGTH];
         int res = is.read(receivedBytes, 0,
-                Frame.DAT_FRAME_HEADER_LENGTH);
+                Frame.FRAME_HEADER_LENGTH);
 
         if (res < 0) rc = res;
         else {
