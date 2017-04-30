@@ -23,6 +23,7 @@ class Session extends Thread {
         this.socket = socket;
         this.writeChunks = new LinkedList<>();
         this.outGoingMutex = new Object();
+        this.mon = new Monitor(this);
     }
 
     public void run() {
@@ -97,7 +98,7 @@ class Session extends Thread {
         if (res < 0) rc = res;
         else {
             DatAction action = new DatAction(receivedBytes);
-            this.mon.reciveActionFromReceiver(action);
+            this.mon.reciveActionFromSession(action);
         }
 
         return rc;
