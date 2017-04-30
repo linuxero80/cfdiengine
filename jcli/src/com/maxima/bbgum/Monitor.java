@@ -25,11 +25,19 @@ public final class Monitor {
         this.blackBox = new EventBlackBox(this);
     }
 
+    private synchronized Transaction getTransactionFromPoll(int index) {
+        return (this.poll[index] != null) ? this.poll[index] : null;
+    }
+
+    private synchronized void destroyTransactionInPoll(int index) {
+        this.poll[index] = null;
+    }
+
     public void reciveActionFromSession(Action action) {
 
     }
 
-    public void sendToDeliver(Action action) throws IOException {
+    public void sendToDeliver(Action action) throws Exception {
         this.session.deliver(action);
     }
 }

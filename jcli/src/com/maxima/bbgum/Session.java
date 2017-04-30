@@ -99,7 +99,7 @@ class Session extends Thread {
         }
     }
 
-    private int readBodyHandler(InputStream is, int size) throws IOException {
+    private int readBodyHandler(InputStream is, int size) throws Exception {
         int rc = 0;
 
         byte[] receivedBytes = new byte[size];
@@ -136,7 +136,7 @@ class Session extends Thread {
             else {
                 try {
                     res = this.readBodyHandler(is, size);
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     String msg = "Problems ocurried when reading"
                         + " frame body from socket";
                     throw new FrameError(msg);

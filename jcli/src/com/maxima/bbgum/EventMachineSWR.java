@@ -57,7 +57,7 @@ public abstract class EventMachineSWR implements EventController {
                 a.setId(Frame.calcIdForACKorNAK(action.getId()));
                 a.setTransaction(action.getTransaction());
                 a.setData(dataForAck);
-                mc.sendToDeliver(a);
+                //mc.sendToDeliver(a);// temporaly comment
                 this.endFlowFlag = true;
                 break;
             }
@@ -68,7 +68,7 @@ public abstract class EventMachineSWR implements EventController {
     public void handlerOutComming(EventBlackBox v, Action action) {
         this.p = Progress.RECIVE_ACK;
         Monitor mc = v.getMonitor();
-        mc.sendToDeliver(action);
+        // mc.sendToDeliver(action); //temporaly comment
     }
 
     @Override
