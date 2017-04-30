@@ -1,6 +1,6 @@
 package com.maxima.bbgum;
 
-public class EventBlackBox implements EventElement {
+public class EventBlackBox implements EventElem {
 
     @Override
     public void inComming(EventController v, DatAction action) {
