@@ -48,6 +48,10 @@ class Session extends Thread {
         }
     }
 
+    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) {
+        return this.mon.pushBuffer(archetype, buffer, block);
+    }
+
     public void deliver(Action action) {
 
         Frame f = null;
