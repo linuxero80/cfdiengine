@@ -115,8 +115,8 @@ final class Monitor {
         try {
 
             synchronized (pollMutex) {
-                a.setTransaction((byte) this.requestNextNum());
-                this.poll[a.getTransaction()] = t;
+                a.setTransNum((byte) this.requestNextNum());
+                this.poll[a.getTransNum()] = t;
             }
 
             this.blackBox.outComming(t.getController(), a);
@@ -126,7 +126,7 @@ final class Monitor {
 
                 //Destroy node
                 synchronized (pollMutex) {
-                    this.poll[a.getTransaction() & 0xff] = null;
+                    this.poll[a.getTransNum() & 0xff] = null;
                 }
 
             }

@@ -3,7 +3,7 @@ package com.maxima.bbgum;
 public class Action {
 
     private byte id;
-    private byte transaction;
+    private byte transnum;
     private byte[] data;
 
     public Action() {
@@ -18,7 +18,7 @@ public class Action {
         }
 
         this.setId(data[0]);
-        this.setTransaction(data[1]);
+        this.setTransNum(data[1]);
 
         byte dataForAction[] = new byte[data.length - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH];
         System.arraycopy(data,
@@ -35,12 +35,12 @@ public class Action {
         this.id = id;
     }
 
-    public byte getTransaction() {
-        return transaction;
+    public byte getTransNum() {
+        return transnum;
     }
 
-    public void setTransaction(byte transaction) {
-        this.transaction = transaction;
+    public void setTransNum(byte transaction) {
+        this.transnum = transaction;
     }
 
     public byte[] getData() {

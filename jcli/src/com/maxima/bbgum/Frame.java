@@ -26,7 +26,7 @@ final class Frame {
             + action.getData().length;
         this.header = Frame.encodeDatFrameHeader(actionLength);
         this.body[0] = action.getId();
-        this.body[1] = action.getTransaction();
+        this.body[1] = action.getTransNum();
         System.arraycopy(action.getData(), 0, this.body,
             Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH,
             action.getData().length);
@@ -56,7 +56,7 @@ final class Frame {
             data.length);
 
         action.setId(this.body[0]);
-        action.setTransaction(this.body[1]);
+        action.setTransNum(this.body[1]);
         action.setData(data);
 
         return action;
