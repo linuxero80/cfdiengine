@@ -1,7 +1,7 @@
 package com.maxima.bbgum;
 
 
-public class Transaction {
+class Transaction {
 
     private byte actionId;
     private boolean blockingMode;

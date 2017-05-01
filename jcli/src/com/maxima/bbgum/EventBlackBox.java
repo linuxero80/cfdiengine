@@ -1,6 +1,6 @@
 package com.maxima.bbgum;
 
-public class EventBlackBox implements EventElem {
+class EventBlackBox implements EventElem {
 
     private final Monitor mon;
 

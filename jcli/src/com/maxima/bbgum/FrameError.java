@@ -1,6 +1,6 @@
 package com.maxima.bbgum;
 
-public class FrameError extends Exception {
+class FrameError extends Exception {
 
     public FrameError() {
     }

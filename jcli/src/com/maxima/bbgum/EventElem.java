@@ -1,6 +1,6 @@
 package com.maxima.bbgum;
 
-public interface EventElem {
+interface EventElem {
     void inComming(EventController v, Action action);
     void outComming(EventController v, Action action);
     void timeOut(EventController v, Action action);
