@@ -33,12 +33,7 @@ class EventBlackBox implements EventElem {
     }
 
     @Override
-    public int getConclusion(EventController v) {
+    public ServerReply getConclusion(EventController v) {
         return v.handlerGetConclusion(this);
-    }
-
-    @Override
-    public byte[] getData(EventController v) {
-        return v.handlerGetData(this);
     }
 }

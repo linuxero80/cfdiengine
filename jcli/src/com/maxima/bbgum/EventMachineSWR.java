@@ -77,8 +77,11 @@ public abstract class EventMachineSWR implements EventController {
     }
 
     @Override
-    public int handlerGetConclusion(EventBlackBox v) {
-        return this.conclusion;
+    public ServerReply handlerGetConclusion(EventBlackBox v) {
+        ServerReply reply = new ServerReply();
+        reply.setReplyCode(this.conclusion);
+        if (this.conclusion == 0) reply.setReplyBuffer(this.bufferWithResponse);
+        return reply;
     }
 
     public abstract int analyzeAck(Action action);

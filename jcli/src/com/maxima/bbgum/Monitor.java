@@ -99,7 +99,7 @@ final class Monitor {
     }
 
     public ServerReply pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
-        ServerReply reply = new ServerReply();
+        ServerReply reply = null;
 
         Action a = new Action();
         a.setArchetype(archetype);
@@ -121,8 +121,8 @@ final class Monitor {
                 String msg = "Transaction could not await";
                 throw new SessionError(msg);
             }
-            reply.setReplyCode(this.blackBox.getConclusion(t.getController()));
-            if (reply.getReplyCode() == 0) reply.setReplyBuffer(this.blackBox.getData(t.getController()));
+
+            reply = this.blackBox.getConclusion(t.getController());
 
             //Destroy node
             synchronized (poolMutex) {
