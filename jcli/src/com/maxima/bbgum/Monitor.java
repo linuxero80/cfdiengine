@@ -1,5 +1,8 @@
 package com.maxima.bbgum;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 final class Monitor {
 
     static final int TRANSACTION_NUM_START_VALUE = 1;
@@ -85,56 +88,48 @@ final class Monitor {
         return ((num % 2) == 0);
     }
 
-    private synchronized Transaction getTransactionFromPoll(int index) {
-        return (this.pool[index] != null) ? this.pool[index] : null;
-    }
-
-    private synchronized void destroyTransactionInPoll(int index) {
-        this.pool[index] = null;
-    }
-
     public void recive(Action action) {
         // Receives an action from upper layer
 
     }
 
-    public void send(Action action) {
+    public void send(Action action) throws SessionError {
         // Sends action to upper layer
         this.session.deliver(action);
     }
 
-    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
-        FeedBackData fb = new FeedBackData();
+    public ServerReply pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
+        ServerReply reply = new ServerReply();
 
         Action a = new Action();
         a.setArchetype(archetype);
         a.setBuffer(buffer);
         Transaction t = new Transaction(archetype, block, false);
-        try {
 
-            synchronized (poolMutex) {
-                a.setTransNum((byte) this.requestNextNum());
-                this.pool[a.getTransNum() & 0xff] = t;
-            }
-
-            this.blackBox.outComming(t.getController(), a);
-
-            if (t.isBlockingMode()) {
-                t.sleep();
-                fb.setResult(this.blackBox.getConclusion(t.getController()));
-                if (fb.getResult() == 0) fb.setData(this.blackBox.getData(t.getController()));
-
-                //Destroy node
-                synchronized (poolMutex) {
-                    this.pool[a.getTransNum() & 0xff] = null;
-                }
-
-            }
-
-        } catch (Exception ex) {
-            throw new SessionError("!!!");
+        synchronized (poolMutex) {
+            a.setTransNum((byte) this.requestNextNum());
+            this.pool[a.getTransNum() & 0xff] = t;
         }
 
-        return fb;
+        this.blackBox.outComming(t.getController(), a);
+
+        if (t.isBlockingMode()) {
+            try {
+                t.sleep();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Monitor.class.getName()).log(Level.SEVERE, null, ex);
+                String msg = "Transaction could not await";
+                throw new SessionError(msg);
+            }
+            reply.setReplyCode(this.blackBox.getConclusion(t.getController()));
+            if (reply.getReplyCode() == 0) reply.setReplyBuffer(this.blackBox.getData(t.getController()));
+
+            //Destroy node
+            synchronized (poolMutex) {
+                this.pool[a.getTransNum() & 0xff] = null;
+            }
+        }
+
+        return reply;
     }
 }

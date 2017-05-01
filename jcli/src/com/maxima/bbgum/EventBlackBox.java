@@ -13,12 +13,12 @@ class EventBlackBox implements EventElem {
     }
 
     @Override
-    public void inComming(EventController v, Action action) {
+    public void inComming(EventController v, Action action) throws SessionError {
         v.handlerInComming(this, action);
     }
 
     @Override
-    public void outComming(EventController v, Action action) {
+    public void outComming(EventController v, Action action) throws SessionError {
         v.handlerOutComming(this, action);
     }
 

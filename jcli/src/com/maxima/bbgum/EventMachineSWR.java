@@ -27,7 +27,7 @@ public abstract class EventMachineSWR implements EventController {
 
     @SuppressWarnings("incomplete-switch")
     @Override
-    public void handlerInComming(EventBlackBox v, Action action) {
+    public void handlerInComming(EventBlackBox v, Action action) throws SessionError {
         switch (this.p) {
             case RECIVE_ACK: {
                 int response = analyzeAck(action);
@@ -65,7 +65,7 @@ public abstract class EventMachineSWR implements EventController {
     }
 
     @Override
-    public void handlerOutComming(EventBlackBox v, Action action) {
+    public void handlerOutComming(EventBlackBox v, Action action) throws SessionError {
         this.p = Progress.RECIVE_ACK;
         Monitor mc = v.getMonitor();
         mc.send(action);

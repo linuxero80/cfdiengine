@@ -48,11 +48,11 @@ class Session extends Thread {
         }
     }
 
-    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
+    public ServerReply pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
         return this.mon.pushBuffer(archetype, buffer, block);
     }
 
-    public void deliver(Action action) {
+    public void deliver(Action action) throws SessionError {
 
         Frame f = null;
 
@@ -60,7 +60,8 @@ class Session extends Thread {
             f = new Frame(action);
         } catch (FrameError ex) {
             Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
-            return;
+            String msg = "Frame could not be conformed with given action";
+            throw new SessionError(msg);
         }
 
         boolean writeInProgress;
@@ -83,6 +84,8 @@ class Session extends Thread {
                 this.release();
             } catch (IOException ex) {
                 Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+                String msg = "Problems when writting socket";
+                throw new SessionError(msg);
             }
         }
     }

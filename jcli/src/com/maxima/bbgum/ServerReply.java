@@ -1,26 +1,26 @@
 package com.maxima.bbgum;
 
-public class FeedBackData {
+public class ServerReply {
 
     private int result;
     private byte[] data;
 
-    public FeedBackData() {
+    public ServerReply() {
         this.result = 0;
     }
-    public int getResult() {
+    public int getReplyCode() {
         return result;
     }
 
-    public void setResult(int result) {
+    public void setReplyCode(int result) {
         this.result = result;
     }
 
-    public byte[] getData() {
+    public byte[] getReplyBuffer() {
         return data;
     }
 
-    public void setData(byte[] data) {
+    public void setReplyBuffer(byte[] data) {
         this.data = data;
     }   
 }
