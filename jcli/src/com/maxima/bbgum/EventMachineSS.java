@@ -16,13 +16,15 @@ public abstract class EventMachineSS implements EventController {
     }
 
     @Override
-    public void handlerOutComming(EventBlackBox v, Action action) {
-
+    public void handlerOutComming(EventBlackBox v, Action action) throws SessionError {
+        Monitor mc = v.getMonitor();
+        mc.send(action);
     }
 
     @Override
     public void handlerInComming(EventBlackBox v, Action action) {
-
+        this.conclusion = analyzeAck(action);
+        this.endFlowFlag = true;
     }
 
     @Override
@@ -34,6 +36,10 @@ public abstract class EventMachineSS implements EventController {
     public ServerReply handlerGetReply(EventBlackBox v) {
         ServerReply reply = new ServerReply();
         reply.setReplyCode(this.conclusion);
+        {
+            byte[] a = {0};
+            reply.setReplyBuffer(a);
+        }
         return reply;
     }
 
