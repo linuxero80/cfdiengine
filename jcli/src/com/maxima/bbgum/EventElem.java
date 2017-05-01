@@ -5,5 +5,5 @@ interface EventElem {
     void outComming(EventController v, Action action) throws SessionError;
     void timeOut(EventController v, Action action);
     boolean isFlowTerm(EventController v);
-    ServerReply getConclusion(EventController v);
+    ServerReply getReply(EventController v);
 }

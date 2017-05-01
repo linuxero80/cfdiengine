@@ -31,7 +31,7 @@ public abstract class EventMachineSS implements EventController {
     }
 
     @Override
-    public ServerReply handlerGetConclusion(EventBlackBox v) {
+    public ServerReply handlerGetReply(EventBlackBox v) {
         ServerReply reply = new ServerReply();
         reply.setReplyCode(this.conclusion);
         return reply;

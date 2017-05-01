@@ -122,7 +122,7 @@ final class Monitor {
                 throw new SessionError(msg);
             }
 
-            reply = this.blackBox.getConclusion(t.getController());
+            reply = this.blackBox.getReply(t.getController());
 
             //Destroy node
             synchronized (poolMutex) {

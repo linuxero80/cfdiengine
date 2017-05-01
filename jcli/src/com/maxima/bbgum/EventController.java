@@ -5,5 +5,5 @@ interface EventController {
     void handlerOutComming(EventBlackBox v, Action action) throws SessionError;
     void handlerInComming(EventBlackBox v, Action action) throws SessionError;
     void handlerTimeOut(EventBlackBox v, Action action);
-    ServerReply handlerGetConclusion(EventBlackBox v);
+    ServerReply handlerGetReply(EventBlackBox v);
 }

@@ -77,7 +77,7 @@ public abstract class EventMachineSWR implements EventController {
     }
 
     @Override
-    public ServerReply handlerGetConclusion(EventBlackBox v) {
+    public ServerReply handlerGetReply(EventBlackBox v) {
         ServerReply reply = new ServerReply();
         reply.setReplyCode(this.conclusion);
         if (this.conclusion == 0) reply.setReplyBuffer(this.bufferWithResponse);
