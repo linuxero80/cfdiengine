@@ -2,7 +2,7 @@ package com.maxima.bbgum;
 
 import java.io.IOException;
 
-public final class Monitor {
+final class Monitor {
 
     static final int TRANSACTION_NUM_START_VALUE = 1;
     static final int TRANSACTION_NUM_LAST_VALUE = 253;
@@ -95,5 +95,10 @@ public final class Monitor {
     public void send(Action action) {
         // Sends action to upper layer
         this.session.deliver(action);
+    }
+
+    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) {
+        FeedBackData rd = null;
+        return rd;
     }
 }
