@@ -56,6 +56,7 @@ class Session extends Thread {
             f = new Frame(action);
         } catch (FrameError ex) {
             Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+            return;
         }
 
         boolean writeInProgress;
