@@ -12,20 +12,28 @@ final class Monitor {
     private int nextNum;
     private Session session;
     private Transaction[] poll;
+    private Object pollMutex;
     private EventBlackBox blackBox;
 
     public Monitor(Session session) {
         this.session = session;
-        this.nextNum = Monitor.TRANSACTION_NUM_START_VALUE;
-        this.poll = new Transaction[Monitor.MAX_NODES];
+        {
+            // Initialization of elements for transactions poll
+            this.nextNum = Monitor.TRANSACTION_NUM_START_VALUE;
+            this.pollMutex = new Object();
+            this.poll = new Transaction[Monitor.MAX_NODES];
 
-        int iter = 0;
-        for (; iter < Monitor.MAX_NODES; iter++) this.poll[iter] = null;
-
+            int iter = 0;
+            for (; iter < Monitor.MAX_NODES; iter++) this.poll[iter] = null;
+        }
         this.blackBox = new EventBlackBox(this);
     }
 
-    private synchronized int requestNextNum() throws Exception {
+    private int requestNextNum() throws SessionError {
+
+        // The current function must only be called
+        // by pushBuffer function.
+
         int index = this.nextNum;
 
         if ((this.poll[index] != null) &&
@@ -68,7 +76,7 @@ final class Monitor {
 
             if (i == (Monitor.MAX_NODES - 1)) {
                 String msg = "Poll of transactions to its maximum capacity";
-                throw new Exception(msg);
+                throw new SessionError(msg);
             }
             this.nextNum = index + Monitor.TRANSACTION_NUM_INCREMENT;
             return index;
@@ -97,8 +105,36 @@ final class Monitor {
         this.session.deliver(action);
     }
 
-    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) {
-        FeedBackData rd = null;
+    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
+        FeedBackData rd = new FeedBackData();
+
+        Action a = new Action();
+        a.setId(archetype);
+        a.setData(buffer);
+        Transaction t = new Transaction(archetype, block, false);
+        try {
+
+            synchronized (pollMutex) {
+                a.setTransaction((byte) this.requestNextNum());
+                this.poll[a.getTransaction()] = t;
+            }
+
+            this.blackBox.outComming(t.getController(), a);
+
+            if (t.isBlockingMode()) {
+                t.sleep();
+
+                //Destroy node
+                synchronized (pollMutex) {
+                    this.poll[a.getTransaction() & 0xff] = null;
+                }
+
+            }
+
+        } catch (Exception ex) {
+            throw new SessionError("!!!");
+        }
+
         return rd;
     }
 }

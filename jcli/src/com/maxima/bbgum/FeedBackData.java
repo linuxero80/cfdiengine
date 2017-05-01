@@ -5,6 +5,9 @@ public class FeedBackData {
     private int result;
     private byte[] data;
 
+    public FeedBackData() {
+        this.result = 0;
+    }
     public int getResult() {
         return result;
     }

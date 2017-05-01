@@ -14,7 +14,7 @@ class Transaction {
         this.blockingMode = block;
         this.modeServer = mode;
 
-
+        this.c = null; // temporaly null til we could have a steady controller factory
     }
     
     public void sleep() throws InterruptedException{

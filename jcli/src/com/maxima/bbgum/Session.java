@@ -48,7 +48,7 @@ class Session extends Thread {
         }
     }
 
-    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) {
+    public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
         return this.mon.pushBuffer(archetype, buffer, block);
     }
 
