@@ -22,7 +22,7 @@ public abstract class EventMachineSS implements EventController {
     }
 
     @Override
-    public void handlerInComming(EventBlackBox v, Action action) {
+    public void handlerInComming(EventBlackBox v, Action action) throws SessionError {
         this.conclusion = analyzeAck(action);
         this.endFlowFlag = true;
     }

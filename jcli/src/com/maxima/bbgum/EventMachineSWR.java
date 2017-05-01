@@ -6,7 +6,7 @@ public abstract class EventMachineSWR implements EventController {
         SEND,
         RECIVE_ACK,
         RECIVE_RESPONSE,
-        SEND_ACK_OR_NAK
+        SEND_ACK
     }
 
     boolean endFlowFlag;

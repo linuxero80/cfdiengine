@@ -88,9 +88,47 @@ final class Monitor {
         return ((num % 2) == 0);
     }
 
-    public void recive(Action action) {
+    public void recive(Action a) throws SessionError {
         // Receives an action from upper layer
 
+        boolean supported = true; // We need to query factory if archetype is supported
+
+        if (!supported) {
+            String msg = "The server side sent an invalid Action which is not registered yet!. It will be ignore";
+            System.out.println(msg);
+            return;
+        }
+
+        Transaction t = null;
+
+        synchronized (poolMutex) {
+            t = this.pool[a.getTransNum() & 0xff];
+        }
+
+        if (t == null) {
+            if (this.isServerTransaction(a.getTransNum())) {
+                t = new Transaction(a.getArchetype(), false, true);
+                synchronized (poolMutex) {
+                    this.pool[a.getTransNum() & 0xff] = t;
+                }
+                this.blackBox.inComming(t.getController(), a);
+            } else {
+                String msg = "The transNum (" + a.getTransNum() +
+                    ") of the Action is not a server transaction number. It will be ignore";
+                System.out.println(msg);
+            }
+        } else this.blackBox.inComming(t.getController(), a);
+
+        if (this.blackBox.isFlowTerm(t.getController())) {
+            if (t.isBlockingMode()) t.wakeUp();
+            else {
+
+                //Destroy transaction
+                synchronized (poolMutex) {
+                    this.pool[a.getTransNum() & 0xff] = null;
+                }
+            }
+        }
     }
 
     public void send(Action action) throws SessionError {
@@ -124,7 +162,7 @@ final class Monitor {
 
             reply = this.blackBox.getReply(t.getController());
 
-            //Destroy node
+            //Destroy transaction
             synchronized (poolMutex) {
                 this.pool[a.getTransNum() & 0xff] = null;
             }
