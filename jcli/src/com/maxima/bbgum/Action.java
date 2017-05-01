@@ -17,21 +17,21 @@ public class Action {
             throw new FrameError(msg);
         }
 
-        this.setId(data[0]);
+        this.setArchetype(data[0]);
         this.setTransNum(data[1]);
 
         byte dataForAction[] = new byte[data.length - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH];
         System.arraycopy(data,
             Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH,
             dataForAction, 0, dataForAction.length);
-        this.setData(dataForAction);
+        this.setBuffer(dataForAction);
     }
 
-    public byte getId() {
+    public byte getArchetype() {
         return id;
     }
 
-    public void setId(byte id) {
+    public void setArchetype(byte id) {
         this.id = id;
     }
 
@@ -43,11 +43,11 @@ public class Action {
         this.transnum = transaction;
     }
 
-    public byte[] getData() {
+    public byte[] getBuffer() {
         return data;
     }
 
-    public void setData(byte[] data) {
+    public void setBuffer(byte[] data) {
         this.data = data;
     }
 }

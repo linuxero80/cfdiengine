@@ -6,4 +6,5 @@ interface EventElem {
     void timeOut(EventController v, Action action);
     boolean isFlowTerm(EventController v);
     int getConclusion(EventController v);
+    byte[] getData(EventController v);
 }

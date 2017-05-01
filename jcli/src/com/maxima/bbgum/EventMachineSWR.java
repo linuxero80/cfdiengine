@@ -54,9 +54,9 @@ public abstract class EventMachineSWR implements EventController {
                 dataForAck[1] = (byte)result;
                 Monitor mc = v.getMonitor();
                 Action a = new Action();
-                a.setId(Frame.calcIdForACKorNAK(action.getId()));
+                a.setArchetype(Frame.calcIdForACKorNAK(action.getArchetype()));
                 a.setTransNum(action.getTransNum());
-                a.setData(dataForAck);
+                a.setBuffer(dataForAck);
                 mc.send(a);
                 this.endFlowFlag = true;
                 break;

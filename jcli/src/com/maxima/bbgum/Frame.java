@@ -23,13 +23,13 @@ final class Frame {
     public Frame(Action action) throws FrameError {
         this();
         this.actionLength = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
-            + action.getData().length;
+            + action.getBuffer().length;
         this.header = Frame.encodeDatFrameHeader(actionLength);
-        this.body[0] = action.getId();
+        this.body[0] = action.getArchetype();
         this.body[1] = action.getTransNum();
-        System.arraycopy(action.getData(), 0, this.body,
+        System.arraycopy(action.getBuffer(), 0, this.body,
             Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH,
-            action.getData().length);
+            action.getBuffer().length);
     }
 
     private Frame() {
@@ -55,9 +55,9 @@ final class Frame {
             Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH, data, 0,
             data.length);
 
-        action.setId(this.body[0]);
+        action.setArchetype(this.body[0]);
         action.setTransNum(this.body[1]);
-        action.setData(data);
+        action.setBuffer(data);
 
         return action;
     }

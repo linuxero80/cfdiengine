@@ -78,7 +78,7 @@ class Session extends Thread {
                 os.write(data, 0,
                     Frame.FRAME_HEADER_LENGTH +
                     Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH +
-                    action.getData().length);
+                    action.getBuffer().length);
                 os.flush();
                 this.release();
             } catch (IOException ex) {
@@ -97,7 +97,7 @@ class Session extends Thread {
 
         if (isNotEmpty) {
             Frame frame = this.writeChunks.getFirst();
-            int lengthActionData = frame.getDatAction().getData().length;
+            int lengthActionData = frame.getDatAction().getBuffer().length;
             byte[] data = frame.getDatFrame();
 
             OutputStream os = this.socket.getOutputStream();

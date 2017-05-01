@@ -6,4 +6,5 @@ interface EventController {
     void handlerInComming(EventBlackBox v, Action action);
     void handlerTimeOut(EventBlackBox v, Action action);
     int handlerGetConclusion(EventBlackBox v);
+    byte[] handlerGetData(EventBlackBox v);
 }

@@ -1,7 +1,5 @@
 package com.maxima.bbgum;
 
-import java.io.IOException;
-
 final class Monitor {
 
     static final int TRANSACTION_NUM_START_VALUE = 1;
@@ -11,20 +9,20 @@ final class Monitor {
 
     private int nextNum;
     private Session session;
-    private Transaction[] poll;
-    private Object pollMutex;
+    private Transaction[] pool;
+    private Object poolMutex;
     private EventBlackBox blackBox;
 
     public Monitor(Session session) {
         this.session = session;
         {
-            // Initialization of elements for transactions poll
+            // Initialization of elements for transactions pool
             this.nextNum = Monitor.TRANSACTION_NUM_START_VALUE;
-            this.pollMutex = new Object();
-            this.poll = new Transaction[Monitor.MAX_NODES];
+            this.poolMutex = new Object();
+            this.pool = new Transaction[Monitor.MAX_NODES];
 
             int iter = 0;
-            for (; iter < Monitor.MAX_NODES; iter++) this.poll[iter] = null;
+            for (; iter < Monitor.MAX_NODES; iter++) this.pool[iter] = null;
         }
         this.blackBox = new EventBlackBox(this);
     }
@@ -36,7 +34,7 @@ final class Monitor {
 
         int index = this.nextNum;
 
-        if ((this.poll[index] != null) &&
+        if ((this.pool[index] != null) &&
             (index == Monitor.TRANSACTION_NUM_LAST_VALUE )) {
 
             // From the first shelf we shall start
@@ -46,7 +44,7 @@ final class Monitor {
             index = Monitor.TRANSACTION_NUM_START_VALUE;
         }
 
-        if (this.poll[index] == null) {
+        if (this.pool[index] == null) {
 
             // When the shelf is available we shall return it
             // before we shall set nextNum variable up for
@@ -72,7 +70,7 @@ final class Monitor {
             do {
                 index += Monitor.TRANSACTION_NUM_INCREMENT;
                 i++;
-            } while ((this.poll[index] != null) && (i < Monitor.MAX_NODES));
+            } while ((this.pool[index] != null) && (i < Monitor.MAX_NODES));
 
             if (i == (Monitor.MAX_NODES - 1)) {
                 String msg = "Poll of transactions to its maximum capacity";
@@ -88,11 +86,11 @@ final class Monitor {
     }
 
     private synchronized Transaction getTransactionFromPoll(int index) {
-        return (this.poll[index] != null) ? this.poll[index] : null;
+        return (this.pool[index] != null) ? this.pool[index] : null;
     }
 
     private synchronized void destroyTransactionInPoll(int index) {
-        this.poll[index] = null;
+        this.pool[index] = null;
     }
 
     public void recive(Action action) {
@@ -106,27 +104,29 @@ final class Monitor {
     }
 
     public FeedBackData pushBuffer(final byte archetype, final byte[] buffer, final boolean block) throws SessionError {
-        FeedBackData rd = new FeedBackData();
+        FeedBackData fb = new FeedBackData();
 
         Action a = new Action();
-        a.setId(archetype);
-        a.setData(buffer);
+        a.setArchetype(archetype);
+        a.setBuffer(buffer);
         Transaction t = new Transaction(archetype, block, false);
         try {
 
-            synchronized (pollMutex) {
+            synchronized (poolMutex) {
                 a.setTransNum((byte) this.requestNextNum());
-                this.poll[a.getTransNum()] = t;
+                this.pool[a.getTransNum() & 0xff] = t;
             }
 
             this.blackBox.outComming(t.getController(), a);
 
             if (t.isBlockingMode()) {
                 t.sleep();
+                fb.setResult(this.blackBox.getConclusion(t.getController()));
+                if (fb.getResult() == 0) fb.setData(this.blackBox.getData(t.getController()));
 
                 //Destroy node
-                synchronized (pollMutex) {
-                    this.poll[a.getTransNum() & 0xff] = null;
+                synchronized (poolMutex) {
+                    this.pool[a.getTransNum() & 0xff] = null;
                 }
 
             }
@@ -135,6 +135,6 @@ final class Monitor {
             throw new SessionError("!!!");
         }
 
-        return rd;
+        return fb;
     }
 }
