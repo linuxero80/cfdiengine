@@ -29,25 +29,33 @@ class Session extends Thread {
 
     @Override
     public void run() {
+        InputStream is = null;
         try {
-            InputStream is = this.socket.getInputStream();
+            is = this.socket.getInputStream();
             for (;;) {
                 if (this.readHeadHandler(is) < 0) break;
             }
-            is.close();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SessionError ex) {
+            Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
-    public void deliver(Action action) throws SessionError {
+    public void deliver(Action action) {
 
         Frame f = null;
 
         try {
             f = new Frame(action);
         } catch (FrameError ex) {
-            throw new SessionError(ex.getMessage());
+            Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         boolean writeInProgress;
@@ -69,7 +77,7 @@ class Session extends Thread {
                 os.flush();
                 this.release();
             } catch (IOException ex) {
-                throw new SessionError(ex.getMessage());
+                Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -114,7 +122,7 @@ class Session extends Thread {
         return rc;
     }
 
-    private int readHeadHandler(InputStream is) throws FrameError {
+    private int readHeadHandler(InputStream is) throws SessionError {
         int rc = 0;
 
         byte[] receivedBytes = new byte[Frame.FRAME_HEADER_LENGTH];
@@ -125,12 +133,18 @@ class Session extends Thread {
         } catch (IOException ex) {
             String msg = "Problems ocurried when reading"
                     + " frame header from socket";
-            throw new FrameError(msg);
+            Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, msg);
+            throw new SessionError(ex.getMessage());
         }
 
         if (res < 0) rc = res;
         else {
-            int size = Frame.decodeDatFrameHeader(receivedBytes);
+            int size = 0;
+            try {
+                size = Frame.decodeDatFrameHeader(receivedBytes);
+            } catch (FrameError ex) {
+                Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             if (size < 0) rc = size;
             else {
@@ -139,7 +153,8 @@ class Session extends Thread {
                 } catch (Exception ex) {
                     String msg = "Problems ocurried when reading"
                         + " frame body from socket";
-                    throw new FrameError(msg);
+                    Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, msg);
+                    throw new SessionError(ex.getMessage());
                 }
                 if (res < 0) rc = res;
             }

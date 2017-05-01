@@ -88,10 +88,12 @@ public final class Monitor {
     }
 
     public void recive(Action action) {
+        // Receives an action from upper layer
 
     }
 
-    public void send(Action action) throws Exception {
+    public void send(Action action) {
+        // Sends action to upper layer
         this.session.deliver(action);
     }
 }
