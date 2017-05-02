@@ -29,21 +29,25 @@ class Session extends Thread {
 
     @Override
     public void run() {
-        InputStream is = null;
-        try {
-            is = this.socket.getInputStream();
-            for (;;) {
-                if (this.readHeadHandler(is) < 0) break;
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SessionError ex) {
-            Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
+        for (;;) {
+            InputStream is = null;
             try {
-                is.close();
+                is = this.socket.getInputStream();
+                if (this.readHeadHandler(is) < 0) {
+                    Logger.getLogger(Session.class.getName()).log(
+                            Level.SEVERE, null, "Connection has been closed!!");
+                    break;
+                }
             } catch (IOException ex) {
                 Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SessionError ex) {
+                Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
