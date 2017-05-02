@@ -24,7 +24,7 @@ final class Frame {
         this();
         this.actionLength = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
             + action.getBuffer().length;
-        this.header = Frame.encodeDatFrameHeader(actionLength);
+        this.header = Frame.encodeHeader(actionLength);
         this.body[0] = action.getArchetype();
         this.body[1] = action.getTransNum();
         System.arraycopy(action.getBuffer(), 0, this.body,
@@ -38,14 +38,14 @@ final class Frame {
         this.actionLength = 0;
     }
 
-    public byte[] getDatFrame() {
+    public byte[] getFrame() {
         byte[] data = new byte[Frame.FRAME_FULL_MAX_LENGTH];
         System.arraycopy(this.header, 0, data, 0, this.header.length);
         System.arraycopy(this.body, 0, data, this.header.length, this.body.length);
         return data;
     }
 
-    public final Action getDatAction() {
+    public final Action getAction() {
         Action action = new Action();
         int dataBufferSize = this.actionLength
             - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH;
@@ -62,11 +62,11 @@ final class Frame {
         return action;
     }
 
-    public static byte calcIdForACKorNAK(byte id) {
+    public static byte calcIdForACKorNAK(final byte id) {
         return (byte)(id + 1);
     }
 
-    public static byte[] encodeDatFrameHeader(final int actionLength) throws FrameError {
+    public static byte[] encodeHeader(final int actionLength) throws FrameError {
         byte[] header = new byte[Frame.FRAME_HEADER_LENGTH];
         byte[] ascii;
 
@@ -83,7 +83,7 @@ final class Frame {
         return header;
     }
 
-    public static int decodeDatFrameHeader(final byte header[]) throws FrameError {
+    public static int decodeHeader(final byte header[]) throws FrameError {
         int rc = 0;
 
         if (header.length == Frame.FRAME_HEADER_LENGTH) {

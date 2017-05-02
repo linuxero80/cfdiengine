@@ -76,7 +76,7 @@ class Session extends Thread {
         }
 
         if (!writeInProgress) {
-            byte[] data = this.writeChunks.getFirst().getDatFrame();
+            byte[] data = this.writeChunks.getFirst().getFrame();
             OutputStream os;
             try {
                 os = this.socket.getOutputStream();
@@ -104,8 +104,8 @@ class Session extends Thread {
 
         if (isNotEmpty) {
             Frame frame = this.writeChunks.getFirst();
-            int lengthActionData = frame.getDatAction().getBuffer().length;
-            byte[] data = frame.getDatFrame();
+            int lengthActionData = frame.getAction().getBuffer().length;
+            byte[] data = frame.getFrame();
 
             OutputStream os = this.socket.getOutputStream();
 
@@ -153,7 +153,7 @@ class Session extends Thread {
         else {
             int size = 0;
             try {
-                size = Frame.decodeDatFrameHeader(receivedBytes);
+                size = Frame.decodeHeader(receivedBytes);
             } catch (FrameError ex) {
                 Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
             }
