@@ -15,9 +15,9 @@ final class Monitor {
     private Transaction[] pool;
     private Object poolMutex;
     private EventBlackBox blackBox;
-    private MaximaFactory<Byte, EventController> factory;
+    private BasicFactory<Byte, EventController> factory;
 
-    public Monitor(Session session, MaximaFactory<Byte, EventController> factory) {
+    public Monitor(Session session, BasicFactory<Byte, EventController> factory) {
         this.session = session;
         this.factory = factory;
         {
@@ -107,7 +107,7 @@ final class Monitor {
         if (t == null) {
             if (this.isServerTransaction(a.getTransNum())) {
                 try {
-                    t = new Transaction(this.factory.getEntity(a.getArchetype()), false, true);
+                    t = new Transaction(this.factory.incept(a.getArchetype()), false, true);
                 } catch (Exception ex) {
                     Logger.getLogger(Monitor.class.getName()).log(Level.SEVERE, null, ex);
                     throw new SessionError("Transaction could not be created");
@@ -148,7 +148,7 @@ final class Monitor {
         a.setBuffer(buffer);
         Transaction t = null;
         try {
-            t = new Transaction(this.factory.getEntity(archetype), block, false);
+            t = new Transaction(this.factory.incept(archetype), block, false);
         } catch (Exception ex) {
             Logger.getLogger(Monitor.class.getName()).log(Level.SEVERE, null, ex);
             String msg = "Transaction could not be created";
