@@ -16,15 +16,15 @@ class Session extends Thread {
     private Object outGoingMutex;
     private Monitor mon;
 
-    public Session(final String serverAddress, final int port) throws IOException {
-        this(new Socket(serverAddress, port));
+    public Session(final String serverAddress, final int port, MaximaFactory<Byte, EventController> factory) throws IOException {
+        this(new Socket(serverAddress, port), factory);
     }
 
-    public Session(Socket socket) {
+    public Session(Socket socket, MaximaFactory<Byte, EventController> factory) {
         this.socket = socket;
         this.writeChunks = new LinkedList<Frame>();
         this.outGoingMutex = new Object();
-        this.mon = new Monitor(this);
+        this.mon = new Monitor(this, factory);
     }
 
     @Override

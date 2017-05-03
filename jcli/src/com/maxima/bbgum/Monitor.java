@@ -15,9 +15,11 @@ final class Monitor {
     private Transaction[] pool;
     private Object poolMutex;
     private EventBlackBox blackBox;
+    private MaximaFactory<Byte, EventController> factory;
 
-    public Monitor(Session session) {
+    public Monitor(Session session, MaximaFactory<Byte, EventController> factory) {
         this.session = session;
+        this.factory = factory;
         {
             // Initialization of elements for transactions pool
             this.nextNum = Monitor.TRANSACTION_NUM_START_VALUE;
