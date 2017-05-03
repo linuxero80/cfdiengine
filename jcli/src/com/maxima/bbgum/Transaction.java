@@ -3,18 +3,15 @@ package com.maxima.bbgum;
 
 class Transaction {
 
-    private byte actionId;
     private boolean blockingMode;
     private boolean modeServer;
     private EventController c;
     private Object wakeUpMutex = new Object();
 
-    public Transaction(byte actionId, boolean block, boolean mode) {
-        this.actionId = actionId;
+    public Transaction(EventController c, boolean block, boolean mode) {
+        this.c = c;
         this.blockingMode = block;
         this.modeServer = mode;
-
-        this.c = null; // temporaly null til we could have a steady controller factory
     }
     
     public void sleep() throws InterruptedException{
@@ -31,10 +28,6 @@ class Transaction {
 
     public EventController getController() {
         return c;
-    }
-
-    public byte getActionId() {
-        return actionId;
     }
 
     public boolean isModeServer() {
