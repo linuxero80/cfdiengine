@@ -7,9 +7,14 @@ public class MaximaFactory<I,T> {
     Map<I, Class<? extends T>> s;
     public MaximaFactory(){
         this.s = new HashMap<I, Class<? extends T>>();
-    } 
-    public T getEntity(I objType) throws InstantiationException, IllegalAccessException {
-        return s.get(objType).newInstance();
+    }
+
+    public boolean isSupported(final I id) {
+        return (this.s.get(id) != null)? true : false;
+    }
+
+    public T getEntity(I id) throws InstantiationException, IllegalAccessException {
+        return s.get(id).newInstance();
     }
     
     public void subscribe(I id, Class<? extends T> x) {

@@ -93,9 +93,7 @@ final class Monitor {
     public void recive(Action a) throws SessionError {
         // Receives an action from upper layer
 
-        boolean supported = true; // We need to query factory if archetype is supported
-
-        if (!supported) {
+        if (!this.factory.isSupported(a.getArchetype())) {
             String msg = "The server side sent an invalid Action which is not registered yet!. It will be ignore";
             System.out.println(msg);
             return;
