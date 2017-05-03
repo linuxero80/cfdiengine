@@ -8,24 +8,27 @@ class Sha256rsa(Signer):
     """
     """
 
-    def __init__(self, logger, pem_privkey):
-        super().__init__(logger, pem_privkey)
+    def __init__(self, logger, pem_pubkey, pem_privkey):
+        super().__init__(logger, pem_pubkey, pem_privkey)
+
+    def verify(self, signature):
+        pass
+
+    def __fetch_result(self, path):
+        rs = None
+        statinfo = os.stat(path)
+        if statinfo.st_size > 0:
+            with open(path, 'r') as rf:
+                rs = rf.readline().replace("\n", "")
+        if rs == None:
+            SignerError("Unexpected ssl output!!!")
+        return rs
+
+    def __touch(self, path):
+        with open(path, 'a'):
+            os.utime(path, None)
 
     def sign(self, str2sign):
-
-        def fetch_result(path):
-            rs = None
-            statinfo = os.stat(path)
-            if statinfo.st_size > 0:
-                with open(path, 'r') as rf:
-                    rs = rf.readline().replace("\n", "")
-            if rs == None:
-                SignerError("Unexpected ssl output!!!")
-            return rs
-
-        def touch(path):
-            with open(path, 'a'):
-                os.utime(path, None)
 
         SIZE_RANDOM_STR = 8
 
@@ -34,9 +37,9 @@ class Sha256rsa(Signer):
         input_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(SIZE_RANDOM_STR))
         result_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(SIZE_RANDOM_STR))
 
-        touch(sealbin_f)
-        touch(input_f)
-        touch(result_f)
+        self.__touch(sealbin_f)
+        self.__touch(input_f)
+        self.__touch(result_f)
 
         with open(input_f, 'a') as cf:
             cf.write(str2sign)
@@ -45,7 +48,7 @@ class Sha256rsa(Signer):
             'dgst',
             '-sha256',
             '-sign',
-            self.pk,
+            self.pem_privkey,
             '-out',
             sealbin_f,
             input_f
@@ -67,7 +70,7 @@ class Sha256rsa(Signer):
             self.logger.error("Command raised exception: " + str(e))
             raise SignerError("Output: " + str(e.output))
 
-        rs = fetch_result(result_f)
+        rs = self.__fetch_result(result_f)
 
         os.remove(sealbin_f)
         os.remove(input_f)

@@ -8,7 +8,7 @@ class Signer(object):
     """
     __SSL_BIN = "openssl"
 
-    def __init__(self, logger, fullpath_pk):
+    def __init__(self, logger, pem_pubkey, pem_privkey):
 
         def seekout_openssl():
             executable = find_executable(self.__SSL_BIN)
@@ -17,8 +17,13 @@ class Signer(object):
             raise SignerError("it has not found {} binary".format(self.__SSL_BIN))
 
         self.le = LocalExec(logger)
-        self.pk = fullpath_pk
+        self.pem_pubkey = pem_pubkey
+        self.pem_privkey = pem_privkey
         self.ssl_bin = seekout_openssl()
+
+    @abstractmethod
+    def verify(self, signature):
+        """verifies base64 string with a public key"""
 
     @abstractmethod
     def sign(self, str2sign):
