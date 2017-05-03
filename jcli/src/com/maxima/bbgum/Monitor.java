@@ -107,7 +107,11 @@ final class Monitor {
 
         if (t == null) {
             if (this.isServerTransaction(a.getTransNum())) {
-                t = new Transaction(this.factory.getEntity(a.getArchetype()), false, true);
+                try {
+                    t = new Transaction(this.factory.getEntity(a.getArchetype()), false, true);
+                } catch (Exception ex) {
+                    Logger.getLogger(Monitor.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 synchronized (poolMutex) {
                     this.pool[a.getTransNum() & 0xff] = t;
                 }
@@ -142,7 +146,12 @@ final class Monitor {
         Action a = new Action();
         a.setArchetype(archetype);
         a.setBuffer(buffer);
-        Transaction t = new Transaction(this.factory.getEntity(archetype), block, false);
+        Transaction t = null;
+        try {
+            t = new Transaction(this.factory.getEntity(archetype), block, false);
+        } catch (Exception ex) {
+            Logger.getLogger(Monitor.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         synchronized (poolMutex) {
             a.setTransNum((byte) this.requestNextNum());
