@@ -95,8 +95,7 @@ final class Monitor {
 
         if (!this.factory.isSupported(a.getArchetype())) {
             String msg = "The server side sent an invalid Action which is not registered yet!. It will be ignore";
-            System.out.println(msg);
-            return;
+            throw new SessionError(msg);
         }
 
         Transaction t = null;
@@ -111,6 +110,7 @@ final class Monitor {
                     t = new Transaction(this.factory.getEntity(a.getArchetype()), false, true);
                 } catch (Exception ex) {
                     Logger.getLogger(Monitor.class.getName()).log(Level.SEVERE, null, ex);
+                    throw new SessionError("Transaction could not be created");
                 }
                 synchronized (poolMutex) {
                     this.pool[a.getTransNum() & 0xff] = t;
@@ -119,7 +119,7 @@ final class Monitor {
             } else {
                 String msg = "The transNum (" + a.getTransNum() +
                     ") of the Action is not a server transaction number. It will be ignore";
-                System.out.println(msg);
+                throw new SessionError(msg);
             }
         } else this.blackBox.inComming(t.getController(), a);
 
@@ -151,6 +151,8 @@ final class Monitor {
             t = new Transaction(this.factory.getEntity(archetype), block, false);
         } catch (Exception ex) {
             Logger.getLogger(Monitor.class.getName()).log(Level.SEVERE, null, ex);
+            String msg = "Transaction could not be created";
+            throw new SessionError(msg);
         }
 
         synchronized (poolMutex) {
