@@ -16,6 +16,11 @@ class Signer(object):
 
     def __init__(self, logger, pem_pubkey, pem_privkey):
 
+        # You must first extract the public key from the certificate:
+        # openssl x509 -pubkey -noout -in cert.pem > pubkey.pem
+        # then use the key to verify the signature:
+        # openssl dgst -verify pubkey.pem -signature sigfile datafile
+
         def seekout_openssl():
             executable = find_executable(self.__SSL_BIN)
             if executable:

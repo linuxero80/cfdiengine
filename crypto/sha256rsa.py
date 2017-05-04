@@ -16,12 +16,9 @@ class Sha256rsa(Signer):
         tmp_dir = tempfile.gettempdir()
         decoded_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
         signature_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
-        result_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
         verify_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
 
-        self.__touch(decoded_f)
         self.__touch(signature_f)
-        self.__touch(result_f)
         self.__touch(verify_f)
 
         with open(signature_f, 'a') as sf:
@@ -30,6 +27,8 @@ class Sha256rsa(Signer):
         with open(verify_f, 'a') as vf:
             vf.write(str2verify)
 
+        # When stripping \n characters and presenting that as one
+        # single line you need the -A option.
         base64_args = [
             'base64',
             '-A',
@@ -50,7 +49,6 @@ class Sha256rsa(Signer):
             verify_f
         ]
 
-        t = None
         try:
             self.le([self.ssl_bin] + base64_args, cmd_timeout = 10, ign_rcs = None)
             self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10, ign_rcs = None)
@@ -58,14 +56,9 @@ class Sha256rsa(Signer):
             self.logger.error("Command raised exception: " + str(e))
             raise SignerError("Output: " + str(e.output))
 
-
-        rs = self.__fetch_result(result_f)
-
         os.remove(decoded_f)
         os.remove(signature_f)
-        os.remove(result_f)
         os.remove(verify_f)
-        return rs
 
 
     def __fetch_result(self, path):
@@ -114,7 +107,6 @@ class Sha256rsa(Signer):
             result_f
         ]
 
-        t = None
         try:
             self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10, ign_rcs = None)
             self.le([self.ssl_bin] + base64_args, cmd_timeout = 10, ign_rcs = None)
