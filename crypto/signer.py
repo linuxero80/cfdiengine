@@ -3,6 +3,12 @@ from abc import ABCMeta, abstractmethod
 from distutils.spawn import find_executable
 import tempfile, os
 
+class SignerError(Exception):
+    def __init__(self, message = None):
+        self.message = message
+    def __str__(self):
+        return self.message
+
 class Signer(object):
     """
     """
@@ -16,21 +22,16 @@ class Signer(object):
                 return os.path.abspath(executable)
             raise SignerError("it has not found {} binary".format(self.__SSL_BIN))
 
-        self.le = LocalExec(logger)
+        self.logger = logger
+        self.le = LocalExec(self.logger)
         self.pem_pubkey = pem_pubkey
         self.pem_privkey = pem_privkey
         self.ssl_bin = seekout_openssl()
 
     @abstractmethod
-    def verify(self, signature):
+    def verify(self, signature, str2verify):
         """verifies base64 string with a public key"""
 
     @abstractmethod
     def sign(self, str2sign):
         """signs an string and returns base64 string"""
-
-class SignerError(Exception):
-    def __init__(self, message = None):
-        self.message = message
-    def __str__(self):
-        return self.message   
