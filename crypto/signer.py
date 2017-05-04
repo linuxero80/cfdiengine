@@ -1,5 +1,5 @@
+from misc.helperstr import HelperStr
 from misc.localexec import LocalExec
-from abc import ABCMeta, abstractmethod
 from distutils.spawn import find_executable
 import tempfile, os
 
@@ -13,8 +13,9 @@ class Signer(object):
     """
     """
     __SSL_BIN = "openssl"
+    __SIZE_RANDOM_STR = 8
 
-    def __init__(self, logger, pem_pubkey, pem_privkey):
+    def __init__(self, logger, cipher, pem_pubkey, pem_privkey):
 
         # You must first extract the public key from the certificate:
         # openssl x509 -pubkey -noout -in cert.pem > pubkey.pem
@@ -29,14 +30,119 @@ class Signer(object):
 
         self.logger = logger
         self.le = LocalExec(self.logger)
+        self.cipher = cipher
         self.pem_pubkey = pem_pubkey
         self.pem_privkey = pem_privkey
         self.ssl_bin = seekout_openssl()
 
-    @abstractmethod
     def verify(self, signature, str2verify):
         """verifies base64 string with a public key"""
 
-    @abstractmethod
+        tmp_dir = tempfile.gettempdir()
+        decoded_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
+        signature_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
+        verify_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
+
+        self.__touch(signature_f)
+        self.__touch(verify_f)
+
+        with open(signature_f, 'a') as sf:
+            sf.write(signature)
+
+        with open(verify_f, 'a') as vf:
+            vf.write(str2verify)
+
+        # When stripping \n characters and presenting that as one
+        # single line you need the -A option.
+        base64_args = [
+            'base64',
+            '-A',
+            '-d',
+            '-in',
+            signature_f,
+            '-out',
+            decoded_f
+        ]
+
+        dgst_args = [
+            'dgst',
+            '-{}'.format(self.cipher),
+            '-verify',
+            self.pem_pubkey,
+            '-signature',
+            decoded_f,
+            verify_f
+        ]
+
+        try:
+            self.le([self.ssl_bin] + base64_args, cmd_timeout = 10, ign_rcs = None)
+            self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10, ign_rcs = None)
+        except subprocess.CalledProcessError as e:
+            self.logger.error("Command raised exception: " + str(e))
+            raise SignerError("Output: " + str(e.output))
+
+        os.remove(decoded_f)
+        os.remove(signature_f)
+        os.remove(verify_f)
+
+
+    def __fetch_result(self, path):
+        rs = None
+        statinfo = os.stat(path)
+        if statinfo.st_size > 0:
+            rs = ''
+            with open(path, 'r') as rf:
+                for line in rf:
+                    rs = rs + line.replace("\n", "")
+        if rs == None:
+            SignerError("Unexpected ssl output!!!")
+        return rs
+
+    def __touch(self, path):
+        with open(path, 'a'):
+            os.utime(path, None)
+
     def sign(self, str2sign):
         """signs an string and returns base64 string"""
+        tmp_dir = tempfile.gettempdir()
+        sealbin_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
+        input_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
+        result_f = '{}/{}'.format(tmp_dir, HelperStr.random_str(self.__SIZE_RANDOM_STR))
+
+        self.__touch(input_f)
+
+        with open(input_f, 'a') as cf:
+            cf.write(str2sign)
+
+        dgst_args = [
+            'dgst',
+            '-{}'.format(self.cipher),
+            '-sign',
+            self.pem_privkey,
+            '-out',
+            sealbin_f,
+            input_f
+        ]
+
+        base64_args = [
+            'base64',
+            '-in',
+            sealbin_f,
+            '-out',
+            result_f
+        ]
+
+        try:
+            self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10, ign_rcs = None)
+            self.le([self.ssl_bin] + base64_args, cmd_timeout = 10, ign_rcs = None)
+        except subprocess.CalledProcessError as e:
+            self.logger.error("Command raised exception: " + str(e))
+            raise SignerError("Output: " + str(e.output))
+
+        rs = self.__fetch_result(result_f)
+
+        os.remove(sealbin_f)
+        os.remove(input_f)
+        os.remove(result_f)
+
+        return rs
