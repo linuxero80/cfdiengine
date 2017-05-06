@@ -12,6 +12,82 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
+    def __create_arts_section(self, dat):
+        add_currency_simbol = lambda c: '${0:>40}'.format(c)
+        st = ParagraphStyle(
+            name='info',
+            fontName='Helvetica',
+            fontSize=7,
+            leading = 8
+        )
+        header_concepts = (
+            dat['CAP_LOADED']['TL_ART_SKU'], dat['CAP_LOADED']['TL_ART_DES'],
+            dat['CAP_LOADED']['TL_ART_UNIT'], dat['CAP_LOADED']['TL_ART_QUAN'],
+            dat['CAP_LOADED']['TL_ART_UP'], dat['CAP_LOADED']['TL_ART_AMNT']
+        )
+        cont_concepts = []
+        for i in dat['ARTIFACTS']:
+            row = [
+                    i['NOIDENTIFICACION'],
+                    Paragraph( i['DESCRIPCION'], st),
+                    i['UNIDAD'].upper(),
+                    currency_format(__chomp_extra_zeroes(i['CANTIDAD'])),
+                    add_currency_simbol(currency_format(__chomp_extra_zeroes(i['VALORUNITARIO']))),
+                    add_currency_simbol(currency_format(__chomp_extra_zeroes(i['IMPORTE'])))
+            ]
+            cont_concepts.append(row)
+
+        cont = [header_concepts] + cont_concepts
+
+        table = Table(cont,[
+                2.2 * cm,
+                5.6 * cm,
+                2.3 * cm,
+                2.3 * cm,
+                3.8 * cm,
+                3.8 * cm])
+
+        table.setStyle(TableStyle([
+
+            #Body and header look and feel (common)
+            ('ALIGN', (0,0),(-1,0), 'CENTER'),
+            ('VALIGN', (0,0),(-1,-1), 'TOP'),
+            ('BOX', (0, 0), (-1, 0), 0.25, colors.black),
+            ('BACKGROUND', (0,0),(-1,0), colors.black),
+            ('TEXTCOLOR', (0,0),(-1,0), colors.white),
+            ('FONT', (0, 0), (-1, -1), 'Helvetica', 7),
+            ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 7),
+            ('ROWBACKGROUNDS', (0, 1),(-1, -1), [colors.white, colors.sandybrown]),
+            ('ALIGN', (0, 1),(1, -1), 'LEFT'),
+            ('ALIGN', (2, 0),(2, -1), 'CENTER'),
+            ('ALIGN', (3, 1),(-1, -1), 'RIGHT'),
+
+            #Clave column look and feel (specific)
+            ('BOX', (0, 1), (0, -1), 0.25, colors.black),
+
+            #Description column look and feel (specific)
+            ('BOX', (1, 1), (1, -1), 0.25, colors.black),
+
+            #Unit column look and feel (specific)
+            ('BOX', (2, 1), (2, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (3, 1),(3, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (4, 1),(4, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (5, 1),(5, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (6, 1),(6, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (7, 1),(7, -1), 0.25, colors.black),
+        ]))
+        return table
+
     def __customer_table(self, t0, t1):
         cont = [[t0,t1]]
         table = Table(cont,
