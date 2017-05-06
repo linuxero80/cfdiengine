@@ -12,7 +12,38 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
-def __create_extra_sec(dat):
+    def __create_seals_table(self, dat):
+        cont = []
+        st = ParagraphStyle(name='seal',fontName='Helvetica', fontSize=6.5, leading = 8)
+        cont.append([ "CADENA ORIGINAL DEL TIMBRE:" ])
+        cont.append([ Paragraph( dat['STAMP_ORIGINAL_STR'], st ) ])
+        cont.append([ "SELLO DIGITAL DEL EMISOR:" ])
+        cont.append([ Paragraph( dat['CFD_SEAL'], st ) ])
+        cont.append([ "SELLO DIGITAL DEL SAT:" ])
+        cont.append([ Paragraph( dat['SAT_SEAL'], st ) ])
+
+        t = Table(
+            cont,
+            [
+                15.5 * cm
+            ],
+            [
+                0.4*cm,
+                0.9*cm,
+                0.4*cm,
+                0.6*cm,
+                0.4*cm,
+                0.6*cm
+            ]
+        )
+        t.setStyle( TableStyle([
+            ('FONT', (0, 0), (0, 0), 'Helvetica-Bold', 6.5),
+            ('FONT', (0, 2), (0, 2), 'Helvetica-Bold', 6.5),
+            ('FONT', (0, 4), (0, 4), 'Helvetica-Bold', 6.5),
+        ]))
+        return t
+
+    def __create_extra_sec(self, dat):
 
         cont = []
         cont.append([ dat['CAP_LOADED']['TL_CUST_NUM'], dat['CAP_LOADED']['TL_PAY_MET'] ])
