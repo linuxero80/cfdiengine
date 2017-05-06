@@ -12,7 +12,7 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
-def __info_stamp_table(self, t0, t1):
+    def __info_stamp_table(self, t0, t1):
         cont = [[t0, t1]]
         table = Table(cont,
             [
@@ -617,7 +617,7 @@ def __info_stamp_table(self, t0, t1):
                 PageTemplate(id='biil_page',frames=[bill_frame],onPage=fp_foot),
             ]
         )
-        doc.build(story, canvasmaker=NumberedCanvas)
+        doc.build(story, canvasmaker=self.NumberedCanvas)
         return
 
 
@@ -626,3 +626,28 @@ def __info_stamp_table(self, t0, t1):
 
     def data_rel(self, dat):
         pass
+
+    class NumberedCanvas(canvas.Canvas):
+
+        def __init__(self, *args, **kwargs):
+            canvas.Canvas.__init__(self, *args, **kwargs)
+            self._saved_page_states = []
+
+        def showPage(self):
+            self._saved_page_states.append(dict(self.__dict__))
+            self._startPage()
+
+        def save(self):
+            """add page info to each page (page x of y)"""
+            num_pages = len(self._saved_page_states)
+            for state in self._saved_page_states:
+                self.__dict__.update(state)
+                self.draw_page_number(num_pages)
+                canvas.Canvas.showPage(self)
+            canvas.Canvas.save(self)
+
+        def draw_page_number(self, page_count):
+            width, height = letter
+            self.setFont("Helvetica", 7)
+            self.drawCentredString(width / 2.0, 0.65*cm,
+                "Pagina %d de %d" % (self._pageNumber, page_count))
