@@ -152,7 +152,29 @@ class CommonBill(BuilderGen):
         ]))
 
         return table
+    def __info_cert_table(self, dat):
 
+        cont = [['INFORMACIÓN DEL TIMBRE FISCAL DIGITAL']]
+        st = ParagraphStyle(name='info',fontName='Helvetica', fontSize=6.5, leading = 8)
+        table = Table(cont,
+            [
+                20.0 * cm
+            ],
+            [
+                0.50*cm,
+            ]
+        )
+
+        table.setStyle( TableStyle([
+            ('BOX', (0, 0), (0, 0), 0.25, colors.black),
+            ('VALIGN', (0, 0),(0, 0), 'MIDDLE'),
+            ('ALIGN', (0, 0),(0, 0), 'LEFT'),
+            ('FONT', (0, 0), (0, 0), 'Helvetica-Bold', 7),
+            ('BACKGROUND', (0, 0),(0, 0), colors.black),
+            ('TEXTCOLOR', (0, 0),(0, 0), colors.white)
+        ]))
+
+        return table
     def data_acq(self, conn, d_rdirs, **kwargs):
         doc = BaseDocTemplate(
             output_file, pagesize=letter,
