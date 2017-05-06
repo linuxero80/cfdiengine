@@ -68,7 +68,7 @@ class CommonBill(BuilderGen):
         }
 
     def __init__(self, logger):
-        super().__(logger)
+        super().__init__(logger)
 
     def __info_stamp_table(self, t0, t1):
         cont = [[t0, t1]]
