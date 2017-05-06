@@ -12,6 +12,49 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
+    def __create_customer_sec(self, dat):
+        cont = []
+        cont.append([ dat['CAP_LOADED']['TL_CUST_NAME'] ])
+        cont.append([ dat['RECEPTOR_NAME'].upper() ])
+        cont.append([ dat['CAP_LOADED']['TL_CUST_REG'] ] )
+        cont.append([ dat['RECEPTOR_RFC'].upper() ])
+        cont.append([ dat['CAP_LOADED']['TL_CUST_ADDR'] ])
+        cont.append([ (
+            "{0} {1}".format(
+                dat['RECEPTOR_STREET'],
+                dat['RECEPTOR_STREET_NUMBER']
+            )
+        ).upper() ])
+        cont.append([ dat['RECEPTOR_SETTLEMENT'].upper() ])
+        cont.append([ "{0}, {1}".format(
+            dat['RECEPTOR_TOWN'],
+            dat['RECEPTOR_STATE']
+        ).upper()])
+        cont.append([ dat['RECEPTOR_COUNTRY'].upper() ])
+        cont.append([ "%s %s" % ( dat['CAP_LOADED']['TL_CUST_ZIPC'], dat['RECEPTOR_CP']) ])
+
+        table = Table(cont,
+            [
+                8.6 * cm   # rowWitdhs
+            ],
+            [0.35*cm] * 10 # rowHeights
+        )
+        table.setStyle( TableStyle([
+            #Body and header look and feel (common)
+            ('ROWBACKGROUNDS', (0, 0),(-1, 4), [colors.sandybrown, colors.white]),
+            ('ALIGN', (0, 1),(-1, -1), 'LEFT'),
+            ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+            ('TEXTCOLOR', (0,0),(-1,-1), colors.black),
+            ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 7),
+            ('FONT', (0, 1), (-1, 1), 'Helvetica', 7),
+            ('FONT', (0, 2), (-1, 2), 'Helvetica-Bold', 7),
+            ('FONT', (0, 3), (-1, 3), 'Helvetica', 7),
+            ('FONT', (0, 4), (-1, 4), 'Helvetica-Bold', 7),
+            ('FONT', (0, 5), (-1, 9), 'Helvetica', 7),
+        ]))
+        return table
+
     def __amount_table(self, t0, t1):
         cont = [[t0,t1]]
         table = Table(cont,
