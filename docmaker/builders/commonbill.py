@@ -172,10 +172,65 @@ class CommonBill(BuilderGen):
         story.append(
             self.__top_table(
                 logo,
-                __create_emisor_table(dat),
-                __create_factura_table(dat)
+                self.__create_emisor_table(dat),
+                self.__create_factura_table(dat)
             )
         )
+        story.append(Spacer(1, 0.4 * cm))
+        story.append(
+            self.__customer_table(
+                self.__create_customer_sec(dat),
+                self.__create_extra_sec(dat)
+            )
+        )
+        story.append(Spacer(1, 0.4 * cm))
+        story.append(self.__create_arts_section(dat))
+        story.append(
+            self.__amount_table(
+                self.__create_letra_section(dat),
+                self.__create_total_section(dat)
+            )
+        )
+        story.append(Spacer(1, 0.45 * cm))
+
+        ct = self.__comments_table(dat)
+        if ct:
+            story.append(ct)
+
+        story.append(Spacer(1, 0.6* cm))
+        story.append(self.__info_cert_table(dat))
+        story.append(
+            self.__info_stamp_table(
+                cedula,
+                self.__create_seals_table(dat)
+            )
+        )
+        story.append(self.__info_cert_extra(dat))
+        story.append(Spacer(1, 0.6 * cm))
+
+        lt = self.__legend_table(dat)
+        if lt:
+            story.append(lt)
+
+        def fp_foot(c, d):
+            c.saveState()
+            width, height = letter
+            c.setFont('Helvetica',7)
+            c.drawCentredString(width / 2.0, (1.00*cm), dat['FOOTER_ABOUT'])
+            c.restoreState()
+
+        bill_frame = Frame(
+            doc.leftMargin, doc.bottomMargin, doc.width, doc.height,
+            id='bill_frame'
+        )
+
+        doc.addPageTemplates(
+            [
+                PageTemplate(id='biil_page',frames=[bill_frame],onPage=fp_foot),
+            ]
+        )
+        doc.build(story, canvasmaker=NumberedCanvas)
+        return
 
     def format_wrt(self, output_file, dat):
         pass
