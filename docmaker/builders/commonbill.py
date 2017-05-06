@@ -12,6 +12,57 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
+    def __create_total_section(dat):
+        cont = [[
+            dat['CAP_LOADED']['TL_ART_SUBT'],
+            dat['CURRENCY_ABR'],
+            currency_format(
+               __chomp_extra_zeroes(dat['CFDI_SUBTOTAL'])
+            )
+        ]]
+
+        for imptras in dat['TAXES']['TRAS']['DETAILS']:
+            (tasa, _) = imptras['TASA'].split('.')
+
+            row = [
+                "{0} {1}%".format(
+                    'TAX' if dat['CAP_LOADED']['TL_DOC_LANG'] == 'ENGLISH' else imptras['IMPUESTO'],
+                    tasa
+                ),
+                dat['CURRENCY_ABR'],
+                currency_format(__chomp_extra_zeroes(imptras['IMPORTE']))
+            ]
+            cont.append(row)
+
+        cont.append([
+            dat['CAP_LOADED']['TL_ART_TOTAL'], dat['CURRENCY_ABR'],
+            currency_format(self.__chomp_extra_zeroes(dat['CFDI_TOTAL']))
+        ])
+
+        table_total = Table(cont,
+            [
+                3.8 * cm,
+                1.28* cm,
+                2.5 * cm  # rowWitdhs
+            ],
+            [0.4*cm] * len(cont) # rowHeights
+        )
+
+        table_total.setStyle( TableStyle([
+            ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
+            ('ALIGN',  (0,0),(-1,-1), 'RIGHT'),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+
+            ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 7),
+
+            ('BOX', (1, 0), (2, -1), 0.25, colors.black),
+
+            ('FONT', (1, 0), (1, 1), 'Helvetica', 7),
+            ('FONT', (1, 2), (1, 2), 'Helvetica-Bold', 7),
+            ('FONT', (-1, 0), (-1, -1), 'Helvetica-Bold', 7),
+        ]))
+        return table_total
+
     def __create_arts_section(self, dat):
         add_currency_simbol = lambda c: '${0:>40}'.format(c)
         st = ParagraphStyle(
