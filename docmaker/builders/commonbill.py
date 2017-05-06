@@ -9,6 +9,64 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 
 class CommonBill(BuilderGen):
 
+    __captions = {
+        'SPA': {
+            'TL_DOC_LANG': 'ESPAÑOL',
+            'TL_DOC_NAME': 'FACTURA',
+            'TL_DOC_DATE': 'FECHA Y HORA',
+            'TL_DOC_OBS': 'OBSERVACIONES',
+            'TL_CUST_NAME': 'CLIENTE',
+            'TL_CUST_ADDR': 'DIRECCIÓN',
+            'TL_CUST_ZIPC': 'C.P.',
+            'TL_CUST_REG': 'R.F.C',
+            'TL_CUST_NUM': 'NO. DE CLIENTE',
+            'TL_ORDER_NUM': 'NO. DE ORDEN',
+            'TL_BILL_CURR': 'MONEDA',
+            'TL_BILL_EXC_RATE': 'TIPO DE CAMBIO',
+            'TL_PAY_DATE': 'FECHA DE PAGO',
+            'TL_SALE_MAN': 'AGENTE DE VENTAS',
+            'TL_PAY_COND': 'CONDICIONES DE PAGO',
+            'TL_ACC_NUM': 'NO. DE CUENTA',
+            'TL_PAY_MET': 'METODO DE PAGO',
+            'TL_PAY_WAY': 'FORMA DE PAGO',
+            'TL_ART_SKU': 'CLAVE',
+            'TL_ART_DES': 'DESCRIPCIÓN',
+            'TL_ART_UNIT': 'UNIDAD',
+            'TL_ART_QUAN': 'CANTIDAD',
+            'TL_ART_UP': 'P. UNITARIO',
+            'TL_ART_AMNT': 'IMPORTE',
+            'TL_ART_SUBT': 'SUB-TOTAL',
+            'TL_ART_TOTAL': 'TOTAL'
+        },
+        'ENG': {
+            'TL_DOC_LANG': 'ENGLISH',
+            'TL_DOC_NAME': 'INVOICE',
+            'TL_DOC_DATE': 'DATE',
+            'TL_DOC_OBS': 'OBS',
+            'TL_CUST_NAME': 'CUSTOMER',
+            'TL_CUST_ADDR': 'ADDRESS SOLD TO',
+            'TL_CUST_ZIPC': 'ZIP CODE',
+            'TL_CUST_REG': 'TAX ID',
+            'TL_CUST_NUM': 'CUSTOMER #',
+            'TL_ORDER_NUM': 'ORDER #',
+            'TL_BILL_CURR': 'CURRENCY',
+            'TL_BILL_EXC_RATE': 'EXCHANGE RATE',
+            'TL_PAY_DATE': 'PAYMENT DATE',
+            'TL_SALE_MAN': 'SALE REP',
+            'TL_PAY_COND': 'PAYMENT TERMS',
+            'TL_ACC_NUM': 'ACCOUNT #',
+            'TL_PAY_MET': 'PAYMENT METHOD',
+            'TL_PAY_WAY': 'TERMS',
+            'TL_ART_SKU': 'SKU',
+            'TL_ART_DES': 'DESCRIPTION',
+            'TL_ART_UNIT': 'MEASURE',
+            'TL_ART_QUAN': 'QUANTITY',
+            'TL_ART_UP': 'UNIT PRICE',
+            'TL_ART_AMNT': 'AMOUNT',
+            'TL_ART_SUBT': 'SUBT',
+            'TL_ART_TOTAL': 'TOTAL'
+        }
+
     def __init__(self, logger):
         super().__(logger)
 
