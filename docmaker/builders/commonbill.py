@@ -12,6 +12,21 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
+    def __amount_table(self, t0, t1):
+        cont = [[t0,t1]]
+        table = Table(cont,
+            [
+                12.4 * cm,
+                8 * cm
+            ],
+            [1.31 * cm] * len(cont) # rowHeights
+        )
+        table.setStyle(TableStyle([
+            ('ALIGN', (0, 0),(0, 0), 'LEFT'),
+            ('ALIGN', (-1, -1),(-1, -1), 'RIGHT'),
+        ]))
+        return table
+
     def __create_letra_section(self, dat):
         cont = [ [''], ["IMPORTE CON LETRA"] ]
         (c,d) = dat['CFDI_TOTAL'].split('.')
