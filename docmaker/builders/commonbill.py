@@ -12,6 +12,27 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
+def __info_stamp_table(self, t0, t1):
+        cont = [[t0, t1]]
+        table = Table(cont,
+            [
+                4.0 * cm,
+                16.0 * cm
+            ],
+            [
+                4.0*cm
+            ]
+        )
+        table.setStyle( TableStyle([
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+            ('VALIGN', (0, 0),(-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0),(0, 0), 'CENTER'),
+            ('ALIGN', (1, 0),(1, 0), 'LEFT'),
+            ('BACKGROUND', (1, 0),(1, 0), colors.sandybrown),
+            ('LINEBEFORE',(1,0),(1,0), 0.25, colors.black)
+        ]))
+        return table
+
     def __create_seals_table(self, dat):
         cont = []
         st = ParagraphStyle(name='seal',fontName='Helvetica', fontSize=6.5, leading = 8)
