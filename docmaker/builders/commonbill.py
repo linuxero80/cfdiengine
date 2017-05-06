@@ -12,6 +12,47 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
+def __create_extra_sec(dat):
+
+        cont = []
+        cont.append([ dat['CAP_LOADED']['TL_CUST_NUM'], dat['CAP_LOADED']['TL_PAY_MET'] ])
+        cont.append([ dat['CUSTOMER_CONTROL_ID'], dat['METODO_PAGO'] ])
+        cont.append([ dat['CAP_LOADED']['TL_ORDER_NUM'], dat['CAP_LOADED']['TL_PAY_COND'] ])
+        cont.append([ dat['PURCHASE_NUMBER'], dat['PAYMENT_CONSTRAINT'] ])
+        cont.append([ dat['CAP_LOADED']['TL_BILL_CURR'] , dat['CAP_LOADED']['TL_PAY_WAY']])
+        cont.append([ dat['CURRENCY_ABR'], dat['FORMA_PAGO'] ])
+        cont.append([ dat['CAP_LOADED']['TL_BILL_EXC_RATE'], dat['CAP_LOADED']['TL_ACC_NUM'] ])
+        cont.append([ dat['XML_PARSED']['MONEY_EXCHANGE'], dat['NO_CUENTA'] ])
+        cont.append([ dat['CAP_LOADED']['TL_PAY_DATE'], dat['CAP_LOADED']['TL_SALE_MAN'] ])
+        cont.append([ dat['PAYMENT_DATE'], dat['SALES_MAN'] ])
+
+        table = Table(cont,
+            [
+                4.0 * cm,
+                7.0 * cm   # rowWitdhs
+            ],
+            [0.35*cm] * 10 # rowHeights
+        )
+        table.setStyle( TableStyle([
+            #Body and header look and feel (common)
+            ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+            ('TEXTCOLOR', (0,0),(-1,-1), colors.black),
+            ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 7),
+            ('FONT', (0, 1), (-1, 1), 'Helvetica', 7),
+            ('FONT', (0, 2), (-1, 2), 'Helvetica-Bold', 7),
+            ('FONT', (0, 3), (-1, 3), 'Helvetica', 7),
+            ('FONT', (0, 4), (-1, 4), 'Helvetica-Bold', 7),
+            ('FONT', (0, 5), (-1, 5), 'Helvetica', 7),
+            ('FONT', (0, 6), (-1, 6), 'Helvetica-Bold', 7),
+            ('FONT', (0, 7), (-1, 7), 'Helvetica', 7),
+            ('FONT', (0, 8), (-1, 8), 'Helvetica-Bold', 7),
+            ('FONT', (0, 9), (-1, 9), 'Helvetica', 7),
+            ('ROWBACKGROUNDS', (0, 0),(-1, -1), [colors.sandybrown, colors.white]),
+            ('ALIGN', (0, 1),(-1, -1), 'LEFT'),
+        ]))
+        return table
+
     def __create_customer_sec(self, dat):
         cont = []
         cont.append([ dat['CAP_LOADED']['TL_CUST_NAME'] ])
