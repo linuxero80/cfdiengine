@@ -12,6 +12,20 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
+    def __customer_table(self, t0, t1):
+        cont = [[t0,t1]]
+        table = Table(cont,
+            [
+                8.4 * cm,
+                12 * cm
+            ]
+        )
+        table.setStyle( TableStyle([
+            ('ALIGN', (0, 0),(0, 0), 'LEFT'),
+            ('ALIGN', (-1, -1),(-1, -1), 'RIGHT'),
+        ]))
+        return table
+
     def __top_table(self, t0, t1, t3):
         cont = [[t0, t1, t3]]
         table = Table(cont,
@@ -150,10 +164,9 @@ class CommonBill(BuilderGen):
             ('ALIGN', (0, 0),(-1, -1), 'CENTER'),
             ('VALIGN', (0, 1),(-1, -1), 'MIDDLE'),
         ]))
-
         return table
-    def __info_cert_table(self, dat):
 
+    def __info_cert_table(self, dat):
         cont = [['INFORMACIÓN DEL TIMBRE FISCAL DIGITAL']]
         st = ParagraphStyle(name='info',fontName='Helvetica', fontSize=6.5, leading = 8)
         table = Table(cont,
@@ -175,6 +188,7 @@ class CommonBill(BuilderGen):
         ]))
 
         return table
+
     def data_acq(self, conn, d_rdirs, **kwargs):
         doc = BaseDocTemplate(
             output_file, pagesize=letter,
