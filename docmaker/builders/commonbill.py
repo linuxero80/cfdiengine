@@ -12,7 +12,35 @@ class CommonBill(BuilderGen):
     def __init__(self, logger):
         super().__(logger)
 
-    def __create_total_section(dat):
+    def __create_letra_section(self, dat):
+        cont = [ [''], ["IMPORTE CON LETRA"] ]
+        (c,d) = dat['CFDI_TOTAL'].split('.')
+        n = numspatrans(c)
+        result = "{0} {1} {2}/100 {3}".format(
+            n.upper(),
+            dat['CURRENCY_NAME'],
+            d,
+            dat['CURRENCY_ABR']
+        )
+
+        # substitute multiple whitespace with single whitespace
+        cont.append([ ' '.join(result.split()) ] )
+
+        table_letra = Table(cont,
+            [
+                12.3 * cm  # rowWitdhs
+            ],
+            [0.4*cm] * len(cont) # rowHeights
+        )
+        table_letra.setStyle(TableStyle([
+            ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
+            ('ALIGN',  (0,0),(-1,-1), 'LEFT'),
+            ('FONT', (0, 1), (-1, 1), 'Helvetica-Bold', 7),
+            ('FONT', (0, 2), (-1, 2), 'Helvetica', 7),
+        ]))
+        return table_letra
+
+    def __create_total_section(self, dat):
         cont = [[
             dat['CAP_LOADED']['TL_ART_SUBT'],
             dat['CURRENCY_ABR'],
