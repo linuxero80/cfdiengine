@@ -27,6 +27,25 @@ class CommonBill(BuilderGen):
         ]))
         return table
 
+    def __legend_table(self, dat):
+        if len(dat['BILL_LEGENDS']) == 0:
+            return None
+
+        st = ParagraphStyle(name='info', alignment=TA_CENTER, fontName='Helvetica', fontSize=7, leading = 7)
+        cont = []
+
+        for l in dat['BILL_LEGENDS']:
+            row = [
+                Paragraph(l, st)
+            ]
+            cont.append(row)
+
+        table = Table(cont,
+            [
+                20.0 * cm
+            ]
+        )
+
     def __create_letra_section(self, dat):
         cont = [ [''], ["IMPORTE CON LETRA"] ]
         (c,d) = dat['CFDI_TOTAL'].split('.')
