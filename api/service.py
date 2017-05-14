@@ -9,17 +9,27 @@ class CfdiEngineError(Exception):
 
 class CfdiEngine(object):
 
-    def __init__(self, logger, config_file, port):
+    __HOST = ''    # Symbolic name meaning all available interfaces
+
+    def __init__(self, logger, config_prof, port):
         self.logger = logger
-        self.port = port
 
         try:
             reader = ProfileReader(self.logger)
-            proftree = reader(config_file)
-
+            proftree = reader(config_prof)
         except:
-            msg = "Problems came up through initialization of api"
+            msg = 'Problems came up when reading configuration profile'
             raise CfdiEngineError(msg)
 
+        self.server = BbGumServer(self.__HOST, port, self.logger)
+
     def start(self):
-        "start the service upon selected port"
+        """start the service upon selected port"""
+        try:
+            print('Use Control-C to exit')
+            self.server.getup()
+        except KeyboardInterrupt:
+            print('Exiting')
+        except BbGumServerError as e:
+            self.logger.error(e)
+            raise
