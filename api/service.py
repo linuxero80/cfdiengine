@@ -30,16 +30,12 @@ class CfdiEngine(object):
         """start the service upon selected port"""
 
         def spawner():
-            self.logger.debug("listening")
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.bind((self.hostname, self.port))
-            self.socket.listen(1)
-
+            print('Use Control-C to exit')
             while True:
                 conn, address = self.socket.accept()
                 self.logger.debug("Got connection")
                 process = multiprocessing.Process(
-                    target=self.handle, args=(conn, address))
+                    target=self.read_header, args=(conn, address))
                 process.daemon = True
                 process.start()
                 self.logger.debug("Started process %r", process)
@@ -52,7 +48,10 @@ class CfdiEngine(object):
                 process.join()
 
         try:
-            print('Use Control-C to exit')
+            self.logger.debug("listening")
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.bind((self.__HOST, self.port))
+            self.socket.listen(1)
             spawner()
         except KeyboardInterrupt:
             print('Exiting')
@@ -62,7 +61,7 @@ class CfdiEngine(object):
         finally:
             shutdown()
 
-    def handle(self, connection, address):
+    def read_header(self, connection, address):
         try:
             self.logger.debug("Connected %r at %r", connection, address)
             while True:
