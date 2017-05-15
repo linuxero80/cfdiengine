@@ -4,13 +4,13 @@ import multiprocessing
 import socket
 import os
 
-class CfdiEngineError(Exception):
+class BbGumServerError(Exception):
     def __init__(self, message = None):
         self.message = message
     def __str__(self):
         return self.message
 
-class CfdiEngine(object):
+class BbGumServer(object):
 
     __HOST = ''     # Symbolic name meaning all available interfaces
     __QCON_MAX = 5  # Maximum number of queued connections
@@ -24,7 +24,7 @@ class CfdiEngine(object):
             proftree = reader(config_prof)
         except:
             msg = 'Problems came up when reading configuration profile'
-            raise CfdiEngineError(msg)
+            raise BbGumServerError(msg)
 
 
     def start(self):
