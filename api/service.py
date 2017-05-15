@@ -12,7 +12,8 @@ class CfdiEngineError(Exception):
 
 class CfdiEngine(object):
 
-    __HOST = '' # Symbolic name meaning all available interfaces
+    __HOST = ''     # Symbolic name meaning all available interfaces
+    __QCON_MAX = 5  # Maximum number of queued connections
 
     def __init__(self, logger, config_prof, port):
         self.logger = logger
@@ -28,6 +29,12 @@ class CfdiEngine(object):
 
     def start(self):
         """start the service upon selected port"""
+
+        def listener():
+            self.logger.debug("listening")
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.bind((self.__HOST, self.port))
+            self.socket.listen(self.__QCON_MAX)
 
         def spawner():
             print('Use Control-C to exit')
@@ -48,15 +55,13 @@ class CfdiEngine(object):
                 process.join()
 
         try:
-            self.logger.debug("listening")
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.bind((self.__HOST, self.port))
-            self.socket.listen(1)
+            listener()
             spawner()
         except KeyboardInterrupt:
             print('Exiting')
         except BbGumServerError as e:
-            self.logger.error(e)
+            raise
+        except Exception as e:
             raise
         finally:
             shutdown()
