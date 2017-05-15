@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from api.service import CfdiEngine, CfdiEngineError
+from bbgum.server import BbGumServer, BbGumServerError
 from os.path import expanduser
 import os
 import inspect
@@ -55,9 +55,9 @@ def go_service(args):
         args.config if args.config else DEFAULT_PROFILE)
 
     try:
-        service = CfdiEngine(logger, prof, port)
+        service = BbGumServer(logger, prof, port)
         service.start()
-    except (CfdiEngineError) as e:
+    except (BbGumServerError) as e:
         logger.error(e)
         raise
 
