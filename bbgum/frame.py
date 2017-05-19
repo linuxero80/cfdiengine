@@ -19,7 +19,7 @@ class Frame(object):
     @staticmethod
     def encodeHeader(action_length):
         l = []
-        for sc in '{:d}'.format(action_length):
+        for sc in '{:3d}'.format(action_length):
             l.append(ord(sc))
         l.append(Frame.C_NULL_CHARACTER)
         return bytes(l)
