@@ -8,5 +8,18 @@ class Frame(object):
     ACTION_DATA_SEGMENT_MAX_LENGTH = FRAME_BODY_MAX_LENGTH - ACTION_FLOW_INFO_SEGMENT_LENGTH
     C_NULL_CHARACTER = 0
 
+    REPLY_PASS = b'\x06'
+    REPLY_FAIL = b'\x15'
+
     def __init__(self):
-        pass
+        byteszero = lambda n: bytes([0] * n)
+        header = byteszero(self.FRAME_HEADER_LENGTH)
+        body = byteszero(self.FRAME_BODY_MAX_LENGTH)
+
+    @staticmethod
+    def encodeHeader(action_length):
+        l = []
+        for sc in '{:d}'.format(action_length):
+            l.append(ord(sc))
+        l.append(Frame.C_NULL_CHARACTER)
+        return bytes(l)
