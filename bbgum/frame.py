@@ -17,9 +17,15 @@ class Frame(object):
         body = byteszero(self.FRAME_BODY_MAX_LENGTH)
 
     @staticmethod
-    def encodeHeader(action_length):
+    def encode_header(action_length):
         l = []
         for sc in '{:3d}'.format(action_length):
             l.append(ord(sc))
         l.append(Frame.C_NULL_CHARACTER)
         return bytes(l)
+
+    @staticmethod
+    def decode_header(header):
+        cut_nullchar = lambda s: s[0:-1]
+        if (len(header) == Frame.FRAME_HEADER_LENGTH):
+            return int(cut_nullchar(header).decode("utf-8"))
