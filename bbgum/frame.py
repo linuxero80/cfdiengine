@@ -19,8 +19,9 @@ class Frame(object):
 
     def __init__(self):
         byteszero = lambda n: bytes([0] * n)
-        header = byteszero(self.FRAME_HEADER_LENGTH)
-        body = byteszero(self.FRAME_BODY_MAX_LENGTH)
+        self.header = byteszero(self.FRAME_HEADER_LENGTH)
+        self.body = byteszero(self.FRAME_BODY_MAX_LENGTH)
+        self.body_length = 0
 
     @staticmethod
     def encode_header(length):
