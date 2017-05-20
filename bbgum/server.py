@@ -21,7 +21,7 @@ class BbGumServer(object):
         self.logger = logger
         self.port = port
 
-    def start(self):
+    def start(self, factory):
         """start the service upon selected port"""
 
         def listener():

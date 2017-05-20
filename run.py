@@ -65,9 +65,10 @@ def go_service(args):
             PROFILES_DIR,
             args.config if args.config else DEFAULT_PROFILE))
 
+    ax = AppCtx(pt)
     try:
         service = BbGumServer(logger, port)
-        service.start()
+        service.start(ax.make_factory())
     except (BbGumServerError) as e:
         logger.error(e)
         raise
