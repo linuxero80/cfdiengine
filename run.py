@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from bbgum.server import BbGumServer, BbGumServerError
+from custom.profile import ProfileReader
 from os.path import expanduser
 import os
 import inspect
