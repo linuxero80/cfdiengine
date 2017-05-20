@@ -17,6 +17,7 @@ class AppCtx(object):
             ProfileReader.get_content(
             self.bbgum.events,
             ProfileReader.PNODE_MANY)
+            'archetype', 'event_mod'
         )
         fact = Factory()
         for archetype, m in devents.items():
