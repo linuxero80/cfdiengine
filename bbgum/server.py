@@ -20,8 +20,6 @@ class BbGumServer(object):
     def __init__(self, logger, port):
         self.logger = logger
         self.port = port
-        self.mon = self.Monitor()
-
 
     def start(self):
         """start the service upon selected port"""
@@ -38,7 +36,7 @@ class BbGumServer(object):
                 conn, address = self.socket.accept()
                 self.logger.debug("Got connection")
                 process = multiprocessing.Process(
-                    target=self.read_frame, args=(conn, address))
+                    target=self.conn_delegate, args=(conn, address, factory))
                 process.daemon = True
                 process.start()
                 self.logger.debug("Started process %r", process)
@@ -62,20 +60,19 @@ class BbGumServer(object):
         finally:
             shutdown()
 
-    def __read_socket(self, c, s):
-        d = c.recv(s)
-        if d == b'':
-            raise RuntimeError("socket connection broken")
-
-    def read_frame(self, conn, addr):
-        read_header = lambda : self.__read_socket(conn, Frame.FRAME_HEADER_LENGTH)
-        read_body = lambda hs: self.__read_socket(conn, hs)
+    def conn_delegate(self, conn, addr, factory):
+        '''deals with an active connection'''
+        def read_socket(s):
+            d = conn.recv(s)
+            if d == b'':
+                raise RuntimeError("socket connection broken")
+        read_header = lambda : read_socket(Frame.FRAME_HEADER_LENGTH)
+        read_body = lambda hs: read_socket(hs)
+        mon = Monitor(conn, factory)
         try:
             self.logger.debug("Connected %r at %r", conn, addr)
             while True:
-                self.mon.recive(
-                    Action(read_body(Frame.decode_header(read_header())))
-                )
+                mon.recive(Action(read_body(Frame.decode_header(read_header()))))
         except (RuntimeError, FrameError) as e:
             self.logger.exception(e)
         except:
@@ -83,20 +80,3 @@ class BbGumServer(object):
         finally:
             self.logger.debug("Closing socket")
             conn.close()
-
-    class Monitor(object):
-        '''
-        Entity to deal with incomming/outcomming transactions
-        '''
-        TRANSACTION_NUM_START_VALUE = 2
-        TRANSACTION_NUM_LAST_VALUE = 254
-        TRANSACTION_NUM_INCREMENT = 2
-        MAX_NODES = 256
-
-        # Initialization of elements for transactions pool
-        next_num = TRANSACTION_NUM_START_VALUE
-        pool = [None] * MAX_NODES
-        pool_lock = threading.Lock()
-
-        def __init__(self):
-            pass
