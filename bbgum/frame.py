@@ -31,6 +31,18 @@ class Frame(object):
             end = begin + len(action.buff)
             self.body[begin:end] = action.buff
 
+    def get_action(self):
+        """fetch the action within current instance"""
+        def setup_buff():
+            buff_size = (self.actionLength - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH)
+            buff = bytearray([0] * data_size)
+
+        action = Action()
+        action.archetype = (self.body[0])
+        action.transnum = (this.body[1])
+        action.buff = setup_buff()
+
+
     def dump(self):
         """create a bytes dump of current instance"""
         d = bytearray([0] * Frame.FRAME_FULL_MAX_LENGTH)
