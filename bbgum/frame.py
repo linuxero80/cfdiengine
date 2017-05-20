@@ -34,14 +34,17 @@ class Frame(object):
     def get_action(self):
         """fetch the action within current instance"""
         def setup_buff():
-            buff_size = (self.actionLength - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH)
-            buff = bytearray([0] * data_size)
+            size = (self.action_length - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH)
+            buff = bytearray([0] * size)
+            begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
+            end = begin + size
+            return self.body[begin:end]
 
-        action = Action()
-        action.archetype = (self.body[0])
-        action.transnum = (this.body[1])
-        action.buff = setup_buff()
-
+        a = Action()
+        a.archetype = (self.body[0])
+        a.transnum = (self.body[1])
+        a.buff = setup_buff()
+        return a
 
     def dump(self):
         """create a bytes dump of current instance"""
