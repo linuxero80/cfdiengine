@@ -17,16 +17,10 @@ class BbGumServer(object):
     __HOST = ''     # Symbolic name meaning all available interfaces
     __QCON_MAX = 5  # Maximum number of queued connections
 
-    def __init__(self, logger, config_prof, port):
+    def __init__(self, logger, port):
         self.logger = logger
         self.port = port
         self.mon = self.Monitor()
-        try:
-            reader = ProfileReader(self.logger)
-            proftree = reader(config_prof)
-        except:
-            msg = 'Problems came up when reading configuration profile'
-            raise BbGumServerError(msg)
 
 
     def start(self):

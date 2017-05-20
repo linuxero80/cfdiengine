@@ -40,6 +40,14 @@ def setup_log(debug=False):
 
 def go_service(args):
 
+    def read_settings(s_file):
+        logger.debug("looking for config profile file in:\n{0}".format(
+            os.path.abspath(s_file)))
+        if os.path.isfile(s_file):
+            reader = ProfileReader(logger)
+            return reader(s_file)
+        raise Exception("unable to locate the config profile file")
+
     RESOURCES_DIR = '{}/resources'.format(expanduser("~"))
     PROFILES_DIR = '{}/profiles'.format(RESOURCES_DIR)
     DEFAULT_PORT = 10080
@@ -50,12 +58,14 @@ def go_service(args):
     logger.debug(args)
 
     port = int(args.port) if args.port else DEFAULT_PORT
-    prof = '{}/{}'.format(
-        PROFILES_DIR,
-        args.config if args.config else DEFAULT_PROFILE)
+
+    pt = read_settings(
+        '{}/{}'.format(
+            PROFILES_DIR,
+            args.config if args.config else DEFAULT_PROFILE))
 
     try:
-        service = BbGumServer(logger, prof, port)
+        service = BbGumServer(logger, port)
         service.start()
     except (BbGumServerError) as e:
         logger.error(e)
