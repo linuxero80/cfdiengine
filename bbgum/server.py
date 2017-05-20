@@ -68,7 +68,7 @@ class BbGumServer(object):
                 raise RuntimeError("socket connection broken")
         read_header = lambda : read_socket(Frame.FRAME_HEADER_LENGTH)
         read_body = lambda hs: read_socket(hs)
-        mon = Monitor(conn, factory)
+        mon = Monitor(self.logger, conn, factory)
         try:
             self.logger.debug("Connected %r at %r", conn, addr)
             while True:

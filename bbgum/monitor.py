@@ -12,5 +12,11 @@ class Monitor(object):
     pool = [None] * MAX_NODES
     pool_lock = threading.Lock()
 
-    def __init__(self):
-       pass
+    def __init__(self, logger, conn, factory):
+       self.logger = logger
+       self.conn = conn
+       self.factory = factory
+
+    def recive(self, a):
+        if not self.factory.is_supported(a.archetype):
+            pass
