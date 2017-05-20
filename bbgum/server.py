@@ -78,7 +78,9 @@ class BbGumServer(object):
         try:
             self.logger.debug("Connected %r at %r", conn, addr)
             while True:
-                a = Action(read_body(Frame.decode_header(read_header())))
+                self.mon.recive(
+                    Action(read_body(Frame.decode_header(read_header())))
+                )
         except (RuntimeError, FrameError) as e:
             self.logger.exception(e)
         except:
@@ -86,3 +88,15 @@ class BbGumServer(object):
         finally:
             self.logger.debug("Closing socket")
             conn.close()
+
+    class Monitor(object):
+        '''
+        Entity to deal with incomming/outcomming transaction
+        '''
+        TRANSACTION_NUM_START_VALUE = 2
+        TRANSACTION_NUM_LAST_VALUE = 254
+        TRANSACTION_NUM_INCREMENT = 2
+        MAX_NODES = 256
+
+        next_num = TRANSACTION_NUM_START_VALUE
+        pool = [None] * MAX_NODES
