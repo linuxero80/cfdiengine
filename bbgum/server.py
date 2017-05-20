@@ -1,4 +1,5 @@
 from custom.profile import ProfileReader
+from bbgum.frame import Frame
 
 import multiprocessing
 import socket
@@ -70,7 +71,7 @@ class BbGumServer(object):
         try:
             self.logger.debug("Connected %r at %r", connection, address)
             while True:
-                data = connection.recv(1024)
+                data = connection.recv(Frame.FRAME_HEADER_LENGTH)
                 if data == "":
                     self.logger.debug("Socket closed remotely")
                     break
