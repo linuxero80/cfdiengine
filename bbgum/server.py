@@ -1,5 +1,5 @@
 from custom.profile import ProfileReader
-from bbgum.frame import Frame
+from bbgum.frame import Action, Frame, FrameError
 
 import multiprocessing
 import socket
@@ -67,19 +67,29 @@ class BbGumServer(object):
         finally:
             shutdown()
 
-    def read_header(self, connection, address):
+    def __read_bytes(self, c, s):
+        d = c.recv(s)
+        if d == b'':
+            raise RuntimeError("socket connection broken")
+
+    def read_header(self, conn, addr):
         try:
-            self.logger.debug("Connected %r at %r", connection, address)
+            self.logger.debug("Connected %r at %r", conn, addr)
             while True:
-                data = connection.recv(Frame.FRAME_HEADER_LENGTH)
-                if data == b'':
-                    self.logger.debug("Socket closed remotely")
-                    break
-                self.logger.debug("Received data %r", data)
-                connection.sendall(data)
-                self.logger.debug("Sent data")
+                h = self.__read_bytes(conn, Frame.FRAME_HEADER_LENGTH)
+                try:
+                    self.read_body(conn, Frame.decode_header(h))
+                except FrameError as e:
+                    self.logger.error(e)
+                    continue
+        except RuntimeError as e:
+            self.logger.exception(e)
         except:
             self.logger.exception("Problem handling request")
         finally:
             self.logger.debug("Closing socket")
-            connection.close()
+            conn.close()
+
+    def read_body(self, conn, size):
+        b = self.__read_bytes(conn, size)
+        Action(b)
