@@ -28,8 +28,17 @@ class Frame(object):
             self.body[0] = action.archetype
             self.body[1] = action.transnum
             begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
-            end = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buffer)
+            end = begin + len(action.buffer)
             self.body[begin:end] = action.buffer
+
+    def dump(self):
+        """create a bytes dump of current instance"""
+        d = bytearray([0] * Frame.FRAME_FULL_MAX_LENGTH)
+        d[:self.FRAME_HEADER_LENGTH-1] = self.header
+        begin = self.FRAME_HEADER_LENGTH
+        end = begin + len(self.body)
+        d[begin:end] = self.body
+        return d
 
     @staticmethod
     def encode_header(length):
