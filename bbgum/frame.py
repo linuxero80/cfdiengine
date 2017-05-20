@@ -35,7 +35,6 @@ class Frame(object):
         """fetch the action within current instance"""
         def setup_buff():
             size = (self.action_length - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH)
-            buff = bytearray([0] * size)
             begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
             end = begin + size
             return self.body[begin:end]
