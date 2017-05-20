@@ -72,7 +72,7 @@ class BbGumServer(object):
             self.logger.debug("Connected %r at %r", connection, address)
             while True:
                 data = connection.recv(Frame.FRAME_HEADER_LENGTH)
-                if data == "":
+                if data == b'':
                     self.logger.debug("Socket closed remotely")
                     break
                 self.logger.debug("Received data %r", data)
