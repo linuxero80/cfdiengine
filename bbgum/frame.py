@@ -74,6 +74,10 @@ class Frame(object):
                 raise FrameError("unexpected problems when decoding header!!")
         raise FrameError("header's width violiation!!")
 
+    @staticmethod
+    def reply_archetype(archetype):
+        """calculates reply archetype as per fail or pass"""
+        return bytes([ord(archetype)+1])
 
 class Action(object):
 
