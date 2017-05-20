@@ -9,6 +9,18 @@
                 "port" : " 5432"
             }           
         },
+        "bbgum": {
+            "events": [
+                 {
+                     "archetype": 0x30,
+                     "event_mod": "hello"
+                 },
+                 {
+                     "archetype": 0x24,
+                     "event_mod": "postbuff"
+                 }
+            ]
+        },
         "res":{
             "dirs":[
                 {
