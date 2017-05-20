@@ -25,8 +25,8 @@ class Frame(object):
         if action:
             self.action_length = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buff) 
             self.header = Frame.encode_header(self.action_length)
-            self.body[0] = action.archetype
-            self.body[1] = action.transnum
+            self.body[0] = ord(action.archetype)
+            self.body[1] = ord(action.transnum)
             begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
             end = begin + len(action.buff)
             self.body[begin:end] = action.buff
@@ -40,8 +40,8 @@ class Frame(object):
             return self.body[begin:end]
 
         a = Action()
-        a.archetype = (self.body[0])
-        a.transnum = (self.body[1])
+        a.archetype = self.body[0]
+        a.transnum = self.body[1]
         a.buff = setup_buff()
         return a
 
@@ -91,6 +91,6 @@ class Action(object):
             if (length > Frame.FRAME_BODY_MAX_LENGTH):
                 msg = "Action can not be bigger than " + str(Frame.FRAME_BODY_MAX_LENGTH) + " " + "bytes";
                 raise FrameError(msg)
-            self.archetype = (data[0])
-            self.transnum = (data[1])
+            self.archetype = data[0]
+            self.transnum = data[1]
             self.buff = data[Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH:-1]

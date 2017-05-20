@@ -43,7 +43,7 @@ class BbGumServer(object):
                 conn, address = self.socket.accept()
                 self.logger.debug("Got connection")
                 process = multiprocessing.Process(
-                    target=self.read_header, args=(conn, address))
+                    target=self.read_frame, args=(conn, address))
                 process.daemon = True
                 process.start()
                 self.logger.debug("Started process %r", process)
@@ -67,29 +67,22 @@ class BbGumServer(object):
         finally:
             shutdown()
 
-    def __read_bytes(self, c, s):
+    def __read_socket(self, c, s):
         d = c.recv(s)
         if d == b'':
             raise RuntimeError("socket connection broken")
 
-    def read_header(self, conn, addr):
+    def read_frame(self, conn, addr):
+        read_header = lambda : self.__read_socket(conn, Frame.FRAME_HEADER_LENGTH)
+        read_body = lambda hs: self.__read_socket(conn, hs)
         try:
             self.logger.debug("Connected %r at %r", conn, addr)
             while True:
-                h = self.__read_bytes(conn, Frame.FRAME_HEADER_LENGTH)
-                try:
-                    self.read_body(conn, Frame.decode_header(h))
-                except FrameError as e:
-                    self.logger.error(e)
-                    continue
-        except RuntimeError as e:
+                a = Action(read_body(Frame.decode_header(read_header())))
+        except (RuntimeError, FrameError) as e:
             self.logger.exception(e)
         except:
             self.logger.exception("Problem handling request")
         finally:
             self.logger.debug("Closing socket")
             conn.close()
-
-    def read_body(self, conn, size):
-        b = self.__read_bytes(conn, size)
-        Action(b)
