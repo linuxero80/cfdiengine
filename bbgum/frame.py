@@ -17,11 +17,19 @@ class Frame(object):
     REPLY_PASS = b'\x06'
     REPLY_FAIL = b'\x15'
 
-    def __init__(self):
-        byteszero = lambda n: bytearray([0] * n)
-        self.header = byteszero(self.FRAME_HEADER_LENGTH)
-        self.body = byteszero(self.FRAME_BODY_MAX_LENGTH)
-        self.body_length = 0
+    self.header = bytearray([0] * self.FRAME_HEADER_LENGTH)
+    self.body = bytearray([0] * self.FRAME_BODY_MAX_LENGTH)
+    self.action_length = 0
+
+    def __init__(self, action = None):
+        if action:
+            self.action_length = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buffer) 
+            self.header = Frame.encode_header(self.action_length)
+            self.body[0] = action.archetype
+            self.body[1] = action.transnum
+            begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
+            end = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buffer)
+            self.body[begin:end] = action.buffer
 
     @staticmethod
     def encode_header(length):
@@ -51,7 +59,6 @@ class Action(object):
     self.buffer = bytearray()
 
     def __init__(self, data = None):
-        byteszero = lambda n: bytearray([0] * n)
         if data:
             length = len(data)
             if (length) > Frame.FRAME_BODY_MAX_LENGTH):
