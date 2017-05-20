@@ -18,7 +18,7 @@ class Frame(object):
     REPLY_FAIL = b'\x15'
 
     def __init__(self):
-        byteszero = lambda n: bytes([0] * n)
+        byteszero = lambda n: bytearray([0] * n)
         self.header = byteszero(self.FRAME_HEADER_LENGTH)
         self.body = byteszero(self.FRAME_BODY_MAX_LENGTH)
         self.body_length = 0
@@ -35,7 +35,7 @@ class Frame(object):
 
     @staticmethod
     def decode_header(header):
-        cut_nullchar = lambda s: s[0:-1]
+        cut_nullchar = lambda s: s[:-1] # keep everything except the last item
         if (len(header) == Frame.FRAME_HEADER_LENGTH):
             try:
                 return int(cut_nullchar(header).decode("utf-8"))
