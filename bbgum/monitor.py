@@ -19,4 +19,6 @@ class Monitor(object):
 
     def recive(self, a):
         if not self.factory.is_supported(a.archetype):
-            pass
+            String msg = "The client side sent an invalid action" +
+                " which is not registered yet!. It will be ignore"
+            raise FrameError(msg)
