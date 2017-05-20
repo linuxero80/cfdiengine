@@ -2,6 +2,7 @@ from custom.profile import ProfileReader
 from bbgum.frame import Action, Frame, FrameError
 
 import multiprocessing
+import threading
 import socket
 import os
 
@@ -19,7 +20,7 @@ class BbGumServer(object):
     def __init__(self, logger, config_prof, port):
         self.logger = logger
         self.port = port
-
+        self.mon = self.Monitor()
         try:
             reader = ProfileReader(self.logger)
             proftree = reader(config_prof)
@@ -91,12 +92,17 @@ class BbGumServer(object):
 
     class Monitor(object):
         '''
-        Entity to deal with incomming/outcomming transaction
+        Entity to deal with incomming/outcomming transactions
         '''
         TRANSACTION_NUM_START_VALUE = 2
         TRANSACTION_NUM_LAST_VALUE = 254
         TRANSACTION_NUM_INCREMENT = 2
         MAX_NODES = 256
 
+        # Initialization of elements for transactions pool
         next_num = TRANSACTION_NUM_START_VALUE
         pool = [None] * MAX_NODES
+        pool_lock = threading.Lock()
+
+        def __init__(self):
+            pass
