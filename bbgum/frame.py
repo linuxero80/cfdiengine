@@ -17,19 +17,19 @@ class Frame(object):
     REPLY_PASS = b'\x06'
     REPLY_FAIL = b'\x15'
 
-    self.header = bytearray([0] * self.FRAME_HEADER_LENGTH)
-    self.body = bytearray([0] * self.FRAME_BODY_MAX_LENGTH)
-    self.action_length = 0
+    header = bytearray([0] * FRAME_HEADER_LENGTH)
+    body = bytearray([0] * FRAME_BODY_MAX_LENGTH)
+    action_length = 0
 
     def __init__(self, action = None):
         if action:
-            self.action_length = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buffer) 
+            self.action_length = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buff) 
             self.header = Frame.encode_header(self.action_length)
             self.body[0] = action.archetype
             self.body[1] = action.transnum
             begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
-            end = begin + len(action.buffer)
-            self.body[begin:end] = action.buffer
+            end = begin + len(action.buff)
+            self.body[begin:end] = action.buff
 
     def dump(self):
         """create a bytes dump of current instance"""
@@ -63,16 +63,16 @@ class Frame(object):
 
 class Action(object):
 
-    self.archetype = b'\x00'
-    self.transnum = b'\x00'
-    self.buffer = bytearray()
+    archetype = b'\x00'
+    transnum = b'\x00'
+    buff = bytearray()
 
     def __init__(self, data = None):
         if data:
             length = len(data)
-            if (length) > Frame.FRAME_BODY_MAX_LENGTH):
+            if (length > Frame.FRAME_BODY_MAX_LENGTH):
                 msg = "Action can not be bigger than " + str(Frame.FRAME_BODY_MAX_LENGTH) + " " + "bytes";
                 raise FrameError(msg)
             self.archetype = (data[0])
             self.transnum = (data[1])
-            self.buffer = data[Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH:-1]
+            self.buff = data[Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH:-1]
