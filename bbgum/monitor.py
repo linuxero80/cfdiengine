@@ -49,6 +49,8 @@ class Monitor(object):
     def receive(self, a):
         """receives action from upper layer"""
 
+        client_origin = lambda n: (ord(n) % 2) == 1
+
         if not self.factory.is_supported(a.archetype):
             String msg = "The client side sent an invalid action" +
                 " which is not registered yet!. It will be ignore"
@@ -57,7 +59,7 @@ class Monitor(object):
         t = self.tp.fetch_from(a.transnum)
 
         if (t == None):
-            if self.isClientTransaction(a.transnum):
+            if client_origin(a.transnum):
                 try:
                     t = Transaction(self.factory.incept(a.archetype))
                 except Exception as e:
@@ -81,9 +83,6 @@ class Monitor(object):
                 t.wake_up()
             else:
                 self.tp.destroy_at(a.transnum)
-
-    def isClientTransaction(self, n):
-        return (ord(n) % 2) == 1
 
     class TransPool(object):
         TRANSACTION_NUM_START_VALUE = 2
@@ -138,8 +137,8 @@ class Monitor(object):
                 return i
 
             pool_lock.acquire()
-            s = req_next()
-            this.pool[s] = t
+            slot = req_next()
+            this.pool[slot] = t
             pool_lock.release()
             return s
 
