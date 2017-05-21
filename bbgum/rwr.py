@@ -45,9 +45,21 @@ class Rwr(Controller):
 
         if status == 0:
             mon.send(resp_action(buff))
+            self.current_step = self.IN_RECV_REPLY
         else:
             self.finish_flag = True
+
+    def __recv_reply(self, mon, act):
+        '''process an incomming reply'''
+        if act.buff[0] == Frame.REPLY_FAIL:
+            reason = act.buff[1]
+            self.postmortem(reason)
+        self.finish_flag = True
 
     @abc.abstractmethod
     def process_buff(buff):
         """processes incomming buffer"""
+
+    @abc.abstractmethod
+    def postmortem(failure):
+        """analyzes a failure code"""

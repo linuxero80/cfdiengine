@@ -1,7 +1,7 @@
 from bbgum.controller import Controller
 import abc
 
-class SingleReceive(Controller):
+class Sr(Controller):
     '''
     Deals with single recive transaction's actions
     '''
@@ -17,14 +17,13 @@ class SingleReceive(Controller):
 
         def result_buff():
             rc = self.process_buff(act.buff)
-            l = [
-                (Frame.REPLY_PASS if rc == 0 else Frame.REPLY_FAIL),
+            return bytes([
+                Frame.REPLY_PASS if rc == 0 else Frame.REPLY_FAIL,
                 rc
-            ]
-            return bytes(l)
+            ])
 
         a = Action()
-        a.archetype = act.archetype
+        a.archetype = Frame.reply_archetype(act.archetype)
         a.transnum = act.transnum
         a.buff = result_buff
         mon.send(a)
