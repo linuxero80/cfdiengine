@@ -16,15 +16,29 @@ class Monitor(object):
                 return Transaction(self.factory.incept(archetype), block)
             except Exception as e:
                 self.logger.exception(e)
-                msg = "Transaction could not be created"
-                raise FrameError(msg)
+                raise FrameError('Transaction could not be created')
 
         a = Action()
         a.archetype = archetype
         a.buff = buff
+
         t = incept_trans()
         self.tp.place_smart(self, t)
+
         t.controller.outcomming(self, a)
+
+        if t.blocking:
+            try:
+                t.sleep()
+            except Exception as e:
+                self.logger.exception(e)
+                raise FrameError('Transaction could not await')
+
+            reply = t.controller.get_reply()
+            self.tp.destroy_at(a.transnum)
+            return reply
+        else:
+            return None
 
     def receive(self, a):
         """receives action from upper layer"""
