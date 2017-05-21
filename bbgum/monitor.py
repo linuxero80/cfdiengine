@@ -40,6 +40,7 @@ class Monitor(object):
 
             reply = t.controller.get_reply()
             self.tp.destroy_at(a.transnum)
+            # Blocking transaction returns a dictionary
             return reply
         else:
             # Non-blocking transaction returns None
@@ -97,7 +98,7 @@ class Monitor(object):
 
         def destroy_at(self, transnum):
             '''destroy the chosen transaction'''
-            self.put(transnum, None)
+            self.place_at(transnum, None)
 
         def place_smart(self, t):
             '''place a transaccion at available pool slot'''
@@ -144,17 +145,15 @@ class Monitor(object):
 
         def place_at(self, transnum, t):
             '''place a transaccion at specific pool slot'''
-            i = ord(transnum)
+            slot = ord(transnum)
             pool_lock.acquire()
-            this.pool[i] = t
+            this.pool[slot] = t
             pool_lock.release()
 
         def fetch_from(self, transnum):
             '''fetches a transaction from pool'''
-            t = None
-            i = ord(transnum)
+            slot = ord(transnum)
             pool_lock.acquire()
-            t = self.pool[i]
+            t = self.pool[slot]
             pool_lock.release()
             return t
-
