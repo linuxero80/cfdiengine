@@ -1,7 +1,7 @@
 from bbgum.controller import Controller
 import abc
 
-class SingleRecive(Controller):
+class SingleReceive(Controller):
     '''
     Deals with single recive transaction's actions
     '''
