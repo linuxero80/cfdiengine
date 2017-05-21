@@ -9,6 +9,23 @@ class Monitor(object):
        self.factory = factory
        self.tp = self.TransPool()
 
+    def push_buff(self, archetype, buff, block = True):
+
+        def incept_trans():
+            try:
+                return Transaction(self.factory.incept(archetype), block)
+            except Exception as e:
+                self.logger.exception(e)
+                msg = "Transaction could not be created"
+                raise FrameError(msg)
+
+        a = Action()
+        a.archetype = archetype
+        a.buff = buff
+        t = incept_trans()
+        self.tp.place_smart(self, t)
+        t.controller.outcomming(self, a)
+
     def receive(self, a):
         """receives action from upper layer"""
 
