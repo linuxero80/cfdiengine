@@ -17,11 +17,25 @@ class Monitor(object):
                 " which is not registered yet!. It will be ignore"
             raise FrameError(msg)
 
-        t = self.tp.get_from(a.transnum)
+        t = self.tp.fetch_from(a.transnum)
 
         if (t == None):
             if self.isClientTransaction(a.transnum):
-                pass
+                try:
+                    t = Transaction(self.factory.incept(a.archetype))
+                except Exception as e:
+                    self.logger.exception(e)
+                    raise FrameError("Transaction could not be created")
+
+                self.tp.place_at(a.transnum, t)
+                pass # this.blackBox.inComming(t.getController(), a)
+            else:
+                msg = "The transaction number (" + a.transnum +
+                    ") in the Action is not a client transaction number." +
+                    " It will be ignore"
+                raise FrameError(msg)
+        else:
+            pass # this.blackBox.inComming(t.getController(), a)
 
     def isClientTransaction(self, n):
         return (ord(n) % 2) == 1
@@ -41,7 +55,7 @@ class Monitor(object):
             '''destroy the chosen transaction'''
             self.put(transnum, None)
 
-        def push_smart(self, t):
+        def place_smart(self, t):
             '''place a transaccion at available pool slot'''
 
             def req_next():
@@ -70,7 +84,7 @@ class Monitor(object):
                 j = 0
                 while True:
                     i += self.TRANSACTION_NUM_INCREMENT
-                    j++
+                    j += 1
                     if (self.pool[i] != None) and (j < self.MAX_NODES):
                         break
 
@@ -83,14 +97,14 @@ class Monitor(object):
             this.pool[i] = t
             pool_lock.release()
 
-        def push_at(self, transnum, t):
+        def place_at(self, transnum, t):
             '''place a transaccion at specific pool slot'''
             i = ord(transnum)
             pool_lock.acquire()
             this.pool[i] = t
             pool_lock.release()
 
-        def get_from(self, transnum):
+        def fetch_from(self, transnum):
             '''fetches a transaction from pool'''
             t = None
             i = ord(transnum)
