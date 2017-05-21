@@ -18,12 +18,16 @@ class Monitor(object):
                 self.logger.exception(e)
                 raise FrameError('Transaction could not be created')
 
-        a = Action()
-        a.archetype = archetype
-        a.buff = buff
+        def makeup_action(transnum):
+            act = Action()
+            act.archetype = archetype
+            act.buff = buff
+            act.transnum = transnum
+            return act
 
         t = incept_trans()
-        self.tp.place_smart(self, t)
+        slot = self.tp.place_smart(self, t)
+        a = makeup_action(bytes([slot]))
 
         t.controller.outcomming(self, a)
 
@@ -38,6 +42,7 @@ class Monitor(object):
             self.tp.destroy_at(a.transnum)
             return reply
         else:
+            # Non-blocking transaction returns None
             return None
 
     def receive(self, a):
@@ -132,9 +137,10 @@ class Monitor(object):
                 return i
 
             pool_lock.acquire()
-            i = req_next()
-            this.pool[i] = t
+            s = req_next()
+            this.pool[s] = t
             pool_lock.release()
+            return s
 
         def place_at(self, transnum, t):
             '''place a transaccion at specific pool slot'''
