@@ -28,14 +28,20 @@ class Monitor(object):
                     raise FrameError("Transaction could not be created")
 
                 self.tp.place_at(a.transnum, t)
-                pass # this.blackBox.inComming(t.getController(), a)
+                t.controller.incomming(self, a)
             else:
-                msg = "The transaction number (" + a.transnum +
+                msg = "The transaction number (" + ord(a.transnum) +
                     ") in the Action is not a client transaction number." +
                     " It will be ignore"
                 raise FrameError(msg)
         else:
-            pass # this.blackBox.inComming(t.getController(), a)
+            t.controller.incomming(self, a)
+
+        if t.controller.finished():
+            if t.blocking:
+                t.wake_up()
+            else:
+                self.tp.destroy_at(a.transnum)
 
     def isClientTransaction(self, n):
         return (ord(n) % 2) == 1
@@ -51,7 +57,7 @@ class Monitor(object):
         pool = [None] * MAX_NODES
         pool_lock = threading.Lock()
 
-        def destroy(self, transnum):
+        def destroy_at(self, transnum):
             '''destroy the chosen transaction'''
             self.put(transnum, None)
 
