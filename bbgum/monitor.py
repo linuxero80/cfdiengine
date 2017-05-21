@@ -38,6 +38,8 @@ class Monitor(object):
             t.controller.incomming(self, a)
 
         if t.controller.finished():
+            # finalization for actions
+            # incepted through push_buff
             if t.blocking:
                 t.wake_up()
             else:
