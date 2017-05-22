@@ -14,6 +14,9 @@ class Signer(object):
     """
     __SSL_BIN = "openssl"
     __SIZE_RANDOM_STR = 8
+    __SUPPORTED = ['sha1', 'sha256']
+
+    SHA1, SHA256 = range(2)
 
     def __init__(self, logger, cipher, pem_pubkey, pem_privkey):
 
@@ -30,7 +33,7 @@ class Signer(object):
 
         self.logger = logger
         self.le = LocalExec(self.logger)
-        self.cipher = cipher
+        self.cipher = self.__SUPPORTED[cipher]
         self.pem_pubkey = pem_pubkey
         self.pem_privkey = pem_privkey
         self.ssl_bin = seekout_openssl()
