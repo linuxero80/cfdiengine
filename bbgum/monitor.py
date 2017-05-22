@@ -1,3 +1,6 @@
+from Queue import Queue, Empty
+import threading
+
 class Monitor(object):
     '''
     Entity to deal with incomming/outcomming transactions
@@ -7,6 +10,7 @@ class Monitor(object):
        self.logger = logger
        self.conn = conn
        self.factory = factory
+       self.outgoing = Queue(maxsize = 0)
        self.tp = self.TransPool()
 
     def push_buff(self, archetype, buff, block = True):
@@ -84,7 +88,26 @@ class Monitor(object):
             else:
                 self.tp.destroy_at(a.transnum)
 
+    def send(self, a):
+        """write accion upon socket"""
+
+        def release():
+            try:
+                frame = self.outgoing.get_nowait()
+                self.conn.send(frame.dump())
+            except Empty as e:
+                self.logger.error(e)
+
+        available = self.outgoing.empty()
+        self.outgoing.put(Frame(a))
+        if available:
+            while not self.outgoing.empty():
+                release()
+
     class TransPool(object):
+        '''
+        pool that stores active transactions
+        '''
         TRANSACTION_NUM_START_VALUE = 2
         TRANSACTION_NUM_LAST_VALUE = 254
         TRANSACTION_NUM_INCREMENT = 2
@@ -94,6 +117,9 @@ class Monitor(object):
         next_num = TRANSACTION_NUM_START_VALUE
         pool = [None] * MAX_NODES
         pool_lock = threading.Lock()
+
+        def __init__():
+            pass
 
         def destroy_at(self, transnum):
             '''destroy the chosen transaction'''
