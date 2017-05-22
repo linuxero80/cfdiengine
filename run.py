@@ -2,7 +2,6 @@
 
 from bbgum.server import BbGumServer, BbGumServerError
 from custom.profile import ProfileReader
-from custom.appctx import AppCtx
 from os.path import expanduser
 import os
 import inspect
@@ -50,6 +49,31 @@ def go_service(args):
             return reader(s_file)
         raise Exception("unable to locate the config profile file")
 
+    def getup_factory(logger, events):
+        devents = dict_params(
+            ProfileReader.get_content(
+            events, ProfileReader.PNODE_MANY),
+            'archetype', 'event_mod')
+        fact = Factory()
+        for archetype, event_mod in devents.items():
+            try:
+                m = __import__(event_mod)
+
+                if not hasattr(m, "impt_class"):
+                    msg = "module {0} has no impt_class attribute".format(event_mod)
+                    raise RuntimeError(msg)
+                cname = getattr(m, "impt_class")
+
+                if not hasattr(m, cname):
+                    msg = "module {0} has no {1} class implemented".format(event_mod, cname)
+                    raise RuntimeError(msg)
+                ic = getattr(m, cname)
+                fact.subscribe(archetype, ic)
+            except (ImportError, RuntimeError) as e:
+                logger.fatal("{0} support library failure".format(event_mod))
+                raise e
+        return fact
+
     RESOURCES_DIR = '{}/resources'.format(expanduser("~"))
     PROFILES_DIR = '{}/profiles'.format(RESOURCES_DIR)
     DEFAULT_PORT = 10080
@@ -66,10 +90,9 @@ def go_service(args):
             PROFILES_DIR,
             args.config if args.config else DEFAULT_PROFILE))
 
-    ax = AppCtx(logger, pt)
     try:
         service = BbGumServer(logger, port)
-        service.start(ax.make_factory(), forking = not args.nmp)
+        service.start(getup_factory(pt.bbgum.events), forking = not args.nmp)
     except (BbGumServerError) as e:
         logger.error(e)
         raise

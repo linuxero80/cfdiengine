@@ -10,4 +10,4 @@ class SrHello(Sr):
         pass
 
     def process_buff(buff):
-        pass
+        buff.decode("utf-8")

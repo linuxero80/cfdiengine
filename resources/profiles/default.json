@@ -13,7 +13,7 @@
             "events": [
                  {
                      "archetype": "0x30",
-                     "event_mod": "hello"
+                     "event_mod": "srhello"
                  },
                  {
                      "archetype": "0x24",
