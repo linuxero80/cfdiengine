@@ -68,7 +68,7 @@ def go_service(args):
     ax = AppCtx(pt)
     try:
         service = BbGumServer(logger, port)
-        service.start(ax.make_factory())
+        service.start(ax.make_factory(), forking = not args.debug)
     except (BbGumServerError) as e:
         logger.error(e)
         raise

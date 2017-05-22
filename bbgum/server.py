@@ -21,7 +21,7 @@ class BbGumServer(object):
         self.logger = logger
         self.port = port
 
-    def start(self, factory):
+    def start(self, factory, forking = True):
         """start the service upon selected port"""
 
         def listener():
@@ -35,6 +35,10 @@ class BbGumServer(object):
             while True:
                 conn, address = self.socket.accept()
                 self.logger.debug("Got connection")
+                if not forking:
+                    # just one connection as per current thread
+                    self.conn_delegate(conn, address, factory)
+                    break
                 process = multiprocessing.Process(
                     target=self.conn_delegate, args=(conn, address, factory))
                 process.daemon = True
