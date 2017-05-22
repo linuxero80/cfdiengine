@@ -10,14 +10,14 @@
             }           
         },
         "bbgum": {
-            "events": [
+            "controllers": [
                  {
                      "archetype": "0x30",
                      "event_mod": "srhello"
                  },
                  {
                      "archetype": "0x24",
-                     "event_mod": "postbuff"
+                     "event_mod": "srpostbuff"
                  }
             ]
         },

@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
+from bbgum.factory import Factory
 from bbgum.server import BbGumServer, BbGumServerError
 from custom.profile import ProfileReader
+from misc.tricks import dict_params
 from os.path import expanduser
 import os
 import inspect
@@ -9,6 +11,10 @@ import traceback
 import argparse
 import logging
 import sys
+
+sys.path.append(
+    os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "controllers")))
 
 def setup_log(debug=False):
 
@@ -49,10 +55,10 @@ def go_service(args):
             return reader(s_file)
         raise Exception("unable to locate the config profile file")
 
-    def getup_factory(logger, events):
+    def getup_factory(logger, variants):
         devents = dict_params(
             ProfileReader.get_content(
-            events, ProfileReader.PNODE_MANY),
+            variants, ProfileReader.PNODE_MANY),
             'archetype', 'event_mod')
         fact = Factory()
         for archetype, event_mod in devents.items():
@@ -92,7 +98,7 @@ def go_service(args):
 
     try:
         service = BbGumServer(logger, port)
-        service.start(getup_factory(pt.bbgum.events), forking = not args.nmp)
+        service.start(getup_factory(logger, pt.bbgum.controllers), forking = not args.nmp)
     except (BbGumServerError) as e:
         logger.error(e)
         raise

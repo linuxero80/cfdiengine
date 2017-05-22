@@ -1,4 +1,5 @@
-import abc
+#import abc
+from abc import ABCMeta, abstractmethod
 
 class Controller(object):
     '''
@@ -21,11 +22,11 @@ class Controller(object):
         """comforms reply for blocking transaction"""
         pass
 
-class Sr(Controller):
+class Sr(Controller, metaclass=ABCMeta):
     '''
     Deals with single recive transaction's actions
     '''
-    __metaclass__ = abc.ABCMeta
+#    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         pass
@@ -48,15 +49,15 @@ class Sr(Controller):
         a.buff = result_buff
         mon.send(a)
 
-    @abc.abstractmethod
+    @abstractmethod
     def process_buff(buff):
         """processes incomming buffer"""
 
-class Rwr(Controller):
+class Rwr(Controller, metaclass=ABCMeta):
     '''
     Deals with recive with response transaction's actions
     '''
-    __metaclass__ = abc.ABCMeta
+#    __metaclass__ = abc.ABCMeta
     IN_RECV_REQ, IN_RECV_REPLY = range(2)
 
     def __init__(self):
@@ -107,10 +108,10 @@ class Rwr(Controller):
             self.postmortem(reason)
         self.finish_flag = True
 
-    @abc.abstractmethod
+    @abstractmethod
     def process_buff(buff):
         """processes incomming buffer"""
 
-    @abc.abstractmethod
+    @abstractmethod
     def postmortem(failure):
         """analyzes a failure code"""
