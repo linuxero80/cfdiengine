@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from bbgum.factory import Factory
+from misc.factory import Factory
 from bbgum.server import BbGumServer, BbGumServerError
 from custom.profile import ProfileReader
 from misc.tricks import dict_params
