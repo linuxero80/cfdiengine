@@ -38,7 +38,7 @@ class BbGumServer(object):
                 if not forking:
                     # just one connection as per current thread
                     self.conn_delegate(conn, address, factory)
-                    break
+                    continue
                 process = multiprocessing.Process(
                     target=self.conn_delegate, args=(conn, address, factory))
                 process.daemon = True

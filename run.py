@@ -68,7 +68,7 @@ def go_service(args):
     ax = AppCtx(pt)
     try:
         service = BbGumServer(logger, port)
-        service.start(ax.make_factory(), forking = not args.debug)
+        service.start(ax.make_factory(), forking = not args.nmp)
     except (BbGumServerError) as e:
         logger.error(e)
         raise
@@ -79,11 +79,14 @@ if __name__ == "__main__":
     def setup_parser():
         """parses the command line arguments at the call."""
 
-        psr_desc="Cfdi engine service interface"
-        psr_epi="Select a config profile to specify defaults"
+        psr_desc="cfdi engine service interface"
+        psr_epi="select a config profile to specify defaults"
 
         psr = argparse.ArgumentParser(
                     description=psr_desc, epilog=psr_epi)
+
+        psr.add_argument('-nmp', action='store_true', dest='nmp',
+                                help='unique process approach (useful in development)')
 
         psr.add_argument('-d', action='store_true', dest='debug',
                                 help='print debug information')
@@ -98,8 +101,8 @@ if __name__ == "__main__":
 
         return psr.parse_args()
 
+    args = setup_parser()
     try:
-        args = setup_parser()
         go_service(args)
     except:
         if args.debug:
