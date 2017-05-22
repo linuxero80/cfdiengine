@@ -94,9 +94,11 @@ class Monitor(object):
         def release():
             try:
                 frame = self.outgoing.get_nowait()
-                self.conn.send(frame.dump())
+                sent = self.conn.send(frame.dump())
+                if sent == 0:
+                    raise RuntimeError("socket connection broken")
             except Empty as e:
-                self.logger.error(e)
+                self.logger.warning(e)
 
         available = self.outgoing.empty()
         self.outgoing.put(Frame(a))

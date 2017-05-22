@@ -76,7 +76,7 @@ class BbGumServer(object):
         try:
             self.logger.debug("Connected %r at %r", conn, addr)
             while True:
-                mon.recive(Action(read_body(Frame.decode_header(read_header()))))
+                mon.receive(Action(read_body(Frame.decode_header(read_header()))))
         except (RuntimeError, FrameError) as e:
             self.logger.exception(e)
         except:
