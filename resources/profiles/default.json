@@ -12,11 +12,11 @@
         "bbgum": {
             "events": [
                  {
-                     "archetype": 0x30,
+                     "archetype": "0x30",
                      "event_mod": "hello"
                  },
                  {
-                     "archetype": 0x24,
+                     "archetype": "0x24",
                      "event_mod": "postbuff"
                  }
             ]

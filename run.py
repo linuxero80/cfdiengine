@@ -2,6 +2,7 @@
 
 from bbgum.server import BbGumServer, BbGumServerError
 from custom.profile import ProfileReader
+from custom.appctx import AppCtx
 from os.path import expanduser
 import os
 import inspect
@@ -65,7 +66,7 @@ def go_service(args):
             PROFILES_DIR,
             args.config if args.config else DEFAULT_PROFILE))
 
-    ax = AppCtx(pt)
+    ax = AppCtx(logger, pt)
     try:
         service = BbGumServer(logger, port)
         service.start(ax.make_factory(), forking = not args.nmp)

@@ -2,6 +2,8 @@ from bbgum.factory import Factory
 from custom.profile import ProfileTree, ProfileReader
 from misc.tricks import dict_params
 from misc.singmeta import SingMeta
+import os
+import sys
 
 sys.path.append(
     os.path.abspath(os.path.join(
@@ -20,8 +22,8 @@ class AppCtx(object):
     def make_factory(self):
         devents = dict_params(
             ProfileReader.get_content(
-            self.bbgum.events,
-            ProfileReader.PNODE_MANY)
+            self.pt.bbgum.events,
+            ProfileReader.PNODE_MANY),
             'archetype', 'event_mod'
         )
         fact = Factory()
