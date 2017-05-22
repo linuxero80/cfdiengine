@@ -1,5 +1,7 @@
 from bbgum.controller import Sr
 
+impt_class = 'SrHello'
+
 class SrHello(Sr):
     '''
     Deals with single recive transaction's actions

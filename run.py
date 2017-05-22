@@ -74,7 +74,7 @@ def go_service(args):
                     msg = "module {0} has no {1} class implemented".format(event_mod, cname)
                     raise RuntimeError(msg)
                 ic = getattr(m, cname)
-                fact.subscribe(archetype, ic)
+                fact.subscribe(int(archetype, 0), ic)
             except (ImportError, RuntimeError) as e:
                 logger.fatal("{0} support library failure".format(event_mod))
                 raise e
