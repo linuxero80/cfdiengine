@@ -94,9 +94,14 @@ class Monitor(object):
         def release():
             try:
                 frame = self.outgoing.get_nowait()
-                sent = self.conn.send(frame.dump())
-                if sent == 0:
-                    raise RuntimeError("socket connection broken")
+                buff = frame.dump()
+                size = len(buff)
+                total = 0
+                while total < size:
+                    sent = self.sock.send(buff[totalsent:])
+                    if sent == 0:
+                        raise RuntimeError("socket connection broken")
+                    total += sent
             except Empty as e:
                 self.logger.warning(e)
 
