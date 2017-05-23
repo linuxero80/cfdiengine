@@ -98,7 +98,7 @@ class Monitor(object):
                 size = len(buff)
                 total = 0
                 while total < size:
-                    sent = self.sock.send(buff[totalsent:])
+                    sent = self.sock.send(buff[total:])
                     if sent == 0:
                         raise RuntimeError("socket connection broken")
                     total += sent
