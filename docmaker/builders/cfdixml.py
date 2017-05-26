@@ -1,3 +1,7 @@
+import pyxb
+from sat.v33 import Comprobante
+from sat.requirement import writedom_cfdi
+
 class CommonBill(BuilderGen):
 
     def __init__(self, logger):
