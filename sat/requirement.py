@@ -35,6 +35,13 @@ def writedom_cfdi(d, file_out):
     """writes and makes up a cfdi's dom"""
 
     import xml.etree.ElementTree as ET
+    from pyxb.namespace import XMLSchema_instance as xsi
+    from pyxb.namespace import XMLNamespaces as xmlns
+
+    d.documentElement.setAttributeNS(
+        xsi.uri(), 'xsi:schemaLocation',
+        'http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv33.xsd')
+    d.documentElement.setAttributeNS(xmlns.uri(), 'xmlns:xsi', xsi.uri())
 
     namespaces = {
         'cfdi': 'http://www.sat.gob.mx/cfd/3',
@@ -47,4 +54,4 @@ def writedom_cfdi(d, file_out):
     root = ET.fromstring(d.toxml("utf-8").decode())
     t = ET.ElementTree(root)
     t.write(file_out, xml_declaration=True,
-           encoding='utf-8', method="xml"
+           encoding='utf-8', method="xml")
