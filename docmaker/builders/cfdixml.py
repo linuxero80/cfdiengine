@@ -1,59 +1,50 @@
-import xml.etree.ElementTree as etree
+class CommonBill(BuilderGen):
 
-namespaces = {
-    'cfdi': 'http://www.sat.gob.mx/cfd/3',
-    'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
-}
+    def __init__(self, logger):
+        super().__init__(logger)
 
-for prefix, uri in namespaces.items():
-    etree.register_namespace(prefix, uri)
+    def data_acq(self, conn, d_rdirs, **kwargs):
+        pass
 
+    def format_wrt(self, output_file, dat):
+        c = Comprobante()
+        c.Version = '3.3'
+        c.Folio = "test attribute" #optional
+        c.Fecha = "2014-06-26T09:13:00"
+        c.Sello = "BLABLALASELLO"
+        c.FormaPago = "01" #optional
+        c.NoCertificado = "00001000000202529199"
+        c.Certificado = "certificado en base64"
+        c.SubTotal = "4180.0"
+        c.Total = "4848.80"
+        c.Moneda = "MXN"
+        c.TipoCambio = "1.0" #optional (requerido en ciertos casos)
+        c.TipoDeComprobante = 'I'
+    #    c.metodoDePago = "NO IDENTIFICADO" #optional
+        c.LugarExpedicion = "60050"
 
-comprobante = etree.Element(
-    '{http://www.sat.gob.mx/cfd/3}Comprobante',
-    attrib={
-        '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation': 'http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv33.xsd',
-        'Version':'3.3',
-        'Folio': "test attribute", #optional
-        'Fecha': "2014-06-26T09:13:00",
-        'Sello': "BLABLALASELLO",
-        'FormaPago': "clave forma de pago", #optional
-        'Nocertificado': "00001000000202529199",
-        'Certificado': "certificado en base64",
-        'SubTotal': "4180.0",
-        'Total': "4848.80",
-        'Moneda': "MXN",
-        'TipoCambio': "1.0", #optional (requerido en ciertos casos)
-        'TipoDeComprobante': 'UNO_CHIDO',
-        'metodoDePago': "NO IDENTIFICADO", #optional
-        'LugarExpedicion': "GRAL. ESCOBEDO, NUEVO LEON"
-    }
-)
+        c.Emisor = pyxb.BIND()
+        c.Emisor.Nombre = "PRODUCTOS INDUSTRIALES SAAR S.A. DE C.V." #opcional
+        c.Emisor.Rfc = "PIS850531CS4"
+        c.Emisor.RegimenFiscal = '601'
 
-emisor = etree.SubElement(
-    comprobante, "{http://www.sat.gob.mx/cfd/3}Emisor",
-    attrib={
-        'Nombre': "PRODUCTOS INDUSTRIALES SAAR S.A. DE C.V.", #opcional
-        'Rfc': "PIS850531CS4",
-        'RegimenFiscal': 'clave regimen contribuyente',
-        
-    }
-)
+        c.Receptor = pyxb.BIND()
+        c.Receptor.Nombre = "PRODUCTOS INDUSTRIALES SAAR S.A. DE C.V." #opcional
+        c.Receptor.Rfc = "PIS850531CS4"
+        c.Receptor.UsoCFDI = 'G01'
 
-receptor = etree.SubElement(
-    comprobante, "{http://www.sat.gob.mx/cfd/3}Emisor",
-    attrib={
-        'Nombre': "PRODUCTOS INDUSTRIALES SAAR S.A. DE C.V.", #opcional
-        'Rfc': "PIS850531CS4",
-        'UsoCFDI': "clave de uso que dara el receptor de esta factura"
-    }
-)
+        c.Conceptos = pyxb.BIND(
+            pyxb.BIND(
+                Cantidad=5,
+                ClaveUnidad='C81',
+                ClaveProdServ='01010101',
+                Descripcion='Palitroche',
+                ValorUnitario='10',
+                Importe='50'
+            )
+        )
 
+        writedom_cfdi(c.toDOM(), output_file)
 
-print(etree.tostring(comprobante))
-
-t= etree.ElementTree(comprobante)
-
-t.write("borrame.xml",
-           xml_declaration=True,encoding='utf-8',
-           method="xml")
+    def data_rel(self, dat):
+        pass
