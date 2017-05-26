@@ -56,7 +56,7 @@ class Monitor(object):
         client_origin = lambda n: (ord(n) % 2) == 1
 
         if not self.factory.is_supported(a.archetype):
-            String msg = "The client side sent an invalid action" +
+            msg = "The client side sent an invalid action" +
                 " which is not registered yet!. It will be ignore"
             raise FrameError(msg)
 
