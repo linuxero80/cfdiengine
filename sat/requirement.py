@@ -1,9 +1,11 @@
 import os
-import qrcode
-from misc.helperstr import HelperStr
 
 def create_qrcode(as_usr, uuid, erfc, rrfc, total, chunk):
     """creates qrcode as per cfdi v33"""
+
+    import qrcode
+    from misc.helperstr import HelperStr
+
     def incept_file(i):
         SIZE_RANDOM_STR = 8
         fname = '{}/{}.jpg'.format(
@@ -27,3 +29,22 @@ def create_qrcode(as_usr, uuid, erfc, rrfc, total, chunk):
     )
     qr.make(fit=True)
     return incept_file(qr.make_image())
+
+
+def writedom_cfdi(d, file_out):
+    """writes and makes up a cfdi's dom"""
+
+    import xml.etree.ElementTree as ET
+
+    namespaces = {
+        'cfdi': 'http://www.sat.gob.mx/cfd/3',
+        'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+    }
+
+    for prefix, uri in namespaces.items():
+        ET.register_namespace(prefix, uri)
+
+    root = ET.fromstring(d.toxml("utf-8").decode())
+    t = ET.ElementTree(root)
+    t.write(file_out, xml_declaration=True,
+           encoding='utf-8', method="xml"
