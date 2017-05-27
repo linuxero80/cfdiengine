@@ -69,7 +69,7 @@ class Servisim(Adapter):
         '''
         try:
             req, conn = self.__setup_req('ns0:ObtencionCFDIRequest')
-            req.TipoPeticion = '2' # TO EXPECT CFDI ID
+            req.TipoPeticion = '2' # TO EXPECT CFDI ALTERNATIVE ID
             req.Emisor = self.config['RFC']
             req.Identificador = xid
             self.__logger.debug(
