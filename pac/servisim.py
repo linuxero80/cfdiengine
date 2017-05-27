@@ -3,7 +3,7 @@ from suds.client import Client
 from suds.transport import TransportError
 import urllib.error
 
-class Servisim(PacAdapter):
+class Servisim(Adapter):
     """
     Current WS API of PAC Servisim
     """
