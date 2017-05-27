@@ -9,8 +9,6 @@ class Servisim(Adapter):
     """
     __PAC_DESC = 'Servisim - Facturacion Electronica'
     __DEFAULT_EP = 'http://201.150.37.20/wstest/CFDI.svc?wsdl' #testing
-    __CUST_SIGNER = 1
-    __USING_UUID = "UUID"
 
     def __init__(self, logger, *args, **kwargs):
         super().__init__(logger, self.__PAC_DESC)
@@ -51,7 +49,7 @@ class Servisim(Adapter):
         '''
         try:
             req, conn = self.__setup_req('ns0:TimbradoCFDIRequest')
-            req.TipoPeticion = self.__CUST_SIGNER
+            req.TipoPeticion = '1' # SIGNED BY CUSTOMER
             req.IdComprobante = xid
             req.Xml = xml
             self.logger.debug(
@@ -63,16 +61,21 @@ class Servisim(Adapter):
             raise AdapterError("Stamp experimenting problems")
 
     def fetch(self, xid):
+        '''
+        Obtencion de cfdi previamente timbrado mediante
+        identificador de cfdi
+        Args:
+            xid (str): mi identificador de cfdi
+        '''
         try:
             req, conn = self.__setup_req('ns0:ObtencionCFDIRequest')
-            req.TipoPeticion = self.__USING_UUID
+            req.TipoPeticion = '2' # TO EXPECT CFDI ID
             req.Emisor = self.config['RFC']
             req.Identificador = xid
             self.__logger.debug(
                 "The following request for fetch will be sent\n{0}".format(req)
             )
             return conn.service.obtenerCFDI(req)
-
         except (WebFault, Exception) as e:
             self.logger.fatal(e)
             raise AdapterError("Fetch experimenting problems")

@@ -19,12 +19,16 @@ class Adapter(metaclass=ABCMeta):
 
     @abstractmethod
     def stamp(self, xml, xid):
-        '''Signature using XML signed by the client'''
+        '''
+        Signature using XML with alternative id
+        signed by the client
+        '''
 
     @abstractmethod
     def fetch(self, xid):
-        """
-        """
+        '''
+        Fetching a cfdi by using alternative id
+        '''
 
     @abstractmethod
     def cancel(self, xml_signed_str, xid):
