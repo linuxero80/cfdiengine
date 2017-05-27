@@ -9,6 +9,7 @@ class Servisim(PacAdapter):
     __PAC_DESC = 'Servisim - Facturacion Electronica'
     __DEFAULT_EP = 'http://201.150.37.20/wstest/CFDI.svc' #testing
     __CUST_SIGNER = 1
+    __USING_UUID = "UUID"
 
     def __init__(self, logger, *args, **kwargs):
         super().__init__(logger, self.__PAC_DESC)
@@ -58,7 +59,7 @@ class Servisim(PacAdapter):
     def fetch(self, xid):
         try:
             req, conn = self.__setup_req('ns0:ObtencionCFDIRequest')
-            req.TipoPeticion = __USING_ALT_ID if self.__alt else __USING_UUID
+            req.TipoPeticion = self.__USING_UUID
             req.Emisor = self.config['RFC']
             req.Identificador = xid
             self.__logger.debug(
