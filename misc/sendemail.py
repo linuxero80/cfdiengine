@@ -1,3 +1,5 @@
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -7,9 +9,6 @@ class SendEmail(object):
     '''
     Function object that sends email with attachment
     '''
-
-    # Following code was taken from
-    # http://naelshiab.com/tutorial-send-email-python
 
     __DEFAULT_FROMADDR = 'johndove@localhost'
     __DEFAULT_SMTP = 'localhost'
@@ -33,7 +32,10 @@ class SendEmail(object):
             attachment = open(self.msg_config['ATTACHMENT'], "rb")
             part = MIMEBase('application', 'octet-stream')
             part.set_payload((attachment).read())
+
+            # Encode the payload using Base64
             encoders.encode_base64(part)
+
             part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
             return part
 
@@ -60,11 +62,10 @@ class SendEmail(object):
 
     def __dialog(self, m):
         '''Dialogs with smtp server'''
-        server = smtplib.SMTP(
+        server = smtplib.SMTP_SSL('{}:{}'.format(
             self.server_config['HOST'],
-            self.server_config['PORT']
-        )
-        server.starttls()
+            self.server_config['PORT']))
+        server.ehlo()
         server.login(
             self.msg_config['FROMADDR'],
             self.server_config['PASSWD']
