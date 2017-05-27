@@ -5,9 +5,16 @@ from email.mime.text import MIMEText
 import smtplib
 import os
 
+class SendEmailError(Exception):
+    def __init__(self, message = None):
+        self.message = message
+    def __str__(self):
+        return self.message
+
 class SendEmail(object):
     '''
-    Function object that sends email with attachment
+    Function object that sends email with attachment.
+    To have an account with smtp ssl is required
     '''
 
     __DEFAULT_FROMADDR = 'johndove@localhost'
@@ -24,31 +31,30 @@ class SendEmail(object):
         }
 
     def __call__(self, **kwargs):
-        '''Sends email with attachment'''
-
-        def encode_file():
-            '''Encodes file part'''
-            filename = os.path.basename(self.msg_config['ATTACHMENT'])
-            attachment = open(self.msg_config['ATTACHMENT'], "rb")
-            part = MIMEBase('application', 'octet-stream')
-            part.set_payload((attachment).read())
-
-            # Encode the payload using Base64
-            encoders.encode_base64(part)
-
-            part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-            return part
-
+        '''Sends email through smtp ssl with one or more attachments'''
         self.msg_config = {
             'FROMADDR': kwargs.get('fromaddr', self.__DEFAULT_FROMADDR),
             'TOADDR': kwargs.get('toaddr', None),
             'SUBJECT': kwargs.get('subject', None),
             'MSG': kwargs.get('msg', None),
-            'ATTACHMENT': kwargs.get('attachment', None)
+            'ATTACHMENTS': kwargs.get('attachments', None)
         }
-        m = self.__conform_body(MIMEMultipart())
-        m.attach(encode_file())
-        self.__dialog(m)
+
+        outer = self.__conform_body(MIMEMultipart())
+
+        # Add the attachments to the message
+        for item in self.msg_config['ATTACHMENTS']:
+            try:
+                with open(item, 'rb') as fp:
+                    part = MIMEBase('application', "octet-stream")
+                    part.set_payload(fp.read())
+                encoders.encode_base64(part)
+                part.add_header('Content-Disposition', 'attachment', filename=os.path.basename(item))
+                outer.attach(part)
+            except:
+                raise SendEmailError("Unable to open one of the attachments")
+
+        self.__dialog(outer)
 
     def __conform_body(self, m):
         '''Conforms message body'''
