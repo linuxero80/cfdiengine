@@ -45,7 +45,7 @@ class Servisim(Adapter):
         Timbrado usando XML firmado por el cliente
         Args:
             xml (str): xml de cfdi firmado por cliente
-            xid (str): mi identificador de cfdi
+            xid (str): mi identificador alternativo de cfdi
         '''
         try:
             req, conn = self.__setup_req('ns0:TimbradoCFDIRequest')
@@ -65,7 +65,7 @@ class Servisim(Adapter):
         Obtencion de cfdi previamente timbrado mediante
         identificador de cfdi
         Args:
-            xid (str): mi identificador de cfdi
+            xid (str): mi identificador alternativo de cfdi
         '''
         try:
             req, conn = self.__setup_req('ns0:ObtencionCFDIRequest')
