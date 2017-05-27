@@ -7,7 +7,7 @@ class Servisim(PacAdapter):
     Current WS API of PAC Servisim
     """
     __PAC_DESC = 'Servisim - Facturacion Electronica'
-    __DEFAULT_EP = 'http://201.150.37.20/wstest/CFDI.svc' #testing
+    __DEFAULT_EP = 'http://201.150.37.20/wstest/CFDI.svc?wsdl' #testing
     __CUST_SIGNER = 1
     __USING_UUID = "UUID"
 
