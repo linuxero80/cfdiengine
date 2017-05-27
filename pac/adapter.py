@@ -31,6 +31,7 @@ class Adapter(metaclass=ABCMeta):
         '''
 
     @abstractmethod
-    def cancel(self, xml_signed_str, xid):
-        """
-        """
+    def cancel(self, xml):
+        '''
+        Cancel using XML signed by the client
+        '''
