@@ -1,3 +1,4 @@
+from pac.adapter import Adapter
 from suds.client import Client
 from suds.transport import TransportError
 import urllib.error
@@ -31,7 +32,7 @@ class Servisim(PacAdapter):
                 return conn
             except (TransportError, urllib.error.HTTPError) as e:
                 self.logger.fatal(e)
-                raise PacAdapterError(
+                raise AdapterError(
                     'can not connect with end point{0}'.format(self.ep))
 
         conn = connect()
@@ -54,7 +55,7 @@ class Servisim(PacAdapter):
 
         except (WebFault, Exception) as e:
             self.logger.fatal(e)
-            raise PacAdapterError("Stamp experimenting problems")
+            raise AdapterError("Stamp experimenting problems")
 
     def fetch(self, xid):
         try:
@@ -69,7 +70,7 @@ class Servisim(PacAdapter):
 
         except (WebFault, Exception) as e:
             self.logger.fatal(e)
-            raise PacAdapterError("Fetch experimenting problems")
+            raise AdapterError("Fetch experimenting problems")
 
     def cancel(self, xml_signed_str, xid):
         try:
@@ -83,4 +84,4 @@ class Servisim(PacAdapter):
 
         except (WebFault, Exception) as e:
             self.logger.fatal(e)
-            raise PacAdapterError("Cancel experimenting problems")
+            raise AdapterError("Cancel experimenting problems")
