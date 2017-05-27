@@ -18,9 +18,8 @@ class Adapter(metaclass=ABCMeta):
 
 
     @abstractmethod
-    def stamp(self, xml_str, xid):
-        """
-        """
+    def stamp(self, xml, xid):
+        '''Signature using XML signed by the client'''
 
     @abstractmethod
     def fetch(self, xid):

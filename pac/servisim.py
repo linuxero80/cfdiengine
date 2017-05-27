@@ -42,17 +42,22 @@ class Servisim(Adapter):
 
         return req, conn
 
-    def stamp(self, xml_str, xid):
+    def stamp(self, xml, xid):
+        '''
+        Timbrado usando XML firmado por el cliente
+        Args:
+            xml (str): xml de cfdi firmado por cliente
+            xid (str): mi identificador de cfdi
+        '''
         try:
             req, conn = self.__setup_req('ns0:TimbradoCFDIRequest')
             req.TipoPeticion = self.__CUST_SIGNER
             req.IdComprobante = xid
-            req.Xml = xml_str
+            req.Xml = xml
             self.logger.debug(
                 "The following request for stamp will be sent\n{0}".format(req)
             )
             return conn.service.timbrarCFDI(req)
-
         except (WebFault, Exception) as e:
             self.logger.fatal(e)
             raise AdapterError("Stamp experimenting problems")
