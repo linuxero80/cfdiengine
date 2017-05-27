@@ -40,7 +40,10 @@ class SendEmail(object):
             'ATTACHMENTS': kwargs.get('attachments', None)
         }
 
-        outer = self.__conform_body(MIMEMultipart())
+        try:
+            outer = self.__conform_body(MIMEMultipart())
+        except:
+            raise SendEmailError("Unable to conform base text message")
 
         # Add the attachments to the message
         for item in self.msg_config['ATTACHMENTS']:
@@ -54,7 +57,10 @@ class SendEmail(object):
             except:
                 raise SendEmailError("Unable to open one of the attachments")
 
-        self.__dialog(outer)
+        try:
+            self.__dialog(outer)
+        except:
+            raise SendEmailError("It was nos possible to correctly dialog with server")
 
     def __conform_body(self, m):
         '''Conforms message body'''
