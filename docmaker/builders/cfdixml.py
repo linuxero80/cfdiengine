@@ -1,4 +1,7 @@
 import pyxb
+import psycopg2
+import psycopg2.extras
+
 from sat.v33 import Comprobante
 from sat.requirement import writedom_cfdi
 
@@ -6,6 +9,33 @@ class CommonBill(BuilderGen):
 
     def __init__(self, logger):
         super().__init__(logger)
+
+    def __get_items(self, conn, prefact_id):
+        '''
+        Busca los conceptos a facturar de la prefactura en dbms
+        '''
+        SQL = """SELECT inv_prod.sku, inv_prod.descripcion,
+            inv_prod_unidades.titulo AS unidad,
+            erp_prefacturas_detalles.cant_facturar AS cantidad,
+            erp_prefacturas_detalles.precio_unitario,
+            (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) AS importe
+            FROM erp_prefacturas
+            JOIN erp_prefacturas_detalles on erp_prefacturas_detalles.prefacturas_id=erp_prefacturas.id
+            LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
+            LEFT JOIN inv_prod_unidades on inv_prod_unidades.id = erp_prefacturas_detalles.inv_prod_unidad_id
+            WHERE erp_prefacturas_detalles.prefacturas_id="""
+
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            q = "{0}'{1}'".format(SQL, prefact_id)
+            cur.execute(q)
+            rows = cur.fetchall()
+            if len(rows) > 0:
+                return rows
+            else:
+                raise DocBuilderStepError('There is not data retrieved')
+        except psycopg2.Error as e:
+            raise DocBuilderStepError("an error occurred when executing query")
 
     def data_acq(self, conn, d_rdirs, **kwargs):
         pass
