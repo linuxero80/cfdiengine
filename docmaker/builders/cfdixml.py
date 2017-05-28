@@ -1,6 +1,5 @@
 import datetime
 import pyxb
-import psycopg2
 import psycopg2.extras
 
 from sat.v33 import Comprobante
@@ -11,18 +10,6 @@ class CfdiXml(BuilderGen):
     def __init__(self, logger):
         super().__init__(logger)
 
-    def __query(self, conn, sql):
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        try:
-            cur.execute(sql)
-            rows = cur.fetchall()
-            if len(rows) > 0:
-                return rows
-            else:
-                raise DocBuilderStepError('There is not data retrieved')
-        except psycopg2.Error as e:
-            raise DocBuilderStepError("an error occurred when executing query")
-
     def __q_moneda(self, conn, prefact_id):
         SQL = """SELECT
             gral_mon.iso_4217 AS curr_iso_4217,
@@ -31,7 +18,7 @@ class CfdiXml(BuilderGen):
             FROM erp_prefacturas
             LEFT JOIN gral_mon ON gral_mon.id=erp_prefacturas.moneda_id
             WHERE erp_prefacturas.id="""
-        return self.__query(conn, "{0}'{1}'".format(SQL, prefact_id))
+        return self.pg_query(conn, "{0}'{1}'".format(SQL, prefact_id))
 
     def __q_receptor(self, conn, prefact_id):
         SQL = """SELECT
@@ -40,7 +27,7 @@ class CfdiXml(BuilderGen):
             FROM erp_prefacturas
             LEFT JOIN cxc_clie ON cxc_clie.id=erp_prefacturas.cliente_id
             WHERE erp_prefacturas.id="""
-        return self.__query(conn, "{0}'{1}'".format(SQL, prefact_id))
+        return self.pg_query(conn, "{0}'{1}'".format(SQL, prefact_id))
 
     def __q_conceptos(self, conn, prefact_id):
         '''
@@ -56,7 +43,7 @@ class CfdiXml(BuilderGen):
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
             LEFT JOIN inv_prod_unidades on inv_prod_unidades.id = erp_prefacturas_detalles.inv_prod_unidad_id
             WHERE erp_prefacturas_detalles.prefacturas_id="""
-        return self.__query(conn, "{0}'{1}'".format(SQL, prefact_id))
+        return self.pg_query(conn, "{0}'{1}'".format(SQL, prefact_id))
 
     def data_acq(self, conn, d_rdirs, **kwargs):
         pass
