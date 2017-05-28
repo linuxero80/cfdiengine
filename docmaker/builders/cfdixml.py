@@ -22,6 +22,16 @@ class CfdiXml(BuilderGen):
         except psycopg2.Error as e:
             raise DocBuilderStepError("an error occurred when executing query")
 
+    def __q_moneda(self, conn, prefact_id):
+        SQL = """SELECT
+            gral_mon.iso_4217 AS curr_iso_4217,
+            gral_mon.simbolo AS curr_symbol,
+            erp_prefacturas.tipo_cambio
+            FROM erp_prefacturas
+            LEFT JOIN gral_mon ON gral_mon.id=erp_prefacturas.moneda_id
+            WHERE erp_prefacturas.id="""
+        return self.__query(conn, "{0}'{1}'".format(SQL, prefact_id))
+
     def __q_receptor(self, conn, prefact_id):
         SQL = """SELECT
             cxc_clie.razon_social,
