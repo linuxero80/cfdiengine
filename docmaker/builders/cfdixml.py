@@ -1,3 +1,4 @@
+import datetime
 import pyxb
 import psycopg2
 import psycopg2.extras
@@ -64,7 +65,7 @@ class CfdiXml(BuilderGen):
         c = Comprobante()
         c.Version = '3.3'
         c.Folio = "test attribute" #optional
-        c.Fecha = "2014-06-26T09:13:00"
+        c.Fecha = '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now())
         c.Sello = "BLABLALASELLO"
         c.FormaPago = "01" #optional
         c.NoCertificado = "00001000000202529199"
