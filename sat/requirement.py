@@ -31,25 +31,32 @@ def create_qrcode(as_usr, uuid, erfc, rrfc, total, chunk):
     return incept_file(qr.make_image())
 
 
-def writedom_cfdi(d, file_out):
-    """writes and makes up a cfdi's dom"""
+def writedom_cfdi(d, propos, file_out):
+    """writes and makes up a cfdi's dom as per purpose"""
 
     import xml.etree.ElementTree as ET
     from pyxb.namespace import XMLSchema_instance as xsi
     from pyxb.namespace import XMLNamespaces as xmlns
 
-    d.documentElement.setAttributeNS(
-        xsi.uri(), 'xsi:schemaLocation',
-        'http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv33.xsd')
-    d.documentElement.setAttributeNS(xmlns.uri(), 'xmlns:xsi', xsi.uri())
+    def makeup_fac():
+        d.documentElement.setAttributeNS(
+            xsi.uri(), 'xsi:schemaLocation',
+            'http://www.sat.gob.mx/cfd/3 http://www.sat.gob.mx/sitio_internet/cfd/3/cfdv33.xsd')
+        d.documentElement.setAttributeNS(xmlns.uri(), 'xmlns:xsi', xsi.uri())
 
-    namespaces = {
-        'cfdi': 'http://www.sat.gob.mx/cfd/3',
-        'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
-    }
+        return {
+            'cfdi': 'http://www.sat.gob.mx/cfd/3',
+            'xsi': 'http://www.w3.org/2001/XMLSchema-instance'
+        }
 
-    for prefix, uri in namespaces.items():
-        ET.register_namespace(prefix, uri)
+    try:
+        namespace_set = {
+            'FAC': makeup_fac
+        }[propos]()
+        for prefix, uri in namespace_set.items():
+            ET.register_namespace(prefix, uri)
+    except KeyError:
+        raise Exception("To make up purpose {} is not supported yet".format(propos))
 
     root = ET.fromstring(d.toxml("utf-8").decode())
     t = ET.ElementTree(root)

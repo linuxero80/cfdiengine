@@ -10,17 +10,6 @@ class CfdiXml(BuilderGen):
     def __init__(self, logger):
         super().__init__(logger)
 
-    def __q_ns_facturas(self, conn):
-        '''
-        Consulta los namespaces a usar en el documento
-        '''
-        SQL = """SELECT
-            (CASE WHEN key_xmlns IS NULL THEN '' ELSE key_xmlns END) AS key_xmlns,
-            (CASE WHEN xmlns IS NULL THEN '' ELSE xmlns END) AS xmlns,
-            (CASE WHEN schemalocation IS NULL THEN '' ELSE schemalocation END) AS schemalocation
-            FROM fac_namespaces WHERE derogado=false AND fac=true"""
-        return self.pg_query(conn, SQL)
-
     def __q_no_certificado(self, conn, usr_id):
         '''
         Consulta el numero de certificado en dbms
