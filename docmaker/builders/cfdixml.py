@@ -10,6 +10,17 @@ class CfdiXml(BuilderGen):
     def __init__(self, logger):
         super().__init__(logger)
 
+    def __q_no_certificado(self, conn, usr_id):
+        '''
+        Consulta el numero de certificado en dbms
+        '''
+        SQL =  """select CFDI_CONF.numero_certificado
+            FROM gral_suc AS SUC
+            LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
+            LEFT JOIN fac_cfds_conf AS CFDI_CONF ON CFDI_CONF.gral_suc_id = SUC.id
+            WHERE USR_SUC.gral_usr_id="""
+        return self.pg_query(conn, "{0}{1}".format(SQL, usr_id))
+
     def __q_emisor(self, conn, usr_id):
         '''
         Consulta el emisor en dbms
