@@ -10,28 +10,44 @@ class CfdiXml(BuilderGen):
     def __init__(self, logger):
         super().__init__(logger)
 
+    def __q_lugar_expedicion(self, conn, usr_id):
+        '''
+        Consulta el lugar de expedicion en dbms
+        '''
+        SQL = """select SUC.cp as lugar_expedicion
+            FROM gral_suc AS SUC
+            LEFT JOIN gral_usr_suc as USR_SUC ON USR_SUC.gral_suc_id=SUC.id
+            WHERE USR_SUC.gral_usr_id="""
+        return self.pg_query(conn, "{0}{1}".format(SQL, usr_id))
+
     def __q_moneda(self, conn, prefact_id):
+        '''
+        Consulta la moneda de la prefactura en dbms
+        '''
         SQL = """SELECT
-            gral_mon.iso_4217 AS curr_iso_4217,
-            gral_mon.simbolo AS curr_symbol,
+            gral_mon.iso_4217 AS moneda_iso_4217,
+            gral_mon.simbolo AS moneda_simbolo,
             erp_prefacturas.tipo_cambio
             FROM erp_prefacturas
             LEFT JOIN gral_mon ON gral_mon.id=erp_prefacturas.moneda_id
             WHERE erp_prefacturas.id="""
-        return self.pg_query(conn, "{0}'{1}'".format(SQL, prefact_id))
+        return self.pg_query(conn, "{0}{1}".format(SQL, prefact_id))
 
     def __q_receptor(self, conn, prefact_id):
+        '''
+        Consulta el cliente de la prefactura en dbms
+        '''
         SQL = """SELECT
             cxc_clie.razon_social,
             cxc_clie.rfc
             FROM erp_prefacturas
             LEFT JOIN cxc_clie ON cxc_clie.id=erp_prefacturas.cliente_id
             WHERE erp_prefacturas.id="""
-        return self.pg_query(conn, "{0}'{1}'".format(SQL, prefact_id))
+        return self.pg_query(conn, "{0}{1}".format(SQL, prefact_id))
 
     def __q_conceptos(self, conn, prefact_id):
         '''
-        Busca los conceptos a facturar de la prefactura en dbms
+        Consulta los conceptos de la prefactura en dbms
         '''
         SQL = """SELECT inv_prod.sku, inv_prod.descripcion,
             inv_prod_unidades.titulo AS unidad,
@@ -43,7 +59,7 @@ class CfdiXml(BuilderGen):
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
             LEFT JOIN inv_prod_unidades on inv_prod_unidades.id = erp_prefacturas_detalles.inv_prod_unidad_id
             WHERE erp_prefacturas_detalles.prefacturas_id="""
-        return self.pg_query(conn, "{0}'{1}'".format(SQL, prefact_id))
+        return self.pg_query(conn, "{0}{1}".format(SQL, prefact_id))
 
     def data_acq(self, conn, d_rdirs, **kwargs):
         pass
