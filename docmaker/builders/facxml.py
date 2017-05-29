@@ -5,7 +5,9 @@ import psycopg2.extras
 from sat.v33 import Comprobante
 from sat.requirement import writedom_cfdi
 
-class CfdiXml(BuilderGen):
+class FacXml(BuilderGen):
+
+    __MAKEUP_PROPOS = 'FAC'
 
     def __init__(self, logger):
         super().__init__(logger)
@@ -124,7 +126,7 @@ class CfdiXml(BuilderGen):
             )
         )
 
-        writedom_cfdi(c.toDOM(), output_file)
+        writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS, output_file)
 
     def data_rel(self, dat):
         pass
