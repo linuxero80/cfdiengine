@@ -10,6 +10,17 @@ class CfdiXml(BuilderGen):
     def __init__(self, logger):
         super().__init__(logger)
 
+    def __q_emisor(self, conn, usr_id):
+        '''
+        Consulta el emisor en dbms
+        '''
+        SQL = """select EMP.rfc, EMP.titulo
+            FROM gral_suc AS SUC
+            LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
+            LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
+            WHERE USR_SUC.gral_usr_id="""
+        return self.pg_query(conn, "{0}{1}".format(SQL, usr_id))
+
     def __q_lugar_expedicion(self, conn, usr_id):
         '''
         Consulta el lugar de expedicion en dbms
