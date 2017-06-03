@@ -1,6 +1,7 @@
 package com.maxima.bbgum;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 public class JCliConnector {
 
@@ -8,6 +9,13 @@ public class JCliConnector {
 
     public JCliConnector(Session s) {
         this.session = s;
+    }
+
+    private Integer conversionFromByteArray2Integer( byte[] array , String encoding ){
+        return Integer.parseInt(
+                new String(
+                array, 0, array.length , Charset.forName( encoding )
+                ).trim());
     }
 
     private int writeBuffTransfer(final int transferId, final byte[] data) throws SessionError {
@@ -25,7 +33,7 @@ public class JCliConnector {
         throw new SessionError("Buffer is too big for action data segment");
     }
 
-    private ServerReply openPostBuffTransfer(final long size) throws SessionError {
+    private ServerReply openBuffTransfer(final long size) throws SessionError {
         // Internal command for server side's transfer manager
         byte openPostCmdId = (byte) 0xBB;
 
