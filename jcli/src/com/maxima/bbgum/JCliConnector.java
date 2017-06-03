@@ -2,6 +2,8 @@ package com.maxima.bbgum;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 public class JCliConnector {
 
@@ -11,7 +13,42 @@ public class JCliConnector {
         this.session = s;
     }
 
-    public static String fromBuffToString(final byte[] array ,final String encoding ){
+    public ServerReply upLoadBuff(final byte[] buff) throws SessionError, IOException {
+        ServerReply rc = new ServerReply();
+
+        ServerReply fo = openBuffTransfer(buff.length);
+        int transferId = this.fromBuffToInteger(fo.getReplyBuffer(),"US-ASCII");
+
+        ByteArrayInputStream fin = new ByteArrayInputStream(buff);
+
+        int chunkSizeToUpload = Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - 1;
+        long offSet = 0;
+
+        if (buff.length < chunkSizeToUpload) chunkSizeToUpload = (int) buff.length;
+
+        for (;;) {
+            if (chunkSizeToUpload == 0) {
+                fin.close();
+                this.closeBuffTransfer(transferId);
+                break;
+            } else {
+                byte[] dataRead = new byte[chunkSizeToUpload];
+
+                fin.read(dataRead);
+                rc.setReplyCode(this.writeBuffTransfer(transferId, dataRead));
+
+                offSet += chunkSizeToUpload;
+                long remaining = buff.length - offSet;
+                if (remaining < Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - 1) {
+                    chunkSizeToUpload = (int)remaining;
+                }
+            }
+        }
+
+        return rc;
+    }
+
+    private static String fromBuffToString(final byte[] array ,final String encoding ){
         return new String(
                 array, 0, array.length , Charset.forName( encoding ) ).trim();
     }
