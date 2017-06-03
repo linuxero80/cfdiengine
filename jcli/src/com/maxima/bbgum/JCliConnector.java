@@ -10,7 +10,22 @@ public class JCliConnector {
         this.session = s;
     }
 
-    public ServerReply openPostBufferTransfer(long size) throws SessionError {
+    private int writeBuffTransfer(final int transferId, final byte[] data) throws SessionError {
+        byte[] ticket = {(byte) transferId};
+
+        if (data.length <= (Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - ticket.length)) {
+            byte[] buff = new byte[data.length + ticket.length];
+            System.arraycopy(ticket, 0, buff, 0, ticket.length);
+            System.arraycopy(data, 0, buff, 1, data.length);
+            ServerReply sr = this.session.pushBuffer(Session.EVENT_POST_RAW_BUFFER, buff, true);
+            return sr.getReplyCode();
+        }
+
+        // We should not have reached at this point :)
+        throw new SessionError("Buffer is too big for action data segment");
+    }
+
+    private ServerReply openPostBuffTransfer(final long size) throws SessionError {
         // Internal command for server side's transfer manager
         byte openPostCmdId = (byte) 0xBB;
 
@@ -31,10 +46,10 @@ public class JCliConnector {
         }
 
         // We should not have reached at this point :)
-        throw new SessionError("Buffer is too big");
+        throw new SessionError("Buffer is too big for action data segment");
     }
 
-    private int closeBufferTransfer(int transferId) throws SessionError {
+    private int closeBuffTransfer(final int transferId) throws SessionError {
         // Internal command for server side's transfer manager
         byte closeCmdId = (byte) 0xCC;
 
