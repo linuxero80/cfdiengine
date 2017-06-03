@@ -174,5 +174,7 @@ class Session extends Thread {
 
         return rc;
     }
+
+    public static final byte EVENT_BUFFER_TRANSFER = (byte) 0x28;
 }
 
