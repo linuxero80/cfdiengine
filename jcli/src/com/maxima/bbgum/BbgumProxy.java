@@ -5,11 +5,11 @@ import java.nio.charset.Charset;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class JCliConnector {
+public class BbgumProxy {
 
     private Session session;
 
-    public JCliConnector(Session s) {
+    public BbgumProxy(Session s) {
         this.session = s;
     }
 
