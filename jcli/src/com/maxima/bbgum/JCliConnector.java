@@ -11,11 +11,14 @@ public class JCliConnector {
         this.session = s;
     }
 
-    private Integer conversionFromByteArray2Integer( byte[] array , String encoding ){
-        return Integer.parseInt(
-                new String(
-                array, 0, array.length , Charset.forName( encoding )
-                ).trim());
+    public static String fromBuffToString(final byte[] array ,final String encoding ){
+        return new String(
+                array, 0, array.length , Charset.forName( encoding ) ).trim();
+    }
+
+    private Integer fromBuffToInteger(final byte[] array, final String encoding){
+        return Integer.parseInt(new String(
+                array, 0, array.length , Charset.forName(encoding)).trim());
     }
 
     private int writeBuffTransfer(final int transferId, final byte[] data) throws SessionError {
