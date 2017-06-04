@@ -1,9 +1,11 @@
 package com.maxima.bbgum;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BbgumProxy {
 
@@ -13,39 +15,49 @@ public class BbgumProxy {
         this.session = s;
     }
 
-    public ServerReply upLoadBuff(final byte[] buff) throws SessionError, IOException {
-        ServerReply rc = new ServerReply();
+    public void uploadBuff(final byte[] buff) throws SessionError {
+        try {
+            this.runBuffTransfer(buff);
+        } catch (IOException ex) {
+            throw new SessionError("Unexpected IO error during upload: " + ex.toString());
+        }
+    }
 
+    private void runBuffTransfer(final byte[] buff) throws SessionError, IOException {
         ServerReply fo = openBuffTransfer(buff.length);
-        int transferId = this.fromBuffToInteger(fo.getReplyBuffer(),"US-ASCII");
 
+        if ( fo.getReplyCode() != 0 ) {
+            throw new SessionError("It was not possible to open a buffer transfer");
+        }
+
+        int transferId = this.fromBuffToInteger(fo.getReplyBuffer(), "US-ASCII");
         ByteArrayInputStream fin = new ByteArrayInputStream(buff);
 
-        int chunkSizeToUpload = Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - 1;
+        int chunkSize = Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - 1;
         long offSet = 0;
 
-        if (buff.length < chunkSizeToUpload) chunkSizeToUpload = (int) buff.length;
+        if (buff.length < chunkSize) chunkSize = buff.length;
 
         for (;;) {
-            if (chunkSizeToUpload == 0) {
+            if (chunkSize == 0) {
                 fin.close();
                 this.closeBuffTransfer(transferId);
                 break;
-            } else {
-                byte[] dataRead = new byte[chunkSizeToUpload];
-
-                fin.read(dataRead);
-                rc.setReplyCode(this.writeBuffTransfer(transferId, dataRead));
-
-                offSet += chunkSizeToUpload;
-                long remaining = buff.length - offSet;
-                if (remaining < Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - 1) {
-                    chunkSizeToUpload = (int)remaining;
-                }
             }
-        }
 
-        return rc;
+            byte[] pivotBuff = new byte[chunkSize];
+            fin.read(pivotBuff);
+            int resolution = this.writeBuffTransfer(transferId, pivotBuff);
+            if ( resolution < 0) {
+                fin.close();
+                this.closeBuffTransfer(transferId);
+                throw new SessionError("Server side experimenting issues when writing");
+            }
+
+            offSet += chunkSize;
+            long remaining = buff.length - offSet;
+            if (remaining < Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - 1) chunkSize = (int)remaining;
+        }
     }
 
     private static String fromBuffToString(final byte[] array ,final String encoding ){
