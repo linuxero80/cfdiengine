@@ -84,7 +84,22 @@ public abstract class EventMachineSWR implements EventController {
         return reply;
     }
 
-    public abstract int analyzeAck(Action action);
+    protected int analyzeAck(Action action) {
+        // In case of a better analisis for action received
+        // This function could be rewritten into children
+        int rc = 0;
+        byte ack = action.getBuffer()[0];
+        byte reason = action.getBuffer()[1];
+        if ( ack == Frame.DAT_NAK ) rc = reason;
+        return rc;
+    }
 
-    public abstract int analyzeData(Action action);
+    public int analyzeData(Action action) {
+        // In case of a better analisis for action received
+        // This function could be rewritten into children
+        int rc = 0;
+        this.bufferWithResponse = action.getBuffer();
+        if ( bufferWithResponse.length == 0 ) rc = -1;
+        return rc;
+    }
 }

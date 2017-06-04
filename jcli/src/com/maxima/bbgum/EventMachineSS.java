@@ -44,7 +44,7 @@ public abstract class EventMachineSS implements EventController {
     }
 
     protected int analyzeAck(Action action) {
-        // In case of a better analisis of action received
+        // In case of a better analisis for action received
         // This function could be rewritten into children
         int rc = 0;
         byte ack = action.getBuffer()[0];
