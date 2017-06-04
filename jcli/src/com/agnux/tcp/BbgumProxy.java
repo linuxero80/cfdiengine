@@ -5,8 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BbgumProxy {
 
@@ -18,6 +16,7 @@ public class BbgumProxy {
     public BbgumProxy(final String serverAddress, final int port) throws BbgumProxyError {
         BasicFactory<Byte, EventController> factory = new BasicFactory<Byte, EventController>();
         factory.subscribe(EVENT_POST_RAW_BUFFER, PostRawBuffer.class);
+        factory.subscribe(EVENT_BUFFER_TRANSFER, BufferTransfer.class);
         try {
             this.session = new Session(serverAddress, port, factory);
         } catch (IOException ex) {
