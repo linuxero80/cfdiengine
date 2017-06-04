@@ -5,6 +5,7 @@ from bbgum.server import BbGumServer, BbGumServerError
 from custom.profile import ProfileReader
 from misc.tricks import dict_params
 from os.path import expanduser
+from logging.handlers import TimedRotatingFileHandler
 import os
 import inspect
 import traceback
@@ -16,13 +17,18 @@ sys.path.append(
     os.path.abspath(os.path.join(
         os.path.dirname(__file__), "controllers")))
 
-def setup_log(debug=False):
+def setup_log(logs_dir, debug=False):
+    '''Setup the overall of handlers needed '''
 
-    logger = logging.getLogger(__name__)
+    LOGGER_NAME = 'blcore'
+    logger = logging.getLogger(LOGGER_NAME)
     logger.setLevel(logging.DEBUG)
 
     # create file handler which logs even debug messages
-    fh = logging.FileHandler(__name__ + '.log')
+    fh = TimedRotatingFileHandler('{}/{}.log'.format(logs_dir, LOGGER_NAME),
+                                       when="d",
+                                       interval=1,
+                                       backupCount=7)
     fh.setLevel(logging.DEBUG if debug else logging.INFO)
 
     # create console handler with a higher log level
@@ -82,10 +88,11 @@ def go_service(args):
 
     RESOURCES_DIR = '{}/resources'.format(expanduser("~"))
     PROFILES_DIR = '{}/profiles'.format(RESOURCES_DIR)
+    LOGS_DIR = '{}/logs'.format(RESOURCES_DIR)
     DEFAULT_PORT = 10080
     DEFAULT_PROFILE = 'default.json'
 
-    logger = setup_log(args.debug)
+    logger = setup_log(LOGS_DIR, args.debug)
 
     logger.debug(args)
 
