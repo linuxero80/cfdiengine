@@ -60,7 +60,7 @@ public class BbgumProxy {
             byte[] pivotBuff = new byte[chunkSize];
             fin.read(pivotBuff);
             int resolution = this.writeBuffTransfer(transferId, pivotBuff);
-            if ( resolution < 0) {
+            if ( resolution != 0) {
                 fin.close();
                 this.closeBuffTransfer(transferId);
                 throw new SessionError("Server side experimenting issues when writing");
