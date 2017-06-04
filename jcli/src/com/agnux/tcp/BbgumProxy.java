@@ -1,13 +1,12 @@
 package com.agnux.tcp;
 
-import com.maxima.bbgum.Frame;
-import com.maxima.bbgum.ServerReply;
-import com.maxima.bbgum.Session;
-import com.maxima.bbgum.SessionError;
+import com.maxima.bbgum.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BbgumProxy {
 
@@ -16,8 +15,16 @@ public class BbgumProxy {
 
     private Session session;
 
-    public BbgumProxy(Session s) {
-        this.session = s;
+    public BbgumProxy(final String serverAddress, final int port) throws BbgumProxyError {
+        BasicFactory<Byte, EventController> factory = new BasicFactory<Byte, EventController>();
+        factory.subscribe(EVENT_POST_RAW_BUFFER, PostRawBuffer.class);
+        try {
+            this.session = new Session(serverAddress, port, factory);
+        } catch (IOException ex) {
+            throw new BbgumProxyError(
+                    "The session with server could not be established: " +
+                    ex.toString());
+        }
     }
 
     public void uploadBuff(final byte[] buff) throws BbgumProxyError {

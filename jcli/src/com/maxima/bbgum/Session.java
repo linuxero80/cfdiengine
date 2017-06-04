@@ -25,6 +25,7 @@ public class Session extends Thread {
         this.writeChunks = new LinkedList<Frame>();
         this.outGoingMutex = new Object();
         this.mon = new Monitor(this, factory);
+        this.start();
     }
 
     @Override
