@@ -1,13 +1,18 @@
-package com.maxima.bbgum;
+package com.agnux.tcp;
 
+import com.maxima.bbgum.Frame;
+import com.maxima.bbgum.ServerReply;
+import com.maxima.bbgum.Session;
+import com.maxima.bbgum.SessionError;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BbgumProxy {
+
+    public static final byte EVENT_POST_RAW_BUFFER = (byte) 0x24;
+    public static final byte EVENT_BUFFER_TRANSFER = (byte) 0x28;
 
     private Session session;
 
@@ -77,7 +82,7 @@ public class BbgumProxy {
             byte[] buff = new byte[data.length + ticket.length];
             System.arraycopy(ticket, 0, buff, 0, ticket.length);
             System.arraycopy(data, 0, buff, 1, data.length);
-            ServerReply sr = this.session.pushBuffer(Session.EVENT_POST_RAW_BUFFER, buff, true);
+            ServerReply sr = this.session.pushBuffer(EVENT_POST_RAW_BUFFER, buff, true);
             return sr.getReplyCode();
         }
 
@@ -102,7 +107,7 @@ public class BbgumProxy {
             byte[] buff = new byte[(cmd.length + ascii.length)];
             System.arraycopy(cmd, 0, buff, 0, cmd.length);
             System.arraycopy(ascii, 0, buff, 1, ascii.length);
-            return this.session.pushBuffer(Session.EVENT_BUFFER_TRANSFER, buff, true);
+            return this.session.pushBuffer(EVENT_BUFFER_TRANSFER, buff, true);
         }
 
         // We should not have reached at this point :)
@@ -120,7 +125,7 @@ public class BbgumProxy {
         buff = new byte[id.length + cmd.length];
         System.arraycopy(cmd, 0, buff, 0, cmd.length);
         System.arraycopy(id, 0, buff, 1, id.length);
-        ServerReply sr = this.session.pushBuffer(Session.EVENT_BUFFER_TRANSFER, buff , true);
+        ServerReply sr = this.session.pushBuffer(EVENT_BUFFER_TRANSFER, buff , true);
         return sr.getReplyCode();
     }
 }

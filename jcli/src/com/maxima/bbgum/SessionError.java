@@ -1,6 +1,6 @@
 package com.maxima.bbgum;
 
-class SessionError extends Exception {
+public class SessionError extends Exception {
 
     public SessionError() {
 

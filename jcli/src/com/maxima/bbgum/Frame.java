@@ -3,7 +3,7 @@ package com.maxima.bbgum;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
-final class Frame {
+public final class Frame {
 
     private byte[] header;
     private byte[] body;

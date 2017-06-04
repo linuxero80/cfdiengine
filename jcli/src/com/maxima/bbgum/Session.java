@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class Session extends Thread {
+public class Session extends Thread {
 
     private Socket socket;
     private Deque<Frame> writeChunks;
@@ -174,8 +174,5 @@ class Session extends Thread {
 
         return rc;
     }
-
-    public static final byte EVENT_POST_RAW_BUFFER = (byte) 0x24;
-    public static final byte EVENT_BUFFER_TRANSFER = (byte) 0x28;
 }
 
