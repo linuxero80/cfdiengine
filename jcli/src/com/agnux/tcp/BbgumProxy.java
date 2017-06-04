@@ -20,15 +20,22 @@ public class BbgumProxy {
         this.session = s;
     }
 
-    public void uploadBuff(final byte[] buff) throws SessionError {
+    public void uploadBuff(final byte[] buff) throws BbgumProxyError {
         try {
-            this.runBuffTransfer(buff);
+            // Run state machine to transfer the buffer
+            this.runSmBuffTransfer(buff);
+        } catch (SessionError ex) {
+            throw new BbgumProxyError(
+                    "Unexpected protocol session error during upload: " +
+                    ex.toString());
         } catch (IOException ex) {
-            throw new SessionError("Unexpected IO error during upload: " + ex.toString());
+            throw new BbgumProxyError(
+                    "Unexpected IO error during upload: " +
+                    ex.toString());
         }
     }
 
-    private void runBuffTransfer(final byte[] buff) throws SessionError, IOException {
+    private void runSmBuffTransfer(final byte[] buff) throws SessionError, IOException {
         ServerReply fo = openBuffTransfer(buff.length);
 
         if ( fo.getReplyCode() != 0 ) {
