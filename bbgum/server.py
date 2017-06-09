@@ -17,8 +17,7 @@ class BbGumServer(object):
     __HOST = ''     # Symbolic name meaning all available interfaces
     __QCON_MAX = 5  # Maximum number of queued connections
 
-    def __init__(self, logger, port):
-        self.logger = logger
+    def __init__(self, port):
         self.port = port
 
     def start(self, factory, forking = True):
@@ -64,23 +63,30 @@ class BbGumServer(object):
         finally:
             shutdown()
 
-    def conn_delegate(self, conn, addr, factory):
+    def conn_delegate(self, conn, addr, queue, configurer):
         '''deals with an active connection'''
+
+        configurer(queue)
+        name = multiprocessing.current_process().name
+        logger = logging.getLogger(name)
+
         def read_socket(s):
             d = conn.recv(s)
             if d == b'':
                 raise RuntimeError("socket connection broken")
+
         read_header = lambda : read_socket(Frame.FRAME_HEADER_LENGTH)
         read_body = lambda hs: read_socket(hs)
-        mon = Monitor(self.logger, conn, factory)
+
+        mon = Monitor(logger, conn, factory)
         try:
-            self.logger.debug("Connected %r at %r", conn, addr)
+            logger.debug("Connected %r at %r", conn, addr)
             while True:
                 mon.receive(Action(read_body(Frame.decode_header(read_header()))))
         except (RuntimeError, FrameError) as e:
-            self.logger.exception(e)
+            logger.exception(e)
         except:
-            self.logger.exception("Problem handling request")
+            logger.exception("Problem handling request")
         finally:
-            self.logger.debug("Closing socket")
+            logger.debug("Closing socket")
             conn.close()
