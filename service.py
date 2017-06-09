@@ -1,5 +1,9 @@
 #!/usr/bin/python3
 
+from os.path import expanduser
+from logging.handlers import TimedRotatingFileHandler
+import multiprocessing
+import os
 import traceback
 import argparse
 import logging
@@ -80,7 +84,7 @@ if __name__ == "__main__":
 
     log_path = '{}/{}.log'.format(LOGS_DIR, LOG_NAME)
     profile_path = '{}/{}'.format(PROFILES_DIR,
-        args.config if args.config else DEFAULT_PROFILE))
+        args.config if args.config else DEFAULT_PROFILE)
 
     queue = multiprocessing.Queue(-1)
     listener = multiprocessing.Process(target=listener_process,
