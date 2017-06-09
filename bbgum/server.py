@@ -17,14 +17,15 @@ class BbGumServer(object):
     __HOST = ''     # Symbolic name meaning all available interfaces
     __QCON_MAX = 5  # Maximum number of queued connections
 
-    def __init__(self, port):
+    def __init__(self, queue, profile_path, port):
+        self.queue = queue
+        self.profile_path = profile_path
         self.port = port
 
-    def start(self, factory, forking = True):
+    def start(self):
         """start the service upon selected port"""
 
         def listener():
-            self.logger.debug("listening")
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.bind((self.__HOST, self.port))
             self.socket.listen(self.__QCON_MAX)
@@ -33,21 +34,18 @@ class BbGumServer(object):
             print('Use Control-C to exit')
             while True:
                 conn, address = self.socket.accept()
-                self.logger.debug("Got connection")
-                if not forking:
-                    # just one connection as per current thread
-                    self.conn_delegate(conn, address, factory)
-                    continue
+                print("Got connection")
                 process = multiprocessing.Process(
-                    target=self.conn_delegate, args=(conn, address, factory))
+                    target=self.conn_delegate, args=(conn, address, self.profile_path,
+                        self.queue, self.conn_logconf))
                 process.daemon = True
                 process.start()
-                self.logger.debug("Started process %r", process)
+                print("Started process %r", process)
 
         def shutdown():
-            self.logger.info("Shutting down")
+            print("Shutting down")
             for process in multiprocessing.active_children():
-                self.logger.info("Shutting down process %r", process)
+                print("Shutting down process %r", process)
                 process.terminate()
                 process.join()
 
@@ -63,7 +61,7 @@ class BbGumServer(object):
         finally:
             shutdown()
 
-    def conn_delegate(self, conn, addr, queue, configurer):
+    def conn_delegate(self, conn, addr, profile_path, queue, configurer):
         '''deals with an active connection'''
 
         configurer(queue)
@@ -90,3 +88,6 @@ class BbGumServer(object):
         finally:
             logger.debug("Closing socket")
             conn.close()
+
+    def conn_logconf(self):
+        pass
