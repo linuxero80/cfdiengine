@@ -113,8 +113,16 @@ class BbGumServer(object):
         read_header = lambda : read_socket(Frame.FRAME_HEADER_LENGTH)
         read_body = lambda hs: read_socket(hs)
 
-        factory = ControllerFactory(logger, profile_path)
-        mon = Monitor(logger, conn, factory)
+        mon = None
+        try:
+            mon = Monitor(logger, conn,
+                ControllerFactory(logger, profile_path))
+        except:
+            logger.error("Problem upon initialization of Monitor entity")
+        finally:
+            logger.debug("Closing socket")
+            conn.close()
+
         try:
             logger.debug("Connected %r at %r", conn, addr)
             while True:
