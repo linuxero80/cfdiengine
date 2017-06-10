@@ -8,6 +8,7 @@ import traceback
 import argparse
 import logging
 import sys
+from bbgum.server import BbGumServer
 
 def listener_configurer(log_path, debug):
 
@@ -37,17 +38,25 @@ def listener_configurer(log_path, debug):
     root.addHandler(fh)
 
 def listener_process(queue, configurer, log_path, debug=False):
+    '''process that receives log traces from connection process'''
+
     configurer(log_path, debug)
     while True:
         try:
             record = queue.get()
             if record is None:  # We send this as a sentinel to tell the listener to quit.
+                print('Finishing log listener')
                 break
             logger = logging.getLogger(record.name)
             logger.handle(record)  # No level or filter logic applied - just do it!
-        except Exception:
+        except KeyboardInterrupt:
+            # SIGINT is masked in the child processes. 
+            # that's why this workaround is required
+            # to exit reliably
+            pass
+        except:
             if debug:
-                print('Whoops! Problem in listener:', file=sys.stderr)
+                print('Whoops! Problem in log listener:', file=sys.stderr)
                 traceback.print_exc(file=sys.stderr)
 
 def parse_cmdline():
@@ -85,6 +94,7 @@ if __name__ == "__main__":
     log_path = '{}/{}.log'.format(LOGS_DIR, LOG_NAME)
     profile_path = '{}/{}'.format(PROFILES_DIR,
         args.config if args.config else DEFAULT_PROFILE)
+    port = int(args.port) if args.port else DEFAULT_PORT
 
     queue = multiprocessing.Queue(-1)
     listener = multiprocessing.Process(target=listener_process,
@@ -93,7 +103,9 @@ if __name__ == "__main__":
 
     try:
         server = BbGumServer(queue, profile_path, port)
-        server.start()
+        server.start(args.debug)
+    except KeyboardInterrupt:
+        print('Exiting')
     except:
         if args.debug:
             print('Whoops! Problem in server:', file=sys.stderr)

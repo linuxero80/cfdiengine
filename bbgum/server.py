@@ -15,6 +15,7 @@ class BbGumServer(object):
         self.queue = queue
         self.profile_path = profile_path
         self.port = port
+        self.ps = []
 
     def start(self, debug):
         """start the service upon selected port"""
@@ -34,20 +35,22 @@ class BbGumServer(object):
                         self.queue, self.conn_logconf, debug))
                 process.daemon = True
                 process.start()
+                self.ps.append(process)
                 print("Started process %r", process)
 
         def shutdown():
             print("Shutting down")
-            for process in multiprocessing.active_children():
-                print("Shutting down process %r", process)
-                process.terminate()
-                process.join()
+            for p in self.ps:
+                if p.is_alive():
+                    print("Shutting down process {}".format(repr(p)))
+                    p.terminate()
+                    p.join()
 
         try:
             listener()
             spawner()
         except KeyboardInterrupt:
-            print('Exiting')
+            raise
         except Exception as e:
             raise
         finally:
