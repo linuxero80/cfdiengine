@@ -4,6 +4,7 @@ from misc.factory import Factory
 from custom.profile import ProfileReader
 from misc.tricks import dict_params
 
+import logging
 import multiprocessing
 import threading
 import socket
@@ -11,10 +12,10 @@ import os
 
 def ControllerFactory(Factory):
 
-    def __init__(logger, profile_path):
-        super().__init()
+    def __init__(self, logger, profile_path):
+        super().__init__()
         self.logger = logger
-        pt = self__read_settings(profile_path)
+        pt = self.__read_settings(profile_path)
         self.__makeup_factory(pt.bbgum.controllers)
 
     def __read_settings(self, s_file):
@@ -115,14 +116,14 @@ class BbGumServer(object):
 
         mon = None
         try:
-            mon = Monitor(logger, conn,
-                ControllerFactory(logger, profile_path))
+            factory = ControllerFactory(logger, profile_path)
+            mon = Monitor(logger, conn, factory)
         except:
             logger.error("Problem upon initialization of Monitor entity")
         finally:
             logger.debug("Closing socket")
             conn.close()
-
+            return
         try:
             logger.debug("Connected %r at %r", conn, addr)
             while True:
