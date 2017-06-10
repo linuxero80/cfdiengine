@@ -46,32 +46,32 @@ def listener_process(queue, configurer, log_path, debug=False):
             logger = logging.getLogger(record.name)
             logger.handle(record)  # No level or filter logic applied - just do it!
         except Exception:
-            print('Whoops! Problem:', file=sys.stderr)
-            traceback.print_exc(file=sys.stderr)
+            if debug:
+                print('Whoops! Problem in listener:', file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
+
+def parse_cmdline():
+    """parses the command line arguments at the call."""
+
+    psr_desc="cfdi engine service interface"
+    psr_epi="select a config profile to specify defaults"
+
+    psr = argparse.ArgumentParser(
+        description=psr_desc, epilog=psr_epi)
+
+    psr.add_argument('-d', action='store_true', dest='debug',
+        help='print debug information')
+
+    psr.add_argument('-c', '--config', action='store',
+        dest='config', help='load an specific config profile')
+
+    psr.add_argument('-p', '--port', action='store',
+        dest='port', help='launches service on specific port')
+
+    return psr.parse_args()
+
 
 if __name__ == "__main__":
-
-    def parse_cmdline():
-        """parses the command line arguments at the call."""
-
-        psr_desc="cfdi engine service interface"
-        psr_epi="select a config profile to specify defaults"
-
-        psr = argparse.ArgumentParser(
-                    description=psr_desc, epilog=psr_epi)
-
-        psr.add_argument('-d', action='store_true', dest='debug',
-                                help='print debug information')
-
-        psr.add_argument('-c', '--config', action='store',
-                               dest='config',
-                               help='load an specific config profile')
-
-        psr.add_argument('-p', '--port', action='store',
-                               dest='port',
-                               help='launches service on specific port')
-
-        return psr.parse_args()
 
     args = parse_cmdline()
 
@@ -91,4 +91,18 @@ if __name__ == "__main__":
         args=(queue, listener_configurer, log_path, args.debug))
     listener.start()
 
+    try:
+        server = BbGumServer(queue, profile_path, port)
+        server.start()
+    except:
+        if args.debug:
+            print('Whoops! Problem in server:', file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+        sys.exit(1)
 
+    # it'll break eternal loop inside listener process
+    queue.put_nowait(None)
+    listener.join()
+
+    # assuming everything went right, exit gracefully
+    sys.exit(0)

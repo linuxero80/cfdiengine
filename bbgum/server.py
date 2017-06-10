@@ -6,12 +6,6 @@ import threading
 import socket
 import os
 
-class BbGumServerError(Exception):
-    def __init__(self, message = None):
-        self.message = message
-    def __str__(self):
-        return self.message
-
 class BbGumServer(object):
 
     __HOST = ''     # Symbolic name meaning all available interfaces
@@ -22,7 +16,7 @@ class BbGumServer(object):
         self.profile_path = profile_path
         self.port = port
 
-    def start(self):
+    def start(self, debug):
         """start the service upon selected port"""
 
         def listener():
@@ -37,7 +31,7 @@ class BbGumServer(object):
                 print("Got connection")
                 process = multiprocessing.Process(
                     target=self.conn_delegate, args=(conn, address, self.profile_path,
-                        self.queue, self.conn_logconf))
+                        self.queue, self.conn_logconf, debug))
                 process.daemon = True
                 process.start()
                 print("Started process %r", process)
@@ -54,17 +48,15 @@ class BbGumServer(object):
             spawner()
         except KeyboardInterrupt:
             print('Exiting')
-        except BbGumServerError as e:
-            raise
         except Exception as e:
             raise
         finally:
             shutdown()
 
-    def conn_delegate(self, conn, addr, profile_path, queue, configurer):
+    def conn_delegate(self, conn, addr, profile_path, queue, configurer, debug):
         '''deals with an active connection'''
 
-        configurer(queue)
+        configurer(queue, debug)
         name = multiprocessing.current_process().name
         logger = logging.getLogger(name)
 
@@ -89,5 +81,8 @@ class BbGumServer(object):
             logger.debug("Closing socket")
             conn.close()
 
-    def conn_logconf(self):
-        pass
+    def conn_logconf(self, queue, debug):
+        h = logging.handlers.QueueHandler(queue)
+        root = logging.getLogger()
+        root.addHandler(h)
+        root.setLevel(logging.DEBUG if debug else logging.INFO)
