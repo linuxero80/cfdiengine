@@ -80,7 +80,7 @@ class Rwr(Controller, metaclass=ABCMeta):
             a.archetype = Frame.reply_archetype(act.archetype)
             a.transnum = act.transnum
             a.buff = bytes([
-                Frame.REPLY_PASS if s == 0 else Frame.REPLY_FAIL,
+                ord(Frame.REPLY_PASS if s == 0 else Frame.REPLY_FAIL),
                 s
             ])
             return a
