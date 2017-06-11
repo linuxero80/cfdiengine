@@ -4,16 +4,16 @@ from bbgum.transaction import Transaction
 import threading
 
 class Monitor(object):
-    """Entity to deal with incomming/outcomming transactions"""
+    """Entity to deal with incoming/outcoming transactions"""
 
     def __init__(self, logger, conn, factory):
-       self.logger = logger
-       self.conn = conn
-       self.factory = factory
-       self.outgoing = Queue(maxsize = 0)
-       self.tp = self.TransPool()
+        self.logger = logger
+        self.conn = conn
+        self.factory = factory
+        self.outgoing = Queue(maxsize=0)
+        self.tp = self.TransPool()
 
-    def push_buff(self, archetype, buff, block = True):
+    def push_buff(self, archetype, buff, block=True):
 
         def incept_trans():
             try:
@@ -53,7 +53,7 @@ class Monitor(object):
     def receive(self, a):
         """receives action from upper layer"""
 
-        client_origin = lambda n: (ord(n) % 2) == 1
+        client_origin = lambda n: (n % 2) == 1
 
         if not self.factory.is_supported(a.archetype):
             msg = '{} {}!'.format(
@@ -67,7 +67,7 @@ class Monitor(object):
         if t is None:
             if client_origin(a.transnum):
                 try:
-                    t = Transaction(self.factory.incept(a.archetype))
+                    t = Transaction(self.factory.incept(a.archetype), False)
                 except Exception as e:
                     self.logger.exception(e)
                     raise FrameError("Transaction could not be created")
@@ -181,14 +181,14 @@ class Monitor(object):
 
         def place_at(self, transnum, t):
             """place a transaction at specific pool slot"""
-            slot = ord(transnum)
+            slot = transnum
             self.pool_lock.acquire()
             self.pool[slot] = t
             self.pool_lock.release()
 
         def fetch_from(self, transnum):
             """fetches a transaction from pool"""
-            slot = ord(transnum)
+            slot = transnum
             self.pool_lock.acquire()
             t = self.pool[slot]
             self.pool_lock.release()

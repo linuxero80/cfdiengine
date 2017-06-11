@@ -81,12 +81,12 @@ class Frame(object):
 
 class Action(object):
 
-    archetype = b'\x00'
-    transnum = b'\x00'
+    archetype = 0
+    transnum = 0
     buff = bytearray()
 
     def __init__(self, data=None):
-        if data:
+        if data is not None:
             length = len(data)
             if length > Frame.FRAME_BODY_MAX_LENGTH:
                 msg = '{} {} bytes'.format(

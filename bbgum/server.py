@@ -4,9 +4,11 @@ from misc.factory import Factory
 from custom.profile import ProfileReader
 from misc.tricks import dict_params
 import logging
+import traceback
 import multiprocessing
 import socket
 import os
+import sys
 
 class ControllerFactory(Factory):
 
@@ -131,6 +133,13 @@ class BbGumServer(object):
             logger.exception(e)
         except:
             logger.exception("Problem handling request")
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            lines = traceback.format_exception(
+                exc_type,
+                exc_value,
+                exc_traceback
+            )
+            logger.error(''.join('!! ' + line for line in lines))
         finally:
             logger.debug("Closing socket")
             conn.close()
