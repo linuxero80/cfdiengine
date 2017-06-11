@@ -66,13 +66,13 @@ class Frame(object):
 
     @staticmethod
     def decode_header(header):
-        cut_nullchar = lambda s: s[:-1] # keep everything except the last item
-        if (len(header) == Frame.FRAME_HEADER_LENGTH):
+        """decodes ascii header of a frame"""
+        if len(header) == Frame.FRAME_HEADER_LENGTH:
             try:
-                return int(cut_nullchar(header).decode("utf-8"))
+                return int(header.decode("utf-8"))
             except:
                 raise FrameError("unexpected problems when decoding header!!")
-        raise FrameError("header's width violiation!!")
+        raise FrameError("header's width violation!!")
 
     @staticmethod
     def reply_archetype(archetype):
@@ -88,8 +88,11 @@ class Action(object):
     def __init__(self, data = None):
         if data:
             length = len(data)
-            if (length > Frame.FRAME_BODY_MAX_LENGTH):
-                msg = "Action can not be bigger than " + str(Frame.FRAME_BODY_MAX_LENGTH) + " " + "bytes";
+            if length > Frame.FRAME_BODY_MAX_LENGTH:
+                msg = '{} {} bytes'.format(
+                    "Action can not be bigger than",
+                    str(Frame.FRAME_BODY_MAX_LENGTH)
+                )
                 raise FrameError(msg)
             self.archetype = data[0]
             self.transnum = data[1]

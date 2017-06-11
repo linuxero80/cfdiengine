@@ -108,6 +108,7 @@ class BbGumServer(object):
             d = conn.recv(s)
             if d == b'':
                 raise RuntimeError("socket connection broken")
+            return d
 
         read_header = lambda : read_socket(Frame.FRAME_HEADER_LENGTH)
         read_body = lambda hs: read_socket(hs)
