@@ -1,31 +1,31 @@
-#import abc
+from bbgum.frame import Action, Frame
 from abc import ABCMeta, abstractmethod
 
 class Controller(object):
-    '''
+    """
     Deals back and forth with transaction's actions
-    '''
+    """
 
     def finished(self):
         """indicates when internal state machine has finished"""
         pass
 
     def outcomming(self, mon, act):
-        """handler to work outcomming action out"""
+        """handler to work outcoming action out"""
         pass
 
     def incomming(self, mon, act):
-        """handler to work incomming action out"""
+        """handler to work incoming action out"""
         pass
 
     def get_reply(self):
-        """comforms reply for blocking transaction"""
+        """conforms reply for blocking transaction"""
         pass
 
 class Sr(Controller, metaclass=ABCMeta):
-    '''
-    Deals with single recive transaction's actions
-    '''
+    """
+    Deals with single receive transaction's actions
+    """
 #    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
@@ -50,13 +50,13 @@ class Sr(Controller, metaclass=ABCMeta):
         mon.send(a)
 
     @abstractmethod
-    def process_buff(buff):
-        """processes incomming buffer"""
+    def process_buff(self, buff):
+        """processes incoming buffer"""
 
 class Rwr(Controller, metaclass=ABCMeta):
-    '''
-    Deals with recive with response transaction's actions
-    '''
+    """
+    Deals with receive with response transaction's actions
+    """
 #    __metaclass__ = abc.ABCMeta
     IN_RECV_REQ, IN_RECV_REPLY = range(2)
 
@@ -72,10 +72,10 @@ class Rwr(Controller, metaclass=ABCMeta):
         self.steps[self.current_step](mon, act)
 
     def __recv_request(self, mon, act):
-        '''process an incomming request'''
+        """process an incoming request"""
 
         def res_action(s):
-            '''creates action with request result code'''
+            """creates action with request result code"""
             a = Action()
             a.archetype = Frame.reply_archetype(act.archetype)
             a.transnum = act.transnum
@@ -86,7 +86,7 @@ class Rwr(Controller, metaclass=ABCMeta):
             return a
 
         def resp_action(d):
-            '''creates action with response's data'''
+            """creates action with response's data"""
             a = Action()
             a.archetype = act.archetype
             a.transnum = act.transnum
@@ -102,16 +102,16 @@ class Rwr(Controller, metaclass=ABCMeta):
             self.finish_flag = True
 
     def __recv_reply(self, mon, act):
-        '''process an incomming reply'''
+        """process an incomming reply"""
         if act.buff[0] == Frame.REPLY_FAIL:
             reason = act.buff[1]
             self.postmortem(reason)
         self.finish_flag = True
 
     @abstractmethod
-    def process_buff(buff):
+    def process_buff(self, buff):
         """processes incomming buffer"""
 
     @abstractmethod
-    def postmortem(failure):
+    def postmortem(self, failure):
         """analyzes a failure code"""
