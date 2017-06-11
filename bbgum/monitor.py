@@ -1,4 +1,6 @@
 from Queue import Queue, Empty
+from bbgum.frame import Action, Frame, FrameError
+from bbgum.transaction import Transaction
 import threading
 
 class Monitor(object):
@@ -56,8 +58,8 @@ class Monitor(object):
         client_origin = lambda n: (ord(n) % 2) == 1
 
         if not self.factory.is_supported(a.archetype):
-            msg = "The client side sent an invalid action" +
-                " which is not registered yet!. It will be ignore"
+            msg = """The client side sent an invalid action which
+             is not registered yet!. It will be ignore"""
             raise FrameError(msg)
 
         t = self.tp.fetch_from(a.transnum)
@@ -73,9 +75,12 @@ class Monitor(object):
                 self.tp.place_at(a.transnum, t)
                 t.controller.incomming(self, a)
             else:
-                msg = "The transaction number (" + ord(a.transnum) +
-                    ") in the Action is not a client transaction number." +
+                msg = '{} ({}) {}. {}'.format(
+                    "The transaction number",
+                    ord(a.transnum),
+                    'in the Action is not a client transaction number.',
                     " It will be ignore"
+                )
                 raise FrameError(msg)
         else:
             t.controller.incomming(self, a)
@@ -125,7 +130,7 @@ class Monitor(object):
         pool = [None] * MAX_NODES
         pool_lock = threading.Lock()
 
-        def __init__():
+        def __init__(self):
             pass
 
         def destroy_at(self, transnum):
@@ -141,7 +146,7 @@ class Monitor(object):
                     # From the first shelf we shall start
                     # the quest of an available one if
                     # next one was ocuppied and the last one.
-                    i = TRANSACTION_NUM_START_VALUE
+                    i = self.TRANSACTION_NUM_START_VALUE
 
                 if (self.pool[i] == None):
                     # When the shelf is available we shall return it
@@ -166,26 +171,26 @@ class Monitor(object):
                         break
 
                 if j == (self.MAX_NODES - 1):
-                self.next_num = i + self.TRANSACTION_NUM_INCREMENT
+                    self.next_num = i + self.TRANSACTION_NUM_INCREMENT
                 return i
 
-            pool_lock.acquire()
+            self.pool_lock.acquire()
             slot = req_next()
-            this.pool[slot] = t
-            pool_lock.release()
+            self.pool[slot] = t
+            self.pool_lock.release()
             return s
 
         def place_at(self, transnum, t):
             '''place a transaccion at specific pool slot'''
             slot = ord(transnum)
-            pool_lock.acquire()
-            this.pool[slot] = t
-            pool_lock.release()
+            self.pool_lock.acquire()
+            self.pool[slot] = t
+            self.pool_lock.release()
 
         def fetch_from(self, transnum):
             '''fetches a transaction from pool'''
             slot = ord(transnum)
-            pool_lock.acquire()
+            self.pool_lock.acquire()
             t = self.pool[slot]
-            pool_lock.release()
+            self.pool_lock.release()
             return t

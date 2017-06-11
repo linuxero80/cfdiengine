@@ -1,16 +1,14 @@
-from custom.profile import ProfileReader
 from bbgum.frame import Action, Frame, FrameError
+from bbgum.monitor import Monitor
 from misc.factory import Factory
 from custom.profile import ProfileReader
 from misc.tricks import dict_params
-
 import logging
 import multiprocessing
-import threading
 import socket
 import os
 
-def ControllerFactory(Factory):
+class ControllerFactory(Factory):
 
     def __init__(self, logger, profile_path):
         super().__init__()
@@ -22,7 +20,7 @@ def ControllerFactory(Factory):
         self.logger.debug("looking for config profile file in:\n{0}".format(
             os.path.abspath(s_file)))
         if os.path.isfile(s_file):
-            reader = ProfileReader(logger)
+            reader = ProfileReader(self.logger)
             return reader(s_file)
         raise Exception("unable to locate the config profile file")
 

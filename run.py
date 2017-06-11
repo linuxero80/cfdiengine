@@ -10,6 +10,10 @@ import logging
 import sys
 from bbgum.server import BbGumServer
 
+sys.path.append(
+    os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "controllers")))
+
 def listener_configurer(log_path, debug):
 
     # if no name is specified, return a logger
