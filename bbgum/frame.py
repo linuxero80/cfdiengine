@@ -18,18 +18,17 @@ class Frame(object):
     REPLY_FAIL = b'\x15'
 
     header = bytearray([0] * FRAME_HEADER_LENGTH)
-    body = bytearray([0] * FRAME_BODY_MAX_LENGTH)
+    body = bytearray()
     action_length = 0
 
     def __init__(self, action=None):
         if action:
             self.action_length = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buff) 
             self.header = Frame.encode_header(self.action_length)
-            self.body[0] = ord(action.archetype)
-            self.body[1] = ord(action.transnum)
-            begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
-            end = begin + len(action.buff)
-            self.body[begin:end] = action.buff
+            self.body = bytearray([0] * self.action_length)
+            self.body[0] = action.archetype
+            self.body[1] = action.transnum
+            self.body[Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH:] = action.buff
 
     def get_action(self):
         """fetch the action within current instance"""
@@ -47,11 +46,10 @@ class Frame(object):
 
     def dump(self):
         """create a bytes dump of current instance"""
-        d = bytearray([0] * Frame.FRAME_FULL_MAX_LENGTH)
+        size = self.FRAME_HEADER_LENGTH + len(self.body)
+        d = bytearray([0] * size)
         d[:self.FRAME_HEADER_LENGTH-1] = self.header
-        begin = self.FRAME_HEADER_LENGTH
-        end = begin + len(self.body)
-        d[begin:end] = self.body
+        d[self.FRAME_HEADER_LENGTH:] = self.body
         return d
 
     @staticmethod
@@ -59,9 +57,8 @@ class Frame(object):
         if length > Frame.FRAME_BODY_MAX_LENGTH:
             raise FrameError("invalid length to encode!!")
         l = []
-        for sc in '{:3d}'.format(length):
+        for sc in '{:4d}'.format(length):
             l.append(ord(sc))
-        l.append(Frame.C_NULL_CHARACTER)
         return bytes(l)
 
     @staticmethod

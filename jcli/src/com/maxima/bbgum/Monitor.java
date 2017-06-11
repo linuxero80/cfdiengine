@@ -93,7 +93,7 @@ final class Monitor {
     public void receive(Action a) throws SessionError {
         // Receives an action from upper layer
 
-        if (!this.factory.isSupported(a.getArchetype()) ||
+        if (!this.factory.isSupported(a.getArchetype()) &&
                 !this.factory.isSupported((byte) (a.getArchetype() - 1))) {
             String msg = "The server side sent an invalid Action which is not registered yet!. " +
                     "It will be ignore";
