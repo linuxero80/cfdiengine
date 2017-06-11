@@ -1,12 +1,10 @@
-from Queue import Queue, Empty
+from queue import Queue, Empty
 from bbgum.frame import Action, Frame, FrameError
 from bbgum.transaction import Transaction
 import threading
 
 class Monitor(object):
-    '''
-    Entity to deal with incomming/outcomming transactions
-    '''
+    """Entity to deal with incomming/outcomming transactions"""
 
     def __init__(self, logger, conn, factory):
        self.logger = logger
@@ -64,7 +62,7 @@ class Monitor(object):
 
         t = self.tp.fetch_from(a.transnum)
 
-        if (t == None):
+        if t is None:
             if client_origin(a.transnum):
                 try:
                     t = Transaction(self.factory.incept(a.archetype))
@@ -94,7 +92,7 @@ class Monitor(object):
                 self.tp.destroy_at(a.transnum)
 
     def send(self, a):
-        """write accion upon socket"""
+        """write action upon socket"""
 
         def release():
             try:
@@ -117,9 +115,8 @@ class Monitor(object):
                 release()
 
     class TransPool(object):
-        '''
-        pool that stores active transactions
-        '''
+        """pool that stores active transactions"""
+
         TRANSACTION_NUM_START_VALUE = 2
         TRANSACTION_NUM_LAST_VALUE = 254
         TRANSACTION_NUM_INCREMENT = 2
@@ -134,21 +131,21 @@ class Monitor(object):
             pass
 
         def destroy_at(self, transnum):
-            '''destroy the chosen transaction'''
+            """destroy the chosen transaction"""
             self.place_at(transnum, None)
 
         def place_smart(self, t):
-            '''place a transaccion at available pool slot'''
+            """place a transaction at available pool slot"""
 
             def req_next():
                 i = self.next_num
-                if (self.pool[i] != None) and (i == self.TRANSACTION_NUM_LAST_VALUE):
+                if (self.pool[i] is not None) and (i == self.TRANSACTION_NUM_LAST_VALUE):
                     # From the first shelf we shall start
                     # the quest of an available one if
                     # next one was ocuppied and the last one.
                     i = self.TRANSACTION_NUM_START_VALUE
 
-                if (self.pool[i] == None):
+                if self.pool[i] is None:
                     # When the shelf is available we shall return it
                     # before we shall set nextNum variable up for
                     # later calls to current function.
@@ -159,7 +156,7 @@ class Monitor(object):
                     return i
 
                 # If you've reached this code block my brother, so...
-                # you migth be in trouble soon. By the way you seem
+                # you might be in trouble soon. By the way you seem
                 # a lucky folk and perhaps you would find a free
                 # shelf by performing sequential search with awful
                 # linear time. Otherwise the matter is fucked :(
@@ -167,7 +164,7 @@ class Monitor(object):
                 while True:
                     i += self.TRANSACTION_NUM_INCREMENT
                     j += 1
-                    if (self.pool[i] != None) and (j < self.MAX_NODES):
+                    if (self.pool[i] is not None) and (j < self.MAX_NODES):
                         break
 
                 if j == (self.MAX_NODES - 1):
@@ -178,17 +175,17 @@ class Monitor(object):
             slot = req_next()
             self.pool[slot] = t
             self.pool_lock.release()
-            return s
+            return slot
 
         def place_at(self, transnum, t):
-            '''place a transaccion at specific pool slot'''
+            """place a transaction at specific pool slot"""
             slot = ord(transnum)
             self.pool_lock.acquire()
             self.pool[slot] = t
             self.pool_lock.release()
 
         def fetch_from(self, transnum):
-            '''fetches a transaction from pool'''
+            """fetches a transaction from pool"""
             slot = ord(transnum)
             self.pool_lock.acquire()
             t = self.pool[slot]

@@ -118,10 +118,10 @@ class BbGumServer(object):
             mon = Monitor(logger, conn, factory)
         except:
             logger.error("Problem upon initialization of Monitor entity")
-        finally:
             logger.debug("Closing socket")
             conn.close()
             return
+
         try:
             logger.debug("Connected %r at %r", conn, addr)
             while True:
