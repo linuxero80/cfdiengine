@@ -18,6 +18,10 @@
                  {
                      "archetype": "0x24",
                      "event_mod": "srpostbuff"
+                 },
+                 {
+                     "archetype": "0x28",
+                     "event_mod": "rwrbufftrans"
                  }
             ]
         },
