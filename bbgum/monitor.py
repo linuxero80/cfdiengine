@@ -56,8 +56,10 @@ class Monitor(object):
         client_origin = lambda n: (ord(n) % 2) == 1
 
         if not self.factory.is_supported(a.archetype):
-            msg = """The client side sent an invalid action which
-             is not registered yet!. It will be ignore"""
+            msg = '{} {}!'.format(
+                'The client side sent an invalid action which',
+                'is not registered yet!. It will be ignore'
+            )
             raise FrameError(msg)
 
         t = self.tp.fetch_from(a.transnum)
@@ -77,7 +79,7 @@ class Monitor(object):
                     "The transaction number",
                     ord(a.transnum),
                     'in the Action is not a client transaction number.',
-                    " It will be ignore"
+                    "It will be ignore!"
                 )
                 raise FrameError(msg)
         else:

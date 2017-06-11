@@ -1,5 +1,5 @@
 class FrameError(Exception):
-    def __init__(self, message = None):
+    def __init__(self, message=None):
         self.message = message
     def __str__(self):
         return self.message
@@ -21,7 +21,7 @@ class Frame(object):
     body = bytearray([0] * FRAME_BODY_MAX_LENGTH)
     action_length = 0
 
-    def __init__(self, action = None):
+    def __init__(self, action=None):
         if action:
             self.action_length = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH + len(action.buff) 
             self.header = Frame.encode_header(self.action_length)
@@ -85,7 +85,7 @@ class Action(object):
     transnum = b'\x00'
     buff = bytearray()
 
-    def __init__(self, data = None):
+    def __init__(self, data=None):
         if data:
             length = len(data)
             if length > Frame.FRAME_BODY_MAX_LENGTH:
