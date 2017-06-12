@@ -5,18 +5,21 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BbgumProxy {
 
     public static final byte EVENT_POST_RAW_BUFFER = (byte) 0x24;
     public static final byte EVENT_BUFFER_TRANSFER = (byte) 0x28;
-
+    public static final byte EVENT_HELLO = (byte) 0x30;
     private Session session;
 
     public BbgumProxy(final String serverAddress, final int port) throws BbgumProxyError {
         BasicFactory<Byte, EventController> factory = new BasicFactory<Byte, EventController>();
         factory.subscribe(EVENT_POST_RAW_BUFFER, PostRawBuffer.class);
         factory.subscribe(EVENT_BUFFER_TRANSFER, BufferTransfer.class);
+        factory.subscribe(EVENT_HELLO, Hello.class);
         try {
             this.session = new Session(serverAddress, port, factory);
         } catch (IOException ex) {
@@ -24,6 +27,20 @@ public class BbgumProxy {
                     "The session with server could not be established: " +
                     ex.toString());
         }
+    }
+
+    public int sayHello() throws BbgumProxyError {
+        ServerReply rc = null;
+        try {
+            byte[] data = "HELLO".getBytes("US-ASCII");
+            rc = this.session.pushBuffer(EVENT_HELLO, data, true);
+        } catch (Exception ex) {
+            Logger.getLogger(BbgumProxy.class.getName()).log(Level.SEVERE, null, ex);
+            throw new BbgumProxyError(
+                    "Unexpected protocol session error when saying hello: " +
+                    ex.toString());
+        }
+        return rc.getReplyCode();
     }
 
     public void uploadBuff(final byte[] buff) throws BbgumProxyError {

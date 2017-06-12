@@ -2,6 +2,7 @@ from bbgum.controller import Rwr
 
 impt_class = 'RwrBuffTrans'
 
+
 class RwrBuffTrans(Rwr):
     """
     Deals with receive with response transaction's actions

@@ -3,6 +3,7 @@ from bbgum.frame import Action, Frame, FrameError
 from bbgum.transaction import Transaction
 import threading
 
+
 class Monitor(object):
     """Entity to deal with incoming/outcoming transactions"""
 
@@ -33,7 +34,7 @@ class Monitor(object):
         slot = self.tp.place_smart(self, t)
         a = makeup_action(bytes([slot]))
 
-        t.controller.outcomming(self, a)
+        t.controller.outcoming(self, a)
 
         if t.blocking:
             try:
@@ -75,7 +76,7 @@ class Monitor(object):
                     raise FrameError("Transaction could not be created")
 
                 self.tp.place_at(a.transnum, t)
-                t.controller.incomming(self, a)
+                t.controller.incoming(self, a)
             else:
                 msg = '{} ({}) {}. {}'.format(
                     "The transaction number",
@@ -85,7 +86,7 @@ class Monitor(object):
                 )
                 raise FrameError(msg)
         else:
-            t.controller.incomming(self, a)
+            t.controller.incoming(self, a)
 
         if t.controller.finished():
             # finalization for actions

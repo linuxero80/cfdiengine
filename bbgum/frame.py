@@ -32,16 +32,10 @@ class Frame(object):
 
     def get_action(self):
         """fetch the action within current instance"""
-        def setup_buff():
-            size = (self.action_length - Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH)
-            begin = Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH
-            end = begin + size
-            return self.body[begin:end]
-
         a = Action()
         a.archetype = self.body[0]
         a.transnum = self.body[1]
-        a.buff = setup_buff()
+        a.buff = self.body[Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH:]
         return a
 
     def dump(self):

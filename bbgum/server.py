@@ -10,8 +10,8 @@ import socket
 import os
 import sys
 
-class ControllerFactory(Factory):
 
+class ControllerFactory(Factory):
     def __init__(self, logger, profile_path):
         super().__init__()
         self.logger = logger
@@ -29,7 +29,7 @@ class ControllerFactory(Factory):
     def __makeup_factory(self, variants):
         devents = dict_params(
             ProfileReader.get_content(
-            variants, ProfileReader.PNODE_MANY),
+                variants, ProfileReader.PNODE_MANY),
             'archetype', 'event_mod')
         for archetype, event_mod in devents.items():
             try:
@@ -49,9 +49,9 @@ class ControllerFactory(Factory):
                 self.logger.fatal("{0} support library failure".format(event_mod))
                 raise e
 
-class BbGumServer(object):
 
-    __HOST = ''     # Symbolic name meaning all available interfaces
+class BbGumServer(object):
+    __HOST = ''  # Symbolic name meaning all available interfaces
     __QCON_MAX = 5  # Maximum number of queued connections
 
     def __init__(self, queue, profile_path, port):
@@ -75,7 +75,7 @@ class BbGumServer(object):
                 print("Got connection")
                 process = multiprocessing.Process(
                     target=self.conn_delegate, args=(conn, address, self.profile_path,
-                        self.queue, self.conn_logconf, debug))
+                                                     self.queue, self.conn_logconf, debug))
                 process.daemon = True
                 process.start()
                 self.ps.append(process)
@@ -94,7 +94,7 @@ class BbGumServer(object):
             spawner()
         except KeyboardInterrupt:
             raise
-        except Exception as e:
+        except:
             raise
         finally:
             shutdown()
@@ -112,7 +112,7 @@ class BbGumServer(object):
                 raise RuntimeError("socket connection broken")
             return d
 
-        read_header = lambda : read_socket(Frame.FRAME_HEADER_LENGTH)
+        read_header = lambda: read_socket(Frame.FRAME_HEADER_LENGTH)
         read_body = lambda hs: read_socket(hs)
 
         mon = None

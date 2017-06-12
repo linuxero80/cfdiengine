@@ -2,6 +2,7 @@ from bbgum.controller import Sr
 
 impt_class = 'SrPostBuff'
 
+
 class SrPostBuff(Sr):
     """
     Deals with single receive transaction's actions

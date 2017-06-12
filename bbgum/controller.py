@@ -1,6 +1,7 @@
 from bbgum.frame import Action, Frame
 from abc import ABCMeta, abstractmethod
 
+
 class Controller(object):
     """
     Deals back and forth with transaction's actions
@@ -10,17 +11,18 @@ class Controller(object):
         """indicates when internal state machine has finished"""
         pass
 
-    def outcomming(self, mon, act):
+    def outcoming(self, mon, act):
         """handler to work outcoming action out"""
         pass
 
-    def incomming(self, mon, act):
+    def incoming(self, mon, act):
         """handler to work incoming action out"""
         pass
 
     def get_reply(self):
         """conforms reply for blocking transaction"""
         pass
+
 
 class Sr(Controller, metaclass=ABCMeta):
     """
@@ -34,12 +36,12 @@ class Sr(Controller, metaclass=ABCMeta):
     def finished(self):
         return True
 
-    def incomming(self, mon, act):
+    def incoming(self, mon, act):
 
         def result_buff():
             rc = self.process_buff(act.buff)
             return bytes([
-                Frame.REPLY_PASS if rc == 0 else Frame.REPLY_FAIL,
+                ord(Frame.REPLY_PASS if rc == 0 else Frame.REPLY_FAIL),
                 rc
             ])
 
@@ -52,6 +54,7 @@ class Sr(Controller, metaclass=ABCMeta):
     @abstractmethod
     def process_buff(self, buff):
         """processes incoming buffer"""
+
 
 class Rwr(Controller, metaclass=ABCMeta):
     """
@@ -68,7 +71,7 @@ class Rwr(Controller, metaclass=ABCMeta):
     def finished(self):
         return self.finish_flag
 
-    def incomming(self, mon, act):
+    def incoming(self, mon, act):
         self.steps[self.current_step](mon, act)
 
     def __recv_request(self, mon, act):
@@ -103,7 +106,7 @@ class Rwr(Controller, metaclass=ABCMeta):
             self.finish_flag = True
 
     def __recv_reply(self, mon, act):
-        """process an incomming reply"""
+        """process an incoming reply"""
         if act.buff[0] == Frame.REPLY_FAIL:
             reason = act.buff[1]
             self.postmortem(reason)
@@ -111,7 +114,7 @@ class Rwr(Controller, metaclass=ABCMeta):
 
     @abstractmethod
     def process_buff(self, buff):
-        """processes incomming buffer"""
+        """processes incoming buffer"""
 
     @abstractmethod
     def postmortem(self, failure):
