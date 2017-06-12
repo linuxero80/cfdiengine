@@ -46,7 +46,7 @@ class Sr(Controller, metaclass=ABCMeta):
         a = Action()
         a.archetype = Frame.reply_archetype(act.archetype)
         a.transnum = act.transnum
-        a.buff = result_buff
+        a.buff = result_buff()
         mon.send(a)
 
     @abstractmethod
