@@ -55,7 +55,9 @@ class Monitor(object):
 
         client_origin = lambda n: (n % 2) == 1
 
-        if not self.factory.is_supported(a.archetype):
+        if (not self.factory.is_supported(
+                a.archetype)) and (not self.factory.is_supported(
+                a.archetype - 1)):
             msg = '{} {}!'.format(
                 'The client side sent an invalid action which',
                 'is not registered yet!. It will be ignore'
