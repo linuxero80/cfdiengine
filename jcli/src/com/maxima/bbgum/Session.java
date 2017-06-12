@@ -39,15 +39,12 @@ public class Session extends Thread {
                             Level.SEVERE, null, "Connection has been closed!!");
                     break;
                 }
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SessionError ex) {
-                Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
                 try {
                     is.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException e) {
+                    Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, e);
                 }
             }
         }

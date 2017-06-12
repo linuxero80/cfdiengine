@@ -91,6 +91,7 @@ class Rwr(Controller, metaclass=ABCMeta):
             a.archetype = act.archetype
             a.transnum = act.transnum
             a.buff = d
+            return a
 
         (status, buff) = self.process_buff(act.buff)
         mon.send(res_action(status))
