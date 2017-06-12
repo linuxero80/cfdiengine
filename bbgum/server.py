@@ -100,7 +100,7 @@ class BbGumServer(object):
             shutdown()
 
     def conn_delegate(self, conn, addr, profile_path, queue, configurer, debug):
-        '''deals with an active connection'''
+        """deals with an active connection"""
 
         configurer(queue, debug)
         name = multiprocessing.current_process().name

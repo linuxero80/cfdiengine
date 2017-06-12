@@ -87,4 +87,4 @@ class Action(object):
                 raise FrameError(msg)
             self.archetype = data[0]
             self.transnum = data[1]
-            self.buff = data[Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH:-1]
+            self.buff = data[Frame.ACTION_FLOW_INFO_SEGMENT_LENGTH:]

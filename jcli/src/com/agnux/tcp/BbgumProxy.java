@@ -5,8 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class BbgumProxy {
 
@@ -35,7 +33,6 @@ public class BbgumProxy {
             byte[] data = "HELLO".getBytes("US-ASCII");
             rc = this.session.pushBuffer(EVENT_HELLO, data, true);
         } catch (Exception ex) {
-            Logger.getLogger(BbgumProxy.class.getName()).log(Level.SEVERE, null, ex);
             throw new BbgumProxyError(
                     "Unexpected protocol session error when saying hello: " +
                     ex.toString());
