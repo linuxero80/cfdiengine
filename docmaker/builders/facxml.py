@@ -27,10 +27,11 @@ class FacXml(BuilderGen):
         '''
         Consulta el emisor en dbms
         '''
-        SQL = """select EMP.rfc, EMP.titulo
+        SQL = """select EMP.rfc, EMP.titulo, REG.descripcion
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
             LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
+            LEFT JOIN cfdi_regimenes AS REG ON REG.numero_control = EMP.regimen_fiscal
             WHERE USR_SUC.gral_usr_id="""
         return self.pg_query(conn, "{0}{1}".format(SQL, usr_id))
 
