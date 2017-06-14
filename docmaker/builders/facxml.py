@@ -133,7 +133,7 @@ class FacXml(BuilderGen):
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
             'MONEDA': self.__q_moneda(conn, prefact_id),
-            'LUGAR_EXPEDICION': self._q_lugar_expedicion(conn, usr_id),
+            'LUGAR_EXPEDICION': self.__q_lugar_expedicion(conn, usr_id),
             'CONCEPTOS': self.__q_conceptos(conn, prefact_id)
         }
 
@@ -142,10 +142,10 @@ class FacXml(BuilderGen):
         c.Version = '3.3'
         c.Folio = "test attribute" #optional
         c.Fecha = '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now())
-        c.Sello = "BLABLALASELLO"
+        c.Sello = '__DIGITAL_SIGN_HERE__'
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
-        c.Certificado = "certificado en base64"
+        c.Certificado = "__CERT_B64_HERE__"
         c.SubTotal = "4180.0"
         c.Total = "4848.80"
         c.Moneda = ['MONEDA']['ISO_4217']
