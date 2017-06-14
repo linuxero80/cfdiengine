@@ -148,8 +148,8 @@ class FacXml(BuilderGen):
         c.Certificado = "certificado en base64"
         c.SubTotal = "4180.0"
         c.Total = "4848.80"
-        c.Moneda = "MXN"
-        c.TipoCambio = "1.0" #optional (requerido en ciertos casos)
+        c.Moneda = ['MONEDA']['ISO_4217']
+        c.TipoCambio = ['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
     #    c.metodoDePago = "NO IDENTIFICADO" #optional
         c.LugarExpedicion = dat['LUGAR_EXPEDICION']
