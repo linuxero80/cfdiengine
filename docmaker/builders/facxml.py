@@ -144,7 +144,7 @@ class FacXml(BuilderGen):
         c.Fecha = '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now())
         c.Sello = "BLABLALASELLO"
         c.FormaPago = "01" #optional
-        c.NoCertificado = "00001000000202529199"
+        c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = "certificado en base64"
         c.SubTotal = "4180.0"
         c.Total = "4848.80"
@@ -152,17 +152,17 @@ class FacXml(BuilderGen):
         c.TipoCambio = "1.0" #optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
     #    c.metodoDePago = "NO IDENTIFICADO" #optional
-        c.LugarExpedicion = "60050"
+        c.LugarExpedicion = dat['LUGAR_EXPEDICION']
 
         c.Emisor = pyxb.BIND()
-        c.Emisor.Nombre = "PRODUCTOS INDUSTRIALES SAAR S.A. DE C.V." #opcional
-        c.Emisor.Rfc = "PIS850531CS4"
-        c.Emisor.RegimenFiscal = '601'
+        c.Emisor.Nombre = dat['EMISOR']['RAZON_SOCIAL'] #opcional
+        c.Emisor.Rfc = dat['EMISOR']['RFC']
+        c.Emisor.RegimenFiscal = dat['EMISOR']['REGIMEN_FISCAL']
 
         c.Receptor = pyxb.BIND()
-        c.Receptor.Nombre = "PRODUCTOS INDUSTRIALES SAAR S.A. DE C.V." #opcional
-        c.Receptor.Rfc = "PIS850531CS4"
-        c.Receptor.UsoCFDI = 'G01'
+        c.Receptor.Nombre = dat['RECEPTOR']['RAZON_SOCIAL'] #opcional
+        c.Receptor.Rfc = dat['RECEPTOR']['RFC']
+        c.Receptor.UsoCFDI = dat['RECEPTOR']['USO_CFDI']
 
         c.Conceptos = pyxb.BIND(
             pyxb.BIND(
