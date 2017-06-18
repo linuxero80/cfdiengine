@@ -128,7 +128,11 @@ class FacXml(BuilderGen):
                   erp_prefacturas_detalles.valor_ieps
                 )
               ) * erp_prefacturas_detalles.valor_imp
-            ) AS importe_impuesto
+            ) AS importe_impuesto,
+            (erp_prefacturas_detalles.valor_ieps * 100::double precision) AS tasa_ieps,
+            (erp_prefacturas_detalles.tasa_ret * 100::double precision) AS tasa_ret,
+            (erp_prefacturas_detalles.valor_imp * 100::double precision) AS tasa_impuesto,
+            erp_prefacturas_detalles.tipo_impuesto_id
             FROM erp_prefacturas
             JOIN erp_prefacturas_detalles on erp_prefacturas_detalles.prefacturas_id=erp_prefacturas.id
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
