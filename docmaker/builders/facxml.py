@@ -171,27 +171,17 @@ class FacXml(BuilderGen):
         c.Receptor.Rfc = dat['RECEPTOR']['RFC']
         c.Receptor.UsoCFDI = dat['RECEPTOR']['USO_CFDI']
 
-        c.Conceptos = pyxb.BIND(
-            pyxb.BIND(
-                Cantidad=5,
-                ClaveUnidad='C81',
-                ClaveProdServ='01010101',
-                Descripcion='Palitroche',
-                ValorUnitario='10',
-                Importe='50'
-            )
-        )
-        #c.Conceptos = pyxb.BIND()
-        #for i in dat['CONCEPTOS']:
-        #    c.Conceptos.append(pyxb.BIND(
-        #        NoIdentificacion = i['SKU'], #opcional
-        #        Cantidad=i['CANTIDAD'],
-        #        ClaveUnidad='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
-        #        ClaveProdServ='01010101', # se deben usar las claves del catalogo sat producto-servicios
-        #        Descripcion = i['DESCRIPCION'],
-        #        ValorUnitario = i['PRECIO_UNITARIO'],
-        #        Importe = '50' #i['IMPORTE']
-        #    ))
+        c.Conceptos = pyxb.BIND()
+        for i in dat['CONCEPTOS']:
+            c.Conceptos.append(pyxb.BIND(
+                Cantidad = 1, #i['CANTIDAD'],
+                ClaveUnidad='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
+                ClaveProdServ='01010101', # se deben usar las claves del catalogo sat producto-servicios
+                Descripcion=i['DESCRIPCION'],
+                ValorUnitario = i['PRECIO_UNITARIO'],
+                NoIdentificacion = i['SKU'], #opcional
+                Importe='50' # #i['IMPORTE']
+            ))
 
         writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS, output_file)
 
