@@ -108,7 +108,27 @@ class FacXml(BuilderGen):
             upper(inv_prod_unidades.titulo) AS unidad,
             erp_prefacturas_detalles.cant_facturar AS cantidad,
             erp_prefacturas_detalles.precio_unitario,
-            (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) AS importe
+            (
+              erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario
+            ) AS importe,
+            -- From this point onwards tax related columns
+            (
+              (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) *
+              erp_prefacturas_detalles.valor_ieps
+            ) AS importe_ieps,
+            (
+              (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) *
+              erp_prefacturas_detalles.tasa_ret
+            ) AS importe_retencion,
+            (
+              (
+                (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) +
+                (
+                  (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) *
+                  erp_prefacturas_detalles.valor_ieps
+                )
+              ) * erp_prefacturas_detalles.valor_imp
+            ) AS importe_impuesto
             FROM erp_prefacturas
             JOIN erp_prefacturas_detalles on erp_prefacturas_detalles.prefacturas_id=erp_prefacturas.id
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
@@ -122,7 +142,11 @@ class FacXml(BuilderGen):
                 'UNIDAD': row['unidad'],
                 'CANTIDAD': row['cantidad'],
                 'PRECIO_UNITARIO': row['precio_unitario'],
-                'IMPORTE': row['importe']
+                'IMPORTE': row['importe'],
+                # From this point onwards tax related elements
+                'IMPORTE_IEPS': row['importe_ieps'],
+                'IMPORTE_RETENCION': row['importe_retencion'],
+                'IMPORTE_IMPUESTO' : row['importe_impuesto']
             })
         return rowset
 
@@ -156,9 +180,10 @@ class FacXml(BuilderGen):
         certb64 = None
         with open(cert_file, 'rb') as f:
             content = f.read()
-            certb64 =  base64.b64encode(content).decode('ascii')
+            certb64 = base64.b64encode(content).decode('ascii')
 
         return {
+            'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
             'CERT_B64': certb64,
             'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
@@ -173,7 +198,7 @@ class FacXml(BuilderGen):
         c = Comprobante()
         c.Version = '3.3'
         c.Folio = "test attribute" #optional
-        c.Fecha = '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now())
+        c.Fecha = dat['TIME_STAMP']
         c.Sello = '__DIGITAL_SIGN_HERE__'
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
