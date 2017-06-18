@@ -1,3 +1,4 @@
+import base64
 import datetime
 import pyxb
 import psycopg2.extras
@@ -127,6 +128,7 @@ class FacXml(BuilderGen):
 
     def __q_cert_file(self, conn, usr_id):
         '''
+        Consulta el certificado que usa el usuario en dbms
         '''
         SQL = """select fac_cfds_conf.archivo_certificado as cert_file
             FROM gral_suc AS SUC
@@ -148,10 +150,16 @@ class FacXml(BuilderGen):
             raise DocBuilderStepError("prefact id not fed")
 
         ed = self.__q_emisor(conn, usr_id)
+        cert_file = '{}/{}/{}'.format(
+                d_rdirs['ssl'], ed['RFC'], self.__q_cert_file(conn, usr_id))
+
+        certb64 = None
+        with open(cert_file, 'rb') as f:
+            content = f.read()
+            certb64 =  base64.b64encode(content).decode('ascii')
 
         return {
-            'CERT_FILE': '{}/{}/{}'.format(
-                d_rdirs['ssl'], ed['RFC'], self.__q_cert_file(conn, usr_id)),
+            'CERT_B64': certb64,
             'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
@@ -169,7 +177,7 @@ class FacXml(BuilderGen):
         c.Sello = '__DIGITAL_SIGN_HERE__'
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
-        c.Certificado = dat['CERT_FILE']
+        c.Certificado = dat['CERT_B64']
         c.SubTotal = "4180.0"
         c.Total = "4848.80"
         c.Moneda = dat['MONEDA']['ISO_4217']
