@@ -44,9 +44,9 @@ def __set_cmdargs_up():
     return psr.parse_args()
 
 
-def dmcli(s_file, args, logger):
+def dmcli(args, logger):
 
-    def read_settings():
+    def read_settings(s_file):
         logger.debug("looking for config profile file in:\n{0}".format(
             os.path.abspath(s_file)))
         if os.path.isfile(s_file):
@@ -56,7 +56,16 @@ def dmcli(s_file, args, logger):
 
     logging.basicConfig(level=logging.DEBUG if args.dm_debug else logging.INFO)
     logger.debug(args)
-    pt = read_settings()
+
+    DEFAULT_RESDIR = '{}/resources'.format(expanduser("~"))
+    DEFAULT_PROFILE = 'default.json'
+
+    resdir = args.resdir if args.resdir else DEFAULT_RESDIR
+    profiles_dir = '{}/profiles'.format(resdir)
+    prof = '{}/{}'.format(profiles_dir,
+        args.config if args.config else DEFAULT_PROFILE)
+
+    pt = read_settings(prof)
 
     if not args.dm_output:
         raise Exception("not defined output file")
@@ -79,7 +88,7 @@ def dmcli(s_file, args, logger):
             raise Exception("input variables bad conformed")
 
         try:
-            dpl = DocPipeLine(logger,
+            dpl = DocPipeLine(logger, resdir,
                 rdirs_conf = pt.res.dirs,
                 pgsql_conf = pt.dbms.pgsql_conn)
             dpl.run(args.dm_builder, args.dm_output, **kwargs)
@@ -90,19 +99,11 @@ def dmcli(s_file, args, logger):
 
 if __name__ == "__main__":
 
-    DEFAULT_RESDIR = '{}/resources'.format(expanduser("~"))
-    DEFAULT_PROFILE = 'default.json'
-
     logger = logging.getLogger(__name__)
     args = __set_cmdargs_up()
 
-    resdir = args.resdir if args.resdir else DEFAULT_RESDIR
-    profiles_dir = '{}/profiles'.format(resdir)
-    prof = '{}/{}'.format(profiles_dir,
-        args.config if args.config else DEFAULT_PROFILE)
-
     try:
-        dmcli(prof, args, logger)
+        dmcli(args, logger)
         logger.info('successful builder execution')
     except:
         if args.dm_debug:

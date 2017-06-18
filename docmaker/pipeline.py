@@ -17,8 +17,12 @@ class DocPipeLine(object):
     creator instance of documents.
     """
 
-    def __init__(self, logger, rdirs_conf = None, pgsql_conf = None):
+    def __init__(self, logger, resdir = None, rdirs_conf = None, pgsql_conf = None):
         self.logger = logger
+
+        if resdir == None:
+            raise DocBuilderError('resources directory not fed!!')
+        self.resdir = resdir
 
         if pgsql_conf == None:
             raise DocBuilderError("pgsql config info not fed!!")
@@ -73,8 +77,12 @@ class DocPipeLine(object):
         else:
             raise DocBuilderError("slack resource dirs configuration")
 
+        fullpath_dirs = {}
+        for k, v in d_rdirs.items():
+            fullpath_dirs[k] = '{}/{}'.format(self.resdir, v)
+
         try:
-            dat = self.builder.data_acq(conn, d_rdirs, **kwargs)
+            dat = self.builder.data_acq(conn, fullpath_dirs, **kwargs)
         except DocBuilderStepError:
             raise
         finally:

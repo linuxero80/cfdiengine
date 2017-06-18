@@ -125,6 +125,18 @@ class FacXml(BuilderGen):
             })
         return rowset
 
+    def __q_cert_file(self, conn, usr_id):
+        '''
+        '''
+        SQL = """select fac_cfds_conf.archivo_certificado as cert_file
+            FROM gral_suc AS SUC
+            LEFT JOIN gral_usr_suc ON gral_usr_suc.gral_suc_id = SUC.id
+            LEFT JOIN fac_cfds_conf ON fac_cfds_conf.gral_suc_id = SUC.id
+            WHERE gral_usr_suc.gral_usr_id="""
+        for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
+            # Just taking first row of query result
+            return row['cert_file']
+
     def data_acq(self, conn, d_rdirs, **kwargs):
 
         usr_id = kwargs.get('usr_id', None)
@@ -135,14 +147,19 @@ class FacXml(BuilderGen):
         if prefact_id is None:
             raise DocBuilderStepError("prefact id not fed")
 
+        ed = self.__q_emisor(conn, usr_id)
+
         return {
-            'EMISOR': self.__q_emisor(conn, usr_id),
+            'CERT_FILE': '{}/{}/{}'.format(
+                d_rdirs['ssl'], ed['RFC'], self.__q_cert_file(conn, usr_id)),
+            'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
             'MONEDA': self.__q_moneda(conn, prefact_id),
             'LUGAR_EXPEDICION': self.__q_lugar_expedicion(conn, usr_id),
             'CONCEPTOS': self.__q_conceptos(conn, prefact_id)
         }
+
 
     def format_wrt(self, output_file, dat):
         c = Comprobante()
@@ -152,7 +169,7 @@ class FacXml(BuilderGen):
         c.Sello = '__DIGITAL_SIGN_HERE__'
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
-        c.Certificado = "__CERT_B64_HERE__"
+        c.Certificado = dat['CERT_FILE']
         c.SubTotal = "4180.0"
         c.Total = "4848.80"
         c.Moneda = dat['MONEDA']['ISO_4217']
