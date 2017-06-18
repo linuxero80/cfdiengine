@@ -2,6 +2,7 @@ import logging
 import sys
 import os
 import psycopg2
+from docmaker.gen import BuilderGen
 from custom.profile import ProfileTree, ProfileReader
 from docmaker.error import DocBuilderImptError, DocBuilderStepError, DocBuilderError
 
@@ -44,7 +45,7 @@ class DocPipeLine(object):
                 msg = "module {0} has no {1} class implemented".format(b, cname)
                 raise DocBuilderImptError(msg)
 
-            self.builder = getattr(hw_mod, cname)(self.logger)
+            self.builder = getattr(doc_mod, cname)(self.logger)
 
             if not isinstance(self.builder, BuilderGen) and not issubclass(self.builder.__class__, BuilderGen):
                 msg = "unknown support library specification in {0}".format(self.builder)
@@ -57,13 +58,13 @@ class DocPipeLine(object):
         self.__create(
             self.__open_dbms_conn(),
             {p["name"]: p["value"] for p in ProfileReader.get_content(
-                self.rdirs_info,
+                self.rdirs_conf,
                 ProfileReader.PNODE_MANY)
             },
             output_file, **kwargs
         )
 
-    def __create(conn, d_rdirs, output_file, **kwargs):
+    def __create(self, conn, d_rdirs, output_file, **kwargs):
         """runs pipeline's steps"""
         dat = None
 
@@ -93,10 +94,10 @@ class DocPipeLine(object):
         """opens a connection to postgresql"""
         try:
             conn_str = "dbname={0} user={1} host={2} password={3} port={4}".format(
-                ProfileReader.get_content(self.pgsql_conf.db, ProfileReader.PNODE_UNIQUE)
-                ProfileReader.get_content(self.pgsql_conf.user, ProfileReader.PNODE_UNIQUE)
-                ProfileReader.get_content(self.pgsql_conf.host, ProfileReader.PNODE_UNIQUE)
-                ProfileReader.get_content(self.pgsql_conf.passwd, ProfileReader.PNODE_UNIQUE)
+                ProfileReader.get_content(self.pgsql_conf.db, ProfileReader.PNODE_UNIQUE),
+                ProfileReader.get_content(self.pgsql_conf.user, ProfileReader.PNODE_UNIQUE),
+                ProfileReader.get_content(self.pgsql_conf.host, ProfileReader.PNODE_UNIQUE),
+                ProfileReader.get_content(self.pgsql_conf.passwd, ProfileReader.PNODE_UNIQUE),
                 ProfileReader.get_content(self.pgsql_conf.port, ProfileReader.PNODE_UNIQUE)
             )
 

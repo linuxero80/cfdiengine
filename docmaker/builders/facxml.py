@@ -2,8 +2,13 @@ import datetime
 import pyxb
 import psycopg2.extras
 
+from docmaker.gen import BuilderGen
 from sat.v33 import Comprobante
 from sat.requirement import writedom_cfdi
+
+
+impt_class='FacXml'
+
 
 class FacXml(BuilderGen):
 
@@ -29,7 +34,8 @@ class FacXml(BuilderGen):
         '''
         Consulta el emisor en dbms
         '''
-        SQL = """select upper(EMP.rfc), upper(EMP.titulo), upper(REG.descripcion)
+        SQL = """select upper(EMP.rfc) as rfc, upper(EMP.titulo) as titulo,
+            upper(REG.descripcion) as descripcion
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
             LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
@@ -79,8 +85,8 @@ class FacXml(BuilderGen):
         Consulta el cliente de la prefactura en dbms
         '''
         SQL = """SELECT
-            upper(cxc_clie.razon_social),
-            upper(cxc_clie.rfc)
+            upper(cxc_clie.razon_social) as razon_social,
+            upper(cxc_clie.rfc) as rfc
             FROM erp_prefacturas
             LEFT JOIN cxc_clie ON cxc_clie.id=erp_prefacturas.cliente_id
             WHERE erp_prefacturas.id="""
@@ -88,7 +94,7 @@ class FacXml(BuilderGen):
             # Just taking first row of query result
             return {
                 'RFC': row['rfc'],
-                'RAZON_SOCIAL']: row['razon_social'],
+                'RAZON_SOCIAL': row['razon_social'],
                 'USO_CFDI': 'G01'
             }
 
@@ -96,7 +102,8 @@ class FacXml(BuilderGen):
         '''
         Consulta los conceptos de la prefactura en dbms
         '''
-        SQL = """SELECT upper(inv_prod.sku), upper(inv_prod.descripcion),
+        SQL = """SELECT upper(inv_prod.sku) as sku,
+            upper(inv_prod.descripcion) as descripcion,
             upper(inv_prod_unidades.titulo) AS unidad,
             erp_prefacturas_detalles.cant_facturar AS cantidad,
             erp_prefacturas_detalles.precio_unitario,
@@ -110,7 +117,7 @@ class FacXml(BuilderGen):
         for row in self.pg_query(conn, "{0}{1}".format(SQL, prefact_id)):
             rowset.append({
                 'SKU': row['sku'],
-                'DESCRIPCION': row['inv_prod.descripcion'],
+                'DESCRIPCION': row['descripcion'],
                 'UNIDAD': row['unidad'],
                 'CANTIDAD': row['cantidad'],
                 'PRECIO_UNITARIO': row['precio_unitario'],
@@ -148,8 +155,8 @@ class FacXml(BuilderGen):
         c.Certificado = "__CERT_B64_HERE__"
         c.SubTotal = "4180.0"
         c.Total = "4848.80"
-        c.Moneda = ['MONEDA']['ISO_4217']
-        c.TipoCambio = ['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
+        c.Moneda = "MXN" # ['MONEDA']['ISO_4217']
+        c.TipoCambio = "1.0" # ['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
     #    c.metodoDePago = "NO IDENTIFICADO" #optional
         c.LugarExpedicion = dat['LUGAR_EXPEDICION']
@@ -157,7 +164,7 @@ class FacXml(BuilderGen):
         c.Emisor = pyxb.BIND()
         c.Emisor.Nombre = dat['EMISOR']['RAZON_SOCIAL'] #opcional
         c.Emisor.Rfc = dat['EMISOR']['RFC']
-        c.Emisor.RegimenFiscal = dat['EMISOR']['REGIMEN_FISCAL']
+        c.Emisor.RegimenFiscal = '601' #dat['EMISOR']['REGIMEN_FISCAL']
 
         c.Receptor = pyxb.BIND()
         c.Receptor.Nombre = dat['RECEPTOR']['RAZON_SOCIAL'] #opcional
@@ -174,6 +181,17 @@ class FacXml(BuilderGen):
                 Importe='50'
             )
         )
+        #c.Conceptos = pyxb.BIND()
+        #for i in dat['CONCEPTOS']:
+        #    c.Conceptos.append(pyxb.BIND(
+        #        NoIdentificacion = i['SKU'], #opcional
+        #        Cantidad=i['CANTIDAD'],
+        #        ClaveUnidad='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
+        #        ClaveProdServ='01010101', # se deben usar las claves del catalogo sat producto-servicios
+        #        Descripcion = i['DESCRIPCION'],
+        #        ValorUnitario = i['PRECIO_UNITARIO'],
+        #        Importe = '50' #i['IMPORTE']
+        #    ))
 
         writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS, output_file)
 
