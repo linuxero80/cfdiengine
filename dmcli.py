@@ -22,6 +22,9 @@ def __set_cmdargs_up():
         dest='dm_debug', help='print debug information'
     )
     psr.add_argument(
+        '-r', '--resdir', action='store',
+        dest='resdir', help='points out the one resources directory')
+    psr.add_argument(
         '-c', '--config', action='store',
         dest='config', help='load an specific config profile'
     )
@@ -87,14 +90,15 @@ def dmcli(s_file, args, logger):
 
 if __name__ == "__main__":
 
-    RESOURCES_DIR = '{}/resources'.format(expanduser("~"))
-    PROFILES_DIR = '{}/profiles'.format(RESOURCES_DIR)
+    DEFAULT_RESDIR = '{}/resources'.format(expanduser("~"))
     DEFAULT_PROFILE = 'default.json'
 
     logger = logging.getLogger(__name__)
     args = __set_cmdargs_up()
 
-    prof = '{}/{}'.format(PROFILES_DIR,
+    resdir = args.resdir if args.resdir else DEFAULT_RESDIR
+    profiles_dir = '{}/profiles'.format(resdir)
+    prof = '{}/{}'.format(profiles_dir,
         args.config if args.config else DEFAULT_PROFILE)
 
     try:
