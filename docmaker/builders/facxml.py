@@ -158,9 +158,9 @@ class FacXml(BuilderGen):
             })
         return rowset
 
-    def __q_ivas(self):
+    def __q_ivas(self, conn):
         '''
-        Consulta el total de IVAS activos en dbms
+        Consulta el total de IVA activos en dbms
         '''
         SQL = """SELECT id, descripcion AS titulo, iva_1 AS tasa
             FROM gral_imptos
@@ -174,13 +174,13 @@ class FacXml(BuilderGen):
             })
         return rowset
 
-    def __q_ieps(self, usr_id):
+    def __q_ieps(self, conn, usr_id):
         '''
         Consulta el total de lo IEPS activos en dbms
         '''
         SQL = """SELECT id, titulo, tasa
             FROM gral_ieps
-            WHERE borrado_logico=false"""
+            WHERE borrado_logico=false """
         rowset = []
         for row in self.pg_query(conn, SQL):
             rowset.append({
