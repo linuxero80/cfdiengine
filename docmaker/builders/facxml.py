@@ -158,6 +158,22 @@ class FacXml(BuilderGen):
             })
         return rowset
 
+    def __q_ivas(self):
+        '''
+        Consulta el total de IVAS activos en dbms
+        '''
+        SQL = """SELECT id, descripcion AS titulo, iva_1 AS tasa
+            FROM gral_imptos
+            WHERE borrado_logico=false"""
+        rowset = []
+        for row in self.pg_query(conn, SQL):
+            rowset.append({
+                'IVA_ID' : row['id'],
+                'IVA_DESC': row['titulo'],
+                'IVA_TASA': row['tasa']
+            })
+        return rowset
+
     def __q_cert_file(self, conn, usr_id):
         '''
         Consulta el certificado que usa el usuario en dbms
