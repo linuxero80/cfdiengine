@@ -36,7 +36,7 @@ class FacXml(BuilderGen):
         Consulta el emisor en dbms
         '''
         SQL = """select upper(EMP.rfc) as rfc, upper(EMP.titulo) as titulo,
-            upper(REG.descripcion) as descripcion
+            upper(REG.numero_control) as numero_control
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
             LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
@@ -47,7 +47,7 @@ class FacXml(BuilderGen):
             return {
                 'RFC': row['rfc'],
                 'RAZON_SOCIAL': row['titulo'],
-                'REGIMEN_FISCAL': row['descripcion']
+                'REGIMEN_FISCAL': row['numero_control']
             }
 
     def __q_lugar_expedicion(self, conn, usr_id):
@@ -254,7 +254,7 @@ class FacXml(BuilderGen):
         c.Emisor = pyxb.BIND()
         c.Emisor.Nombre = dat['EMISOR']['RAZON_SOCIAL'] #opcional
         c.Emisor.Rfc = dat['EMISOR']['RFC']
-        c.Emisor.RegimenFiscal = '601' #dat['EMISOR']['REGIMEN_FISCAL']
+        c.Emisor.RegimenFiscal = dat['EMISOR']['REGIMEN_FISCAL']
 
         c.Receptor = pyxb.BIND()
         c.Receptor.Nombre = dat['RECEPTOR']['RAZON_SOCIAL'] #opcional
