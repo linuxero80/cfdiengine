@@ -150,7 +150,11 @@ class FacXml(BuilderGen):
                 # From this point onwards tax related elements
                 'IMPORTE_IEPS': row['importe_ieps'],
                 'IMPORTE_RETENCION': row['importe_retencion'],
-                'IMPORTE_IMPUESTO' : row['importe_impuesto']
+                'IMPORTE_IMPUESTO' : row['importe_impuesto'],
+                'TASA_IEPS': row['tasa_ieps'],
+                'TASA_RETENCION': row['tasa_ret'],
+                'TASA_IMPUESTO': row['tasa_impuesto'],
+                'TIPO_IMPUESTO_ID': row['tipo_impuesto_id']
             })
         return rowset
 
