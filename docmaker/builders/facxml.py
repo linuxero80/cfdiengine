@@ -174,6 +174,22 @@ class FacXml(BuilderGen):
             })
         return rowset
 
+    def __q_ieps(self, usr_id):
+        '''
+        Consulta el total de lo IEPS activos en dbms
+        '''
+        SQL = """SELECT id, titulo, tasa
+            FROM gral_ieps
+            WHERE borrado_logico=false"""
+        rowset = []
+        for row in self.pg_query(conn, SQL):
+            rowset.append({
+                'IEPS_ID' : row['id'],
+                'IEPS_DESC': row['titulo'],
+                'IEPS_TASA': row['tasa']
+            })
+        return rowset
+
     def __q_cert_file(self, conn, usr_id):
         '''
         Consulta el certificado que usa el usuario en dbms
