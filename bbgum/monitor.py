@@ -1,6 +1,7 @@
 from queue import Queue, Empty
 from bbgum.frame import Action, Frame, FrameError
 from bbgum.transaction import Transaction
+from misc.slackpool import SlackPool
 import threading
 
 
@@ -12,7 +13,8 @@ class Monitor(object):
         self.conn = conn
         self.factory = factory
         self.outgoing = Queue(maxsize=0)
-        self.tp = self.TransPool()
+        self.tp = SlackPool('start_value'=2, 'last_value'=254,
+                            'increment'=2, 'max'=256)
 
     def push_buff(self, archetype, buff, block=True):
 
@@ -118,81 +120,3 @@ class Monitor(object):
         if available:
             while not self.outgoing.empty():
                 release()
-
-    class TransPool(object):
-        """pool that stores active transactions"""
-
-        TRANSACTION_NUM_START_VALUE = 2
-        TRANSACTION_NUM_LAST_VALUE = 254
-        TRANSACTION_NUM_INCREMENT = 2
-        MAX_NODES = 256
-
-        # Initialization of elements for transactions pool
-        next_num = TRANSACTION_NUM_START_VALUE
-        pool = [None] * MAX_NODES
-        pool_lock = threading.Lock()
-
-        def __init__(self):
-            pass
-
-        def destroy_at(self, transnum):
-            """destroy the chosen transaction"""
-            self.place_at(transnum, None)
-
-        def place_smart(self, t):
-            """place a transaction at available pool slot"""
-
-            def req_next():
-                i = self.next_num
-                if (self.pool[i] is not None) and (i == self.TRANSACTION_NUM_LAST_VALUE):
-                    # From the first shelf we shall start
-                    # the quest of an available one if
-                    # next one was ocuppied and the last one.
-                    i = self.TRANSACTION_NUM_START_VALUE
-
-                if self.pool[i] is None:
-                    # When the shelf is available we shall return it
-                    # before we shall set nextNum variable up for
-                    # later calls to current function.
-                    if i == self.TRANSACTION_NUM_LAST_VALUE:
-                        self.next_num = self.TRANSACTION_NUM_START_VALUE
-                    else:
-                        self.next_num = i + self.TRANSACTION_NUM_INCREMENT
-                    return i
-
-                # If you've reached this code block my brother, so...
-                # you might be in trouble soon. By the way you seem
-                # a lucky folk and perhaps you would find a free
-                # shelf by performing sequential search with awful
-                # linear time. Otherwise the matter is fucked :(
-                j = 0
-                while True:
-                    i += self.TRANSACTION_NUM_INCREMENT
-                    j += 1
-                    if (self.pool[i] is not None) and (j < self.MAX_NODES):
-                        break
-
-                if j == (self.MAX_NODES - 1):
-                    self.next_num = i + self.TRANSACTION_NUM_INCREMENT
-                return i
-
-            self.pool_lock.acquire()
-            slot = req_next()
-            self.pool[slot] = t
-            self.pool_lock.release()
-            return slot
-
-        def place_at(self, transnum, t):
-            """place a transaction at specific pool slot"""
-            slot = transnum
-            self.pool_lock.acquire()
-            self.pool[slot] = t
-            self.pool_lock.release()
-
-        def fetch_from(self, transnum):
-            """fetches a transaction from pool"""
-            slot = transnum
-            self.pool_lock.acquire()
-            t = self.pool[slot]
-            self.pool_lock.release()
-            return t
