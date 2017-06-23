@@ -2,7 +2,6 @@ from queue import Queue, Empty
 from bbgum.frame import Action, Frame, FrameError
 from bbgum.transaction import Transaction
 from misc.slackpool import SlackPool
-import threading
 
 
 class Monitor(object):

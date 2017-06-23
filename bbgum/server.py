@@ -1,12 +1,10 @@
 from bbgum.frame import Action, Frame, FrameError
 from bbgum.monitor import Monitor
-from misc.singletoner import Singletoner
 from engine.erp import Erp
+from misc.tricks import dump_exception
 import logging
-import traceback
 import multiprocessing
 import socket
-import sys
 
 
 class BbGumServer(object):
@@ -68,9 +66,10 @@ class BbGumServer(object):
 
         erp = None
         try:
-            erp = Singletoner(Erp(logger, profile_path))
+            erp = Erp(logger, profile_path)
         except:
             logger.error("Problem upon initialization of Erp entity")
+            logger.error(dump_exception())
             return
 
         def read_socket(s):
@@ -88,6 +87,7 @@ class BbGumServer(object):
         except:
             logger.error("Problem upon initialization of Monitor entity")
             logger.debug("Closing socket")
+            logger.error(dump_exception())
             conn.close()
             return
 
@@ -99,13 +99,7 @@ class BbGumServer(object):
             logger.exception(e)
         except:
             logger.exception("Problem handling request")
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            lines = traceback.format_exception(
-                exc_type,
-                exc_value,
-                exc_traceback
-            )
-            logger.error(''.join('!! ' + line for line in lines))
+            logger.error(dump_exception())
         finally:
             logger.debug("Closing socket")
             conn.close()

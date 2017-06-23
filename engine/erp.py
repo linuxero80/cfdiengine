@@ -1,7 +1,9 @@
 from misc.factory import Factory
 from misc.tricks import dict_params
 from custom.profile import ProfileReader
+from misc.singletoner import Singletoner
 import os
+
 
 class ControllerFactory(Factory):
 
@@ -43,7 +45,7 @@ class ControllerFactory(Factory):
                 raise e
 
 
-class Erp(object):
+class Erp(metaclass=Singletoner):
 
     def __init__(self, logger, profile_path):
         self.__factory = ControllerFactory(logger, profile_path)

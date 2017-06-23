@@ -1,5 +1,5 @@
-from queue import Queue, Empty
 import threading
+
 
 class SlackPool(object):
     """pool that stores any kind of elements"""
