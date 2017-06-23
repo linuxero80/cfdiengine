@@ -8,10 +8,10 @@ class SlackPool(object):
 
     def __init__(self, **kwargs):
         try:
-            self.num_start_value = kwargs['start_value']
-            self.num_last_value = kwargs['last_value']
+            self.num_start_value = kwargs['start']
+            self.num_last_value = kwargs['last']
             self.num_increment = kwargs['increment']
-            self.max_nodes = kwargs['max']
+            self.max_nodes = kwargs['reset']
         except KeyError:
             raise Exception('one or more elements of pool have not been set')
 
@@ -19,9 +19,9 @@ class SlackPool(object):
         self.next_num = self.num_start_value
         self.pool = [None] * self.max_nodes
 
-    def destroy_at(self, transnum):
+    def destroy_at(self, slot):
         """destroy the chosen element"""
-        self.place_at(transnum, None)
+        self.place_at(slot, None)
 
     def place_smart(self, t):
         """place a element at available pool slot"""
@@ -66,16 +66,14 @@ class SlackPool(object):
         self.pool_lock.release()
         return slot
 
-    def place_at(self, transnum, t):
+    def place_at(self, slot, t):
         """place a element at specific pool slot"""
-        slot = transnum
         self.pool_lock.acquire()
         self.pool[slot] = t
         self.pool_lock.release()
 
-    def fetch_from(self, transnum):
+    def fetch_from(self, slot):
         """fetches a element from pool"""
-        slot = transnum
         self.pool_lock.acquire()
         t = self.pool[slot]
         self.pool_lock.release()

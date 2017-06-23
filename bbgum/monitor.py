@@ -13,8 +13,8 @@ class Monitor(object):
         self.conn = conn
         self.factory = factory
         self.outgoing = Queue(maxsize=0)
-        self.tp = SlackPool('start_value'=2, 'last_value'=254,
-                            'increment'=2, 'max'=256)
+        self.tp = SlackPool(start=2, last=254,
+                            increment=2, reset=256)
 
     def push_buff(self, archetype, buff, block=True):
 
