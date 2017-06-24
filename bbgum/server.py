@@ -1,6 +1,6 @@
 from bbgum.frame import Action, Frame, FrameError
 from bbgum.monitor import Monitor
-from engine.erp import Erp
+from engine.erp import ControllerFactory
 from misc.tricks import dump_exception
 import logging
 import multiprocessing
@@ -64,14 +64,6 @@ class BbGumServer(object):
         name = multiprocessing.current_process().name
         logger = logging.getLogger(name)
 
-        erp = None
-        try:
-            erp = Erp(logger, profile_path)
-        except:
-            logger.error("Problem upon initialization of Erp entity")
-            logger.error(dump_exception())
-            return
-
         def read_socket(s):
             d = conn.recv(s)
             if d == b'':
@@ -83,7 +75,8 @@ class BbGumServer(object):
 
         mon = None
         try:
-            mon = Monitor(logger, conn, erp.get_factory())
+            factory = ControllerFactory(logger, profile_path)
+            mon = Monitor(logger, conn, factory)
         except:
             logger.error("Problem upon initialization of Monitor entity")
             logger.debug("Closing socket")

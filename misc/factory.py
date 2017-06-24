@@ -15,4 +15,4 @@ class Factory(object):
 
     def incept(self, i):
         ic = self.inceptors.get(i, None)
-        return None if not ic else ic()
+        return None if ic is None else ic()

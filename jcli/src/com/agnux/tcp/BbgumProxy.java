@@ -118,7 +118,8 @@ public class BbgumProxy {
     }
 
     private ServerReply openBuffTransfer(final long size) throws SessionError {
-        // Internal command for server side's transfer manager
+        // Internal command to start
+        // server side's transfer manager (Post Mode)
         byte openPostCmdId = (byte) 0xBB;
 
         byte[] cmd = {openPostCmdId};

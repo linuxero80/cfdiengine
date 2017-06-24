@@ -28,7 +28,6 @@ class Sr(Controller, metaclass=ABCMeta):
     """
     Deals with single receive transaction's actions
     """
-#    __metaclass__ = abc.ABCMeta
 
     def __init__(self):
         pass
@@ -60,7 +59,7 @@ class Rwr(Controller, metaclass=ABCMeta):
     """
     Deals with receive with response transaction's actions
     """
-#    __metaclass__ = abc.ABCMeta
+
     IN_RECV_REQ, IN_RECV_REPLY = range(2)
 
     def __init__(self):

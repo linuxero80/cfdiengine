@@ -1,15 +1,31 @@
 from misc.factory import Factory
 from misc.tricks import dict_params
 from custom.profile import ProfileReader
-from misc.singletoner import Singletoner
+from engine.buffmediator import BuffMediator
 import os
+import json
+
+
+def do_request(req, adapter=None):
+
+    def apply_adapter():
+        if adapter is not None:
+            return adapter()
+        # So interpret request as json string
+        json_lines = req.decode(encoding='UTF-8')
+        return json.loads(json_lines)
+
+    d = apply_adapter()
+    erp_mod = d.get('module', None)
+
+
 
 
 class ControllerFactory(Factory):
-
     def __init__(self, logger, profile_path):
         super().__init__()
         self.logger = logger
+        self.bm = BuffMediator()
         pt = self.__read_settings(profile_path)
         self.__makeup_factory(pt.bbgum.controllers)
 
@@ -44,14 +60,6 @@ class ControllerFactory(Factory):
                 self.logger.fatal("{0} support library failure".format(event_mod))
                 raise e
 
-
-class Erp(metaclass=Singletoner):
-
-    def __init__(self, logger, profile_path):
-        self.__factory = ControllerFactory(logger, profile_path)
-
-    def get_factory(self):
-        return self.__factory
-
-    def facturar(self):
-        pass
+    def incept(self, i):
+        ic = self.inceptors.get(i, None)
+        return None if ic is None else ic(self.logger, self.bm)
