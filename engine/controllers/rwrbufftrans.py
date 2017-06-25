@@ -1,5 +1,6 @@
 from bbgum.controller import Rwr
 from engine.buffmediator import BuffMediator
+from engine.error import ErrorCode
 from engine.erp import do_request
 
 
@@ -10,11 +11,6 @@ class RwrBuffTrans(Rwr):
     """
     Deals with receive with response transaction's actions
     """
-
-    ERROR_CODES = {
-        'SUCCESS': 0,
-        'MODE_NOT_SUPPORTED': 101
-    }
 
     START_BUFF_TRANS_MODE_GET = b'\xAA'
     START_BUFF_TRANS_MODE_POST = b'\xBB'
@@ -30,14 +26,14 @@ class RwrBuffTrans(Rwr):
         if mode == ord(self.START_BUFF_TRANS_MODE_POST):
             data_str = buff[1:].decode(encoding='UTF-8')
             sid = self.bm.mediate(BuffMediator.IN_STREAM, int(data_str), do_request)
-            return self.ERROR_CODES['SUCCESS'], '{:02X}'.format(sid).encode()
+            return ErrorCode.SUCCESS.value, '{:02X}'.format(sid).encode()
         elif mode == ord(self.STOP_BUFF_TRANS):
             sid = buff[1]
             rc = self.bm.release(sid)
             return rc, '{:02X}'.format(sid).encode()
         else:
             # non-supported command
-            return self.ERROR_CODES['MODE_NOT_SUPPORTED'], None
+            return ErrorCode.MODE_NOT_SUPPORTED.value, None
 
     def postmortem(self, failure):
         self.logger.error(failure)

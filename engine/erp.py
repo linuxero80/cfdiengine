@@ -2,35 +2,54 @@ from misc.factory import Factory
 from misc.tricks import dict_params
 from custom.profile import ProfileReader
 from engine.buffmediator import BuffMediator
+from misc.tricks import dump_exception
+from engine.error import ErrorCode
 import os
 import json
 import sys
 
-from engine.cxc import facturar
 
-sys.path.append(
-    os.path.abspath(os.path.join(
-        os.path.dirname(__file__), "controllers")))
-
-
-def do_request(req, adapter=None):
+def do_request(logger, req, adapter=None):
+    """"""
     def apply_adapter():
         if adapter is not None:
             return adapter()
-        # So interpret request as json string
+        # So we assumed request are bytes of a json string
         json_lines = req.decode(encoding='UTF-8')
         return json.loads(json_lines)
 
     d = apply_adapter()
-    return facturar(d)
+    try:
+        business_mod = d['request']['to']
+        action = d['request']['action']
+        args = d['request']['args']
+
+        m = __import__(business_mod)
+
+        if not hasattr(m, action):
+            msg = "module {0} has no handler {1}".format(business_mod, action)
+            raise RuntimeError(msg)
+
+        handler = getattr(m, action)
+        return handler(logger, args)
+    except (ImportError, RuntimeError) as e:
+        logger.fatal("{0} support module failure".format(business_mod))
+        return ErrorCode.MOD_BUSINESS_NOT_LOADED.value
+    except:
+        logger.error(dump_exception())
+        return ErrorCode.MOD_BUSINESS_UNEXPECTED_FAIL.value
 
 
 class ControllerFactory(Factory):
     def __init__(self, logger, profile_path):
         super().__init__()
         self.logger = logger
-        self.bm = BuffMediator()
         pt = self.__read_settings(profile_path)
+        for name in ["controllers", "business"]:
+            sys.path.append(
+                os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), name)))
+        self.bm = BuffMediator(self.logger)
         self.__makeup_factory(pt.bbgum.controllers)
 
     def __read_settings(self, s_file):

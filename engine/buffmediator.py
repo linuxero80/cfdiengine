@@ -1,15 +1,16 @@
 from misc.slackpool import SlackPool
+from engine.error import ErrorCode
 
 
 class BuffMediator(object):
-
-    ERROR_CODES = {
-        'BUFF_INCOMPLETE': 102
-    }
+    """
+    Mediator to deal with buffer transfers
+    """
 
     IN_STREAM, OUT_STREAM = range(2)
 
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
         self.sp = SlackPool(start=1, last=10,
                             increment=1, reset=11)
 
@@ -26,9 +27,9 @@ class BuffMediator(object):
         m = self.sp.fetch_from(sid)
         self.sp.destroy_at(sid)
         if len(m['BUFF']) == m['SIZE']:
-            return m['ON_RELEASE'](m['BUFF'])
+            return m['ON_RELEASE'](self.logger, m['BUFF'])
         else:
-            return self.ERROR_CODES['BUFF_INCOMPLETE']
+            return ErrorCode.BUFF_INCOMPLETE.value
 
     def write(self, sid, buff):
         m = self.sp.fetch_from(sid)
