@@ -4,9 +4,13 @@ from custom.profile import ProfileReader
 from engine.buffmediator import BuffMediator
 import os
 import json
+import sys
 
 from engine.cxc import facturar
 
+sys.path.append(
+    os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "controllers")))
 
 def do_request(req, adapter=None):
 

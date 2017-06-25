@@ -3,16 +3,11 @@
 from os.path import expanduser
 from logging.handlers import TimedRotatingFileHandler
 import multiprocessing
-import os
 import traceback
 import argparse
 import logging
 import sys
 from bbgum.server import BbGumServer
-
-sys.path.append(
-    os.path.abspath(os.path.join(
-        os.path.dirname(__file__), "controllers")))
 
 
 def listener_configurer(log_path, debug):
