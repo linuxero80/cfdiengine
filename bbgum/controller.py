@@ -7,6 +7,10 @@ class Controller(object):
     Deals back and forth with transaction's actions
     """
 
+    # Success error code must be always zero
+    # upon children and even its descendants
+    SUCCESS = 0
+
     def finished(self):
         """indicates when internal state machine has finished"""
         pass
@@ -39,10 +43,10 @@ class Sr(Controller, metaclass=ABCMeta):
 
         def result_buff():
             rc = self.process_buff(act.buff)
-            return bytes([
-                ord(Frame.REPLY_PASS if rc == 0 else Frame.REPLY_FAIL),
-                rc
-            ])
+            reply = ord(
+                Frame.REPLY_PASS if rc == self.SUCCESS else Frame.REPLY_FAIL
+            )
+            return bytes([reply, rc])
 
         a = Action()
         a.archetype = Frame.reply_archetype(act.archetype)
@@ -78,13 +82,13 @@ class Rwr(Controller, metaclass=ABCMeta):
 
         def res_action(s):
             """creates action with request result code"""
+            reply = ord(
+                Frame.REPLY_PASS if s == self.SUCCESS else Frame.REPLY_FAIL
+            )
             a = Action()
             a.archetype = Frame.reply_archetype(act.archetype)
             a.transnum = act.transnum
-            a.buff = bytes([
-                ord(Frame.REPLY_PASS if s == 0 else Frame.REPLY_FAIL),
-                s
-            ])
+            a.buff = bytes([reply, s])
             return a
 
         def resp_action(d):
@@ -98,7 +102,7 @@ class Rwr(Controller, metaclass=ABCMeta):
         (status, buff) = self.process_buff(act.buff)
         mon.send(res_action(status))
 
-        if status == 0:
+        if status == self.SUCCESS:
             mon.send(resp_action(buff))
             self.current_step = self.IN_RECV_REPLY
         else:
