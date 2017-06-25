@@ -12,8 +12,8 @@ sys.path.append(
     os.path.abspath(os.path.join(
         os.path.dirname(__file__), "controllers")))
 
-def do_request(req, adapter=None):
 
+def do_request(req, adapter=None):
     def apply_adapter():
         if adapter is not None:
             return adapter()
