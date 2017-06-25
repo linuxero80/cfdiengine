@@ -3,6 +3,10 @@ from misc.slackpool import SlackPool
 
 class BuffMediator(object):
 
+    ERROR_CODES = {
+        'BUFF_INCOMPLETE': 102
+    }
+
     IN_STREAM, OUT_STREAM = range(2)
 
     def __init__(self):
@@ -14,8 +18,6 @@ class BuffMediator(object):
             'BUFF': bytearray(),
             'SENSE': sense,
             'SIZE': size,
-            'READ': 0,
-            'WRITTEN': 0,
             'ON_RELEASE': on_release
         }
         return self.sp.place_smart(m)
@@ -23,10 +25,11 @@ class BuffMediator(object):
     def release(self, sid):
         m = self.sp.fetch_from(sid)
         self.sp.destroy_at(sid)
-        return m['ON_RELEASE'](m['BUFF'])
+        if len(m['BUFF']) == m['SIZE']:
+            return m['ON_RELEASE'](m['BUFF'])
+        else:
+            return self.ERROR_CODES['BUFF_INCOMPLETE']
 
-    def write(self, sid, data):
-        self.sp.fetch_from(sid)
-
-    def read(self, sid, length):
-        self.sp.fetch_from(sid)
+    def write(self, sid, buff):
+        m = self.sp.fetch_from(sid)
+        m['BUFF'] += buff

@@ -5,6 +5,8 @@ from engine.buffmediator import BuffMediator
 import os
 import json
 
+from engine.cxc import facturar
+
 
 def do_request(req, adapter=None):
 
@@ -16,9 +18,7 @@ def do_request(req, adapter=None):
         return json.loads(json_lines)
 
     d = apply_adapter()
-    erp_mod = d.get('module', None)
-
-
+    return facturar(d)
 
 
 class ControllerFactory(Factory):

@@ -11,6 +11,11 @@ class RwrBuffTrans(Rwr):
     Deals with receive with response transaction's actions
     """
 
+    ERROR_CODES = {
+        'SUCCESS': 0,
+        'MODE_NOT_SUPPORTED': 101
+    }
+
     START_BUFF_TRANS_MODE_GET = b'\xAA'
     START_BUFF_TRANS_MODE_POST = b'\xBB'
     STOP_BUFF_TRANS = b'\xCC'
@@ -22,17 +27,17 @@ class RwrBuffTrans(Rwr):
 
     def process_buff(self, buff):
         mode = buff[0]
-        data_str = buff[1:].decode(encoding='UTF-8')
         if mode == ord(self.START_BUFF_TRANS_MODE_POST):
+            data_str = buff[1:].decode(encoding='UTF-8')
             sid = self.bm.mediate(BuffMediator.IN_STREAM, int(data_str), do_request)
-            return 0, str(sid).encode()
+            return self.ERROR_CODES['SUCCESS'], '{:02X}'.format(sid).encode()
         elif mode == ord(self.STOP_BUFF_TRANS):
-            sid = int(data_str)
+            sid = buff[1]
             rc = self.bm.release(sid)
-            return rc, str(sid).encode()
+            return rc, '{:02X}'.format(sid).encode()
         else:
             # non-supported command
-            return 1, None
+            return self.ERROR_CODES['MODE_NOT_SUPPORTED'], None
 
     def postmortem(self, failure):
         self.logger.error(failure)

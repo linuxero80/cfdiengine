@@ -1,3 +1,3 @@
 
 def facturar(req):
-    pass
+    return 0
