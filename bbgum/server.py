@@ -88,10 +88,12 @@ class BbGumServer(object):
             logger.debug("Connected %r at %r", conn, addr)
             while True:
                 mon.receive(Action(read_body(Frame.decode_header(read_header()))))
-        except (RuntimeError, FrameError) as e:
+        except (FrameError) as e:
             logger.exception(e)
+        except (RuntimeError) as e:
+            logger.warning(e)
         except:
-            logger.exception("Problem handling request")
+            logger.error("Problem handling request")
             logger.error(dump_exception())
         finally:
             logger.debug("Closing socket")
