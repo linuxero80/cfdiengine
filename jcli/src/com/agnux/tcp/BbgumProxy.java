@@ -40,10 +40,10 @@ public class BbgumProxy {
         return rc.getReplyCode();
     }
 
-    public void uploadBuff(final byte[] buff) throws BbgumProxyError {
+    public ServerReply uploadBuff(final byte[] buff) throws BbgumProxyError {
         try {
             // Run state machine to transfer the buffer
-            this.runSmBuffTransfer(buff);
+            return this.runSmBuffTransfer(buff);
         } catch (SessionError ex) {
             throw new BbgumProxyError(
                     "Unexpected protocol session error during upload: " +
@@ -55,14 +55,14 @@ public class BbgumProxy {
         }
     }
 
-    private void runSmBuffTransfer(final byte[] buff) throws SessionError, IOException {
-        ServerReply fo = openBuffTransfer(buff.length);
+    private ServerReply runSmBuffTransfer(final byte[] buff) throws SessionError, IOException {
+        ServerReply replyObt = openBuffTransfer(buff.length);
 
-        if ( fo.getReplyCode() != 0 ) {
+        if ( replyObt.getReplyCode() != 0 ) {
             throw new SessionError("It was not possible to open a buffer transfer");
         }
 
-        int transferId = this.fromBuffToInteger(fo.getReplyBuffer(), "US-ASCII");
+        int sid = this.fromBuffToInteger(replyObt.getReplyBuffer(), "US-ASCII");
         ByteArrayInputStream fin = new ByteArrayInputStream(buff);
 
         int chunkSize = Frame.ACTION_DATA_SEGMENT_MAX_LENGTH - 1;
@@ -73,16 +73,15 @@ public class BbgumProxy {
         for (;;) {
             if (chunkSize == 0) {
                 fin.close();
-                this.closeBuffTransfer(transferId);
-                break;
+                return this.closeBuffTransfer(sid);
             }
 
             byte[] pivotBuff = new byte[chunkSize];
             fin.read(pivotBuff);
-            int resolution = this.writeBuffTransfer(transferId, pivotBuff);
+            int resolution = this.writeBuffTransfer(sid, pivotBuff);
             if ( resolution != 0) {
                 fin.close();
-                this.closeBuffTransfer(transferId);
+                this.closeBuffTransfer(sid);
                 throw new SessionError("Server side experimenting issues when writing");
             }
 
@@ -142,7 +141,7 @@ public class BbgumProxy {
         throw new SessionError("Buffer is too big for action data segment");
     }
 
-    private int closeBuffTransfer(final int transferId) throws SessionError {
+    private ServerReply closeBuffTransfer(final int transferId) throws SessionError {
         // Internal command for server side's transfer manager
         byte closeCmdId = (byte) 0xCC;
 
@@ -153,7 +152,6 @@ public class BbgumProxy {
         buff = new byte[id.length + cmd.length];
         System.arraycopy(cmd, 0, buff, 0, cmd.length);
         System.arraycopy(id, 0, buff, 1, id.length);
-        ServerReply sr = this.session.pushBuffer(EVENT_BUFFER_TRANSFER, buff , true);
-        return sr.getReplyCode();
+        return this.session.pushBuffer(EVENT_BUFFER_TRANSFER, buff , true);
     }
 }

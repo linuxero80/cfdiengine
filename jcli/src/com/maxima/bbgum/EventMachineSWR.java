@@ -90,7 +90,12 @@ public abstract class EventMachineSWR implements EventController {
         int rc = 0;
         byte ack = action.getBuffer()[0];
         byte reason = action.getBuffer()[1];
-        if ( ack == Frame.DAT_NAK ) rc = reason;
+        if ( ack == Frame.DAT_NAK ) {
+            // Java does not allow to express 255 as a byte value, as would C.
+            // To express positive integers above Byte.MAX_VALUE (127)
+            // you have to use an other integer type.
+            rc = reason & 0xff;
+        }
         return rc;
     }
 
