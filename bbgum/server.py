@@ -5,12 +5,14 @@ from misc.tricks import dump_exception
 import logging
 import multiprocessing
 import socket
+import time
 
 
 class BbGumServer(object):
 
     __HOST = ''  # Symbolic name meaning all available interfaces
     __QCON_MAX = 5  # Maximum number of queued connections
+    __WORKERS = __QCON_MAX
 
     def __init__(self, queue, profile_path, port):
         self.queue = queue
@@ -27,17 +29,27 @@ class BbGumServer(object):
             self.socket.listen(self.__QCON_MAX)
 
         def spawner():
+            self.ps = [
+                multiprocessing.Process(
+                    target=self.conn_delegate, args=(
+                        self.socket, self.profile_path,
+                        self.queue, self.conn_logconf, debug
+                    )
+                ) for i in range(self.__WORKERS)
+            ]
+
+            for p in self.ps:
+                p.daemon = True
+                p.start()
+                print("Started process %r", p)
+
             print('Use Control-C to exit')
+
             while True:
-                conn, address = self.socket.accept()
-                print("Got connection")
-                process = multiprocessing.Process(
-                    target=self.conn_delegate, args=(conn, address, self.profile_path,
-                                                     self.queue, self.conn_logconf, debug))
-                process.daemon = True
-                process.start()
-                self.ps.append(process)
-                print("Started process %r", process)
+                try:
+                    time.sleep(10)
+                except:
+                    break
 
         def shutdown():
             print("Shutting down")
@@ -57,47 +69,51 @@ class BbGumServer(object):
         finally:
             shutdown()
 
-    def conn_delegate(self, conn, addr, profile_path, queue, configurer, debug):
+    def conn_delegate(self, socket, profile_path, queue, configurer, debug):
         """deals with an active connection"""
 
         configurer(queue, debug)
         name = multiprocessing.current_process().name
         logger = logging.getLogger(name)
 
-        def read_socket(s):
-            d = conn.recv(s)
-            if d == b'':
-                raise RuntimeError("socket connection broken")
-            return d
+        while True:
+            conn, addr = socket.accept()
+            logger.info("Got connection")
 
-        read_header = lambda: read_socket(Frame.FRAME_HEADER_LENGTH)
-        read_body = lambda hs: read_socket(hs)
+            def read_socket(s):
+                d = conn.recv(s)
+                if d == b'':
+                    raise RuntimeError("socket connection broken")
+                return d
 
-        mon = None
-        try:
-            factory = ControllerFactory(logger, profile_path)
-            mon = Monitor(logger, conn, factory)
-        except:
-            logger.error("Problem upon initialization of Monitor entity")
-            logger.debug("Closing socket")
-            logger.error(dump_exception())
-            conn.close()
-            return
+            read_header = lambda: read_socket(Frame.FRAME_HEADER_LENGTH)
+            read_body = lambda hs: read_socket(hs)
 
-        try:
-            logger.debug("Connected %r at %r", conn, addr)
-            while True:
-                mon.receive(Action(read_body(Frame.decode_header(read_header()))))
-        except (FrameError) as e:
-            logger.exception(e)
-        except (RuntimeError) as e:
-            logger.warning(e)
-        except:
-            logger.error("Problem handling request")
-            logger.error(dump_exception())
-        finally:
-            logger.debug("Closing socket")
-            conn.close()
+            mon = None
+            try:
+                factory = ControllerFactory(logger, profile_path)
+                mon = Monitor(logger, conn, factory)
+            except:
+                logger.error("Problem upon initialization of Monitor entity")
+                logger.debug("Closing socket")
+                logger.error(dump_exception())
+                conn.close()
+                return
+
+            try:
+                logger.debug("Connected %r at %r", conn, addr)
+                while True:
+                    mon.receive(Action(read_body(Frame.decode_header(read_header()))))
+            except (FrameError) as e:
+                logger.exception(e)
+            except (RuntimeError) as e:
+                logger.warning(e)
+            except:
+                logger.error("Problem handling request")
+                logger.error(dump_exception())
+            finally:
+                logger.debug("Closing socket")
+                conn.close()
 
     def conn_logconf(self, queue, debug):
         h = logging.handlers.QueueHandler(queue)
