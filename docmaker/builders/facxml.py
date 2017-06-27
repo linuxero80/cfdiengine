@@ -212,9 +212,9 @@ class FacXml(BuilderGen):
         rowset = []
         for row in self.pg_query(conn, SQL):
             rowset.append({
-                'IVA_ID' : row['id'],
-                'IVA_DESC': row['titulo'],
-                'IVA_TASA': row['tasa']
+                'ID' : row['id'],
+                'DESC': row['titulo'],
+                'TASA': row['tasa']
             })
         return rowset
 
@@ -228,9 +228,9 @@ class FacXml(BuilderGen):
         rowset = []
         for row in self.pg_query(conn, SQL):
             rowset.append({
-                'IEPS_ID' : row['id'],
-                'IEPS_DESC': row['titulo'],
-                'IEPS_TASA': row['tasa']
+                'ID' : row['id'],
+                'DESC': row['titulo'],
+                'TASA': row['tasa']
             })
         return rowset
 
