@@ -222,14 +222,19 @@ class FacXml(BuilderGen):
         '''
         Consulta el total de lo IEPS activos en dbms
         '''
-        SQL = """SELECT id, titulo, tasa
-            FROM gral_ieps
-            WHERE borrado_logico=false """
+        SQL = """SELECT gral_ieps.id as id,
+            gral_ieps.titulo as desc, gral_ieps.tasa as tasa
+            FROM gral_suc AS SUC
+            LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
+            LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
+            LEFT JOIN gral_ieps ON gral_ieps.gral_emp_id = EMP.id
+            WHERE gral_ieps.borrado_logico=false AND
+            USR_SUC.gral_usr_id="""
         rowset = []
-        for row in self.pg_query(conn, SQL):
+        for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             rowset.append({
                 'ID' : row['id'],
-                'DESC': row['titulo'],
+                'DESC': row['desc'],
                 'TASA': row['tasa']
             })
         return rowset
