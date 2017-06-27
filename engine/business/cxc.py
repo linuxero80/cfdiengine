@@ -18,5 +18,5 @@ def facturar(logger, pt, req):
             logger.error(dump_exception)
             return ErrorCode.DOCMAKER_ERROR
 
-    rc = dm_exec(req.get(usr_id, None), req.get(prefact_id, None))
+    rc = dm_exec(req.get('usr_id', None), req.get('prefact_id', None))
     return rc.value
