@@ -132,7 +132,8 @@ class FacXml(BuilderGen):
             (erp_prefacturas_detalles.valor_ieps * 100::double precision) AS tasa_ieps,
             (erp_prefacturas_detalles.tasa_ret * 100::double precision) AS tasa_ret,
             (erp_prefacturas_detalles.valor_imp * 100::double precision) AS tasa_impuesto,
-            erp_prefacturas_detalles.tipo_impuesto_id
+            erp_prefacturas_detalles.gral_ieps_id as ieps_id,
+            erp_prefacturas_detalles.tipo_impuesto_id as impto_id
             FROM erp_prefacturas
             JOIN erp_prefacturas_detalles on erp_prefacturas_detalles.prefacturas_id=erp_prefacturas.id
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
@@ -154,7 +155,8 @@ class FacXml(BuilderGen):
                 'TASA_IEPS': row['tasa_ieps'],
                 'TASA_RETENCION': row['tasa_ret'],
                 'TASA_IMPUESTO': row['tasa_impuesto'],
-                'TIPO_IMPUESTO_ID': row['tipo_impuesto_id']
+                'IEPS_ID': row['ieps_id'],
+                'IMPUESTO_ID': row['impto_id']
             })
         return rowset
 
@@ -169,8 +171,8 @@ class FacXml(BuilderGen):
             tasa = None
             importe_sum = 0
             for item in l_items:
-                if tax['ID'] == item['IMPTO_ID']:
-                    impto_id = item['IMPTO_ID']
+                if tax['ID'] == item['IMPUESTO_ID']:
+                    impto_id = item['IMPUESTO_ID']
                     tasa = item['TASA_IMPUESTO']
                     importe_sum += item['IMPORTE_IMPUESTO']
             if impto_id > 0:
