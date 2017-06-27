@@ -62,7 +62,6 @@ class ProfileReader(object):
             try:
                 json_lines = open(p_file_path).read()
                 parsed_json = json.loads(json_lines)
-                parsed_json['engine_profile']['source'] = p_file_path
                 return parsed_json['engine_profile']
             except (KeyError, OSError, IOError) as e:
                 self.__logger.error(e)
@@ -72,7 +71,9 @@ class ProfileReader(object):
                 raise
 
         try:
-            return ProfileTree(parse_profile())
+            prof = parse_profile()
+            prof['source'] = p_file_path
+            return ProfileTree(prof)
         except:
             raise
 
