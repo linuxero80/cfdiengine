@@ -9,7 +9,7 @@ import json
 import sys
 
 
-def do_request(logger, req, adapter=None):
+def do_request(logger, pt, req, adapter=None):
     """"""
     def apply_adapter():
         if adapter is not None:
@@ -31,7 +31,7 @@ def do_request(logger, req, adapter=None):
             raise RuntimeError(msg)
 
         handler = getattr(m, action)
-        return handler(logger, args)
+        return handler(logger, pt, args)
     except (ImportError, RuntimeError) as e:
         logger.fatal("{0} support module failure".format(business_mod))
         return ErrorCode.MOD_BUSINESS_NOT_LOADED.value
