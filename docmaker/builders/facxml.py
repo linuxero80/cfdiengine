@@ -167,8 +167,8 @@ class FacXml(BuilderGen):
         for tax in l_iva:
             # next two variables shall get lastest value of loop
             # It's not me. It is the Noe approach :|
-            impto_id = None
-            tasa = None
+            impto_id = 0
+            tasa = 0
             importe_sum = 0
             for item in l_items:
                 if tax['ID'] == item['IMPUESTO_ID']:
@@ -185,9 +185,8 @@ class FacXml(BuilderGen):
         for tax in l_ieps:
             # next two variables shall get lastest value of loop
             # It's not me. It is the Noe approach :|
-            impto_id = None
-            tasa = None
-
+            impto_id = 0
+            tasa = 0
             importe_sum = 0
             for item in l_items:
                 if tax['ID'] == item['IEPS_ID']:
@@ -271,6 +270,10 @@ class FacXml(BuilderGen):
             content = f.read()
             certb64 = base64.b64encode(content).decode('ascii')
 
+        conceptos = self.__q_conceptos(conn, prefact_id)
+        self.__calc_traslados(conceptos,
+            self.__q_ieps(conn, usr_id), self.__q_ivas(conn))
+
         return {
             'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
             'CERT_B64': certb64,
@@ -279,7 +282,7 @@ class FacXml(BuilderGen):
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
             'MONEDA': self.__q_moneda(conn, prefact_id),
             'LUGAR_EXPEDICION': self.__q_lugar_expedicion(conn, usr_id),
-            'CONCEPTOS': self.__q_conceptos(conn, prefact_id)
+            'CONCEPTOS': conceptos
         }
 
 
