@@ -49,7 +49,7 @@ class ControllerFactory(Factory):
             sys.path.append(
                 os.path.abspath(os.path.join(
                     os.path.dirname(__file__), name)))
-        self.bm = BuffMediator(self.logger)
+        self.bm = BuffMediator(self.logger, pt)
         self.__makeup_factory(pt.bbgum.controllers)
 
     def __read_settings(self, s_file):

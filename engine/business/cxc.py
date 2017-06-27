@@ -3,7 +3,7 @@ from misc.tricks import dump_exception
 from engine.error import ErrorCode
 
 
-def facturar(logger, req):
+def facturar(logger, pt, req):
 
     def dm_exec(usr_id, prefact_id):
         dm_builder = 'facxml'

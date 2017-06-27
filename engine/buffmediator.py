@@ -9,8 +9,9 @@ class BuffMediator(object):
 
     IN_STREAM, OUT_STREAM = range(2)
 
-    def __init__(self, logger):
+    def __init__(self, logger, pt):
         self.logger = logger
+        self.pt = pt
         self.sp = SlackPool(start=1, last=10,
                             increment=1, reset=11)
 
@@ -27,7 +28,7 @@ class BuffMediator(object):
         m = self.sp.fetch_from(sid)
         self.sp.destroy_at(sid)
         if len(m['BUFF']) == m['SIZE']:
-            return m['ON_RELEASE'](self.logger, m['BUFF'])
+            return m['ON_RELEASE'](self.logger, self.pt, m['BUFF'])
         else:
             return ErrorCode.BUFF_INCOMPLETE.value
 
