@@ -160,6 +160,15 @@ class FacXml(BuilderGen):
             })
         return rowset
 
+    def __calc_totales(self, l_items):
+        totales = {'TOTAL': 0, 'IMPORTE_SUM': 0,
+            'IMPORTE_SUM_IMPUESTO': 0, 'IMPORTE_SUM_IEPS': 0}
+        for item in l_items:
+            totales['IMPORTE_SUM'] += item['IMPORTE']
+            totales['IMPORTE_SUM_IMPUESTO'] += item['IMPORTE_IMPUESTO']
+            totales['IMPORTE_SUM_IEPS'] += item['IMPORTE_IEPS']
+        return totales
+
     def __calc_traslados(self, l_items, l_ieps, l_iva):
         """calcula los impuestos trasladados"""
         traslados = []
