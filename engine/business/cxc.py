@@ -2,6 +2,12 @@ from docmaker.pipeline import DocPipeLine
 from misc.tricks import dump_exception
 from engine.error import ErrorCode
 
+def __setup_dm(logger, pt):
+    resdir = os.path.abspath(
+        os.path.dirname(pt.source), os.pardir))
+    return DocPipeLine(logger, resdir,
+        rdirs_conf = pt.res.dirs,
+        pgsql_conf = pt.dbms.pgsql_conn)
 
 def facturar(logger, pt, req):
 
@@ -9,9 +15,7 @@ def facturar(logger, pt, req):
         dm_builder = 'facxml'
         kwargs = {'usr_id': usr_id, 'prefact_id': prefact_id}
         try:
-            dpl = DocPipeLine(logger, resdir,
-                rdirs_conf = pt.res.dirs,
-                pgsql_conf = pt.dbms.pgsql_conn)
+            dpl __setup_dm(logger, pt)
             dpl.run(dm_builder, args.dm_output, **kwargs)
             return ErrorCode.SUCCESS
         except:

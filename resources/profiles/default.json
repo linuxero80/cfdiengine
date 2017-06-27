@@ -1,5 +1,5 @@
 {
-    "cfdi_engine_profile": {
+    "engine_profile": {
         "dbms": {
             "pgsql_conn": {
                 "host" : "localhost",
