@@ -161,12 +161,17 @@ class FacXml(BuilderGen):
         return rowset
 
     def __calc_totales(self, l_items):
-        totales = {'TOTAL': 0, 'IMPORTE_SUM': 0,
-            'IMPORTE_SUM_IMPUESTO': 0, 'IMPORTE_SUM_IEPS': 0}
+        totales = {
+            'TOTAL': 0, 'IMPORTE_SUM': 0,
+            'IMPORTE_SUM_IMPUESTO': 0,
+            'IMPORTE_SUM_IEPS': 0,
+            'IMPORTE_SUM_RETENCION': 0
+        }
         for item in l_items:
             totales['IMPORTE_SUM'] += item['IMPORTE']
             totales['IMPORTE_SUM_IMPUESTO'] += item['IMPORTE_IMPUESTO']
             totales['IMPORTE_SUM_IEPS'] += item['IMPORTE_IEPS']
+            totales['IMPORTE_SUM_RETENCION'] += item['IMPORTE_RETENCION']
         return totales
 
     def __calc_traslados(self, l_items, l_ieps, l_iva):
@@ -280,6 +285,7 @@ class FacXml(BuilderGen):
             certb64 = base64.b64encode(content).decode('ascii')
 
         conceptos = self.__q_conceptos(conn, prefact_id)
+        self.__calc_totales(conceptos)
         self.__calc_traslados(conceptos,
             self.__q_ieps(conn, usr_id), self.__q_ivas(conn))
 
