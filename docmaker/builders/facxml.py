@@ -158,6 +158,48 @@ class FacXml(BuilderGen):
             })
         return rowset
 
+    def __calc_traslados(self, l_items, l_ieps, l_iva):
+        """calcula los impuestos trasladados"""
+        traslados = []
+
+        for tax in l_iva:
+            # next two variables shall get lastest value of loop
+            # It's not me. It is the Noe approach :|
+            impto_id = None
+            tasa = None
+            importe_sum = 0
+            for item in l_items:
+                if tax['ID'] == item['IMPTO_ID']:
+                    impto_id = item['IMPTO_ID']
+                    tasa = item['TASA_IMPUESTO']
+                    importe_sum += item['IMPORTE_IMPUESTO']
+            if impto_id > 0:
+                traslados.append({
+                    'impuesto': 'IVA',
+                    'importe': importe_sum,
+                    'tasa': tasa
+                })
+
+        for tax in l_ieps:
+            # next two variables shall get lastest value of loop
+            # It's not me. It is the Noe approach :|
+            impto_id = None
+            tasa = None
+
+            importe_sum = 0
+            for item in l_items:
+                if tax['ID'] == item['IEPS_ID']:
+                    impto_id = item['IEPS_ID']
+                    tasa = item['TASA_IEPS']
+                    importe_sum += item['IMPORTE_IEPS']
+            if impto_id > 0:
+                traslados.append({
+                    'impuesto': 'IEPS',
+                    'importe': importe_sum,
+                    'tasa': tasa
+                })
+        return traslados
+
     def __q_ivas(self, conn):
         '''
         Consulta el total de IVA activos en dbms
