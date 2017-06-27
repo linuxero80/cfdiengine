@@ -162,12 +162,16 @@ class FacXml(BuilderGen):
 
     def __calc_totales(self, l_items):
         totales = {
-            'TOTAL': 0, 'IMPORTE_SUM': 0,
+            'MONTO_TOTAL': 0,
+            'IMPORTE_SUM': 0,
             'IMPORTE_SUM_IMPUESTO': 0,
             'IMPORTE_SUM_IEPS': 0,
             'IMPORTE_SUM_RETENCION': 0
         }
         for item in l_items:
+            for label in ['IMPORTE', 'IMPORTE_IMPUESTO',
+                          'IMPORTE_IEPS','IMPORTE_RETENCION']:
+                totales['MONTO_TOTAL'] += item[label]
             totales['IMPORTE_SUM'] += item['IMPORTE']
             totales['IMPORTE_SUM_IMPUESTO'] += item['IMPORTE_IMPUESTO']
             totales['IMPORTE_SUM_IEPS'] += item['IMPORTE_IEPS']
@@ -285,8 +289,7 @@ class FacXml(BuilderGen):
             certb64 = base64.b64encode(content).decode('ascii')
 
         conceptos = self.__q_conceptos(conn, prefact_id)
-        self.__calc_totales(conceptos)
-        self.__calc_traslados(conceptos,
+        traslados = self.__calc_traslados(conceptos,
             self.__q_ieps(conn, usr_id), self.__q_ivas(conn))
 
         return {
@@ -297,7 +300,8 @@ class FacXml(BuilderGen):
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
             'MONEDA': self.__q_moneda(conn, prefact_id),
             'LUGAR_EXPEDICION': self.__q_lugar_expedicion(conn, usr_id),
-            'CONCEPTOS': conceptos
+            'CONCEPTOS': conceptos,
+            'TOTALES': self.__calc_totales(conceptos)
         }
 
 
@@ -311,7 +315,7 @@ class FacXml(BuilderGen):
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = dat['CERT_B64']
         c.SubTotal = "4180.0"
-        c.Total = "4848.80"
+        c.Total = dat['TOTALES']['MONTO_TOTAL']
         c.Moneda = dat['MONEDA']['ISO_4217']
         c.TipoCambio = dat['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
