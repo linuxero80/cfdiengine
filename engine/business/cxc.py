@@ -15,7 +15,7 @@ def facturar(logger, pt, req):
             dpl.run(dm_builder, args.dm_output, **kwargs)
             return ErrorCode.SUCCESS
         except:
-            logger.error(dump_exception)
+            logger.error(dump_exception())
             return ErrorCode.DOCMAKER_ERROR
 
     rc = dm_exec(req.get('usr_id', None), req.get('prefact_id', None))
