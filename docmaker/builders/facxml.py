@@ -163,19 +163,25 @@ class FacXml(BuilderGen):
     def __calc_totales(self, l_items):
         totales = {
             'MONTO_TOTAL': 0,
+            'MONTO_RETENCION': 0,
             'IMPORTE_SUM': 0,
             'IMPORTE_SUM_IMPUESTO': 0,
             'IMPORTE_SUM_IEPS': 0,
             'IMPORTE_SUM_RETENCION': 0
         }
         for item in l_items:
-            for label in ['IMPORTE', 'IMPORTE_IMPUESTO',
-                          'IMPORTE_IEPS','IMPORTE_RETENCION']:
-                totales['MONTO_TOTAL'] += item[label]
             totales['IMPORTE_SUM'] += item['IMPORTE']
             totales['IMPORTE_SUM_IMPUESTO'] += item['IMPORTE_IMPUESTO']
             totales['IMPORTE_SUM_IEPS'] += item['IMPORTE_IEPS']
             totales['IMPORTE_SUM_RETENCION'] += item['IMPORTE_RETENCION']
+
+            totales['MONTO_RETENCION'] += item['IMPORTE'] * item['TASA_RETENCION']
+            for label in ['IMPORTE', 'IMPORTE_IMPUESTO', 'IMPORTE_IEPS']:
+                totales['MONTO_TOTAL'] += item[label]
+
+        totales['MONTO_TOTAL'] -= totales['MONTO_RETENCION']
+        totales['MONTO_RETENCION'] += totales['IMPORTE_SUM_RETENCION']
+
         return totales
 
     def __calc_traslados(self, l_items, l_ieps, l_iva):
