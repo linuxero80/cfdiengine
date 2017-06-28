@@ -320,7 +320,7 @@ class FacXml(BuilderGen):
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = dat['CERT_B64']
-        c.SubTotal = "4180.0"
+        c.SubTotal = dat['TOTALES']['IMPORTE_SUM']
         c.Total = dat['TOTALES']['MONTO_TOTAL']
         c.Moneda = dat['MONEDA']['ISO_4217']
         c.TipoCambio = dat['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
@@ -341,13 +341,13 @@ class FacXml(BuilderGen):
         c.Conceptos = pyxb.BIND()
         for i in dat['CONCEPTOS']:
             c.Conceptos.append(pyxb.BIND(
-                Cantidad = 1, #i['CANTIDAD'],
-                ClaveUnidad='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
-                ClaveProdServ='01010101', # se deben usar las claves del catalogo sat producto-servicios
-                Descripcion=i['DESCRIPCION'],
+                Cantidad = 1, # i['CANTIDAD'],
+                ClaveUnidad ='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
+                ClaveProdServ ='01010101', # se deben usar las claves del catalogo sat producto-servicios
+                Descripcion =i['DESCRIPCION'],
                 ValorUnitario = i['PRECIO_UNITARIO'],
                 NoIdentificacion = i['SKU'], #opcional
-                Importe='50' # #i['IMPORTE']
+                Importe = i['IMPORTE']
             ))
 
         writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS, output_file)
