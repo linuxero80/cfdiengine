@@ -320,7 +320,7 @@ class FacXml(BuilderGen):
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = dat['CERT_B64']
-        c.SubTotal = "4180.0"
+        c.SubTotal = dat['TOTALES']['IMPORTE_SUM']
         c.Total = dat['TOTALES']['MONTO_TOTAL']
         c.Moneda = dat['MONEDA']['ISO_4217']
         c.TipoCambio = dat['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
