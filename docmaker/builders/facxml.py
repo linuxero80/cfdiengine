@@ -270,8 +270,7 @@ class FacXml(BuilderGen):
         SQL = """SELECT fac_cfds_conf.password_llave as passwd
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
-            LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
-            LEFT JOIN fac_cfds_conf ON fac_cfds_conf.empresa_id = EMP.id
+            LEFT JOIN fac_cfds_conf ON fac_cfds_conf.gral_suc_id = SUC.id
             WHERE USR_SUC.gral_usr_id="""
         for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             # Just taking first row of query result
