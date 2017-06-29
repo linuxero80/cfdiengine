@@ -7,15 +7,17 @@ import os
 
 def facturar(logger, pt, req):
 
-    def dm_exec(resdir, usr_id, prefact_id):
+    def dm_exec(filename, resdir, usr_id, prefact_id):
+        if filename is None:
+            return ErrorCode.REQUEST_INCOMPLETE
+
         dm_builder = 'facxml'
-        dm_output = '/tmp/text.xml'
         kwargs = {'usr_id': usr_id, 'prefact_id': prefact_id}
         try:
             dpl = DocPipeLine(logger, resdir,
                 rdirs_conf = pt.res.dirs,
                 pgsql_conf = pt.dbms.pgsql_conn)
-            dpl.run(dm_builder, dm_output, **kwargs)
+            dpl.run(dm_builder, filename, **kwargs)
             return ErrorCode.SUCCESS
         except:
             logger.error(dump_exception())
@@ -28,6 +30,6 @@ def facturar(logger, pt, req):
                 os.path.dirname(source), os.pardir))
     logger.info(
         'Passing to docmaker as resources directory {}'.format(resdir))
-    rc = dm_exec(resdir, req.get('usr_id', None),
+    rc = dm_exec(req.get('filename', None), resdir, req.get('usr_id', None),
                        req.get('prefact_id', None))
     return rc.value

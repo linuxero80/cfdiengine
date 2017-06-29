@@ -1,3 +1,4 @@
+import os
 import base64
 import datetime
 import pyxb
@@ -288,6 +289,7 @@ class FacXml(BuilderGen):
         ed = self.__q_emisor(conn, usr_id)
         cert_file = '{}/{}/{}'.format(
                 d_rdirs['ssl'], ed['RFC'], self.__q_cert_file(conn, usr_id))
+        output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
 
         certb64 = None
         with open(cert_file, 'rb') as f:
@@ -307,7 +309,8 @@ class FacXml(BuilderGen):
             'MONEDA': self.__q_moneda(conn, prefact_id),
             'LUGAR_EXPEDICION': self.__q_lugar_expedicion(conn, usr_id),
             'CONCEPTOS': conceptos,
-            'TOTALES': self.__calc_totales(conceptos)
+            'TOTALES': self.__calc_totales(conceptos),
+            'OUTPUT_DIR': output_dir
         }
 
 
@@ -350,7 +353,8 @@ class FacXml(BuilderGen):
                 Importe = i['IMPORTE']
             ))
 
-        writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS, output_file)
+        writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS,
+                 os.path.join(dat['OUTPUT_DIR'], output_file))
 
     def data_rel(self, dat):
         pass
