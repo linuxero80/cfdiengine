@@ -308,6 +308,7 @@ class FacXml(BuilderGen):
 
         output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
         sslrfc_dir = os.path.join(d_rdirs['ssl'], ed['RFC'])
+        xslt_dir = os.path.join(d_rdirs['cfdi_xslt'], ed['RFC'])
 
         cert_file = os.path.join(
                        sslrfc_dir, self.__q_cert_file(conn, usr_id))
