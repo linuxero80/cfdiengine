@@ -342,6 +342,8 @@ class FacXml(BuilderGen):
 
 
     def format_wrt(self, output_file, dat):
+        self.logger.debug('dumping contents of dat: {}'.format(repr(dat)))
+
         c = Comprobante()
         c.Version = '3.3'
         c.Folio = "test attribute" #optional
