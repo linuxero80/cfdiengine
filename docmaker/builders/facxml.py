@@ -263,7 +263,7 @@ class FacXml(BuilderGen):
             })
         return rowset
 
-    def __q_key_passwd(self, conn, usr_id):
+    def __q_pk_attrs(self, conn, usr_id):
         '''
         Consulta el password de la llave privada en dbms
         '''
@@ -304,10 +304,13 @@ class FacXml(BuilderGen):
             raise DocBuilderStepError("prefact id not fed")
 
         ed = self.__q_emisor(conn, usr_id)
-        cert_file = '{}/{}/{}'.format(
-                d_rdirs['ssl'], ed['RFC'], self.__q_cert_file(conn, usr_id))
-        output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
+        pk = self.__q_pk_attrs(conn, usr_id)
 
+        output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
+        sslrfc_dir = os.path.join(d_rdirs['ssl'], ed['RFC'])
+
+        cert_file = os.path.join(
+                       sslrfc_dir, self.__q_cert_file(conn, usr_id))
         certb64 = None
         with open(cert_file, 'rb') as f:
             content = f.read()
@@ -320,7 +323,8 @@ class FacXml(BuilderGen):
         return {
             'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
             'CERT_B64': certb64,
-            'KEY_PRIVATE': self.__q_key_passwd(conn, usr_id)
+            'KEY_PRIVATE': os.path.join(sslrfc_dir, pk['FILENAME']),
+            'KEY_PASSWD': pk['PASSWD'],
             'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
@@ -365,7 +369,7 @@ class FacXml(BuilderGen):
                 Cantidad = 1, # i['CANTIDAD'],
                 ClaveUnidad ='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
                 ClaveProdServ ='01010101', # se deben usar las claves del catalogo sat producto-servicios
-                Descripcion =i['DESCRIPCION'],
+                Descripcion = i['DESCRIPCION'],
                 ValorUnitario = i['PRECIO_UNITARIO'],
                 NoIdentificacion = i['SKU'], #opcional
                 Importe = i['IMPORTE']
