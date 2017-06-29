@@ -15,17 +15,24 @@ public class Session extends Thread {
     private Deque<Frame> writeChunks;
     private Object outGoingMutex;
     private Monitor mon;
+    private boolean stopFlag;
 
-    public Session(final String serverAddress, final int port, BasicFactory<Byte, EventController> factory) throws IOException {
-        this(new Socket(serverAddress, port), factory);
-    }
-
-    public Session(Socket socket, BasicFactory<Byte, EventController> factory) {
-        this.socket = socket;
+    public Session(BasicFactory<Byte, EventController> factory){
         this.writeChunks = new LinkedList<Frame>();
         this.outGoingMutex = new Object();
         this.mon = new Monitor(this, factory);
+    }
+
+    public void connect(final String serverAddress, final int port) throws IOException{
+        this.socket = new Socket(serverAddress, port);
+        this.stopFlag = false;
         this.start();
+    }
+
+    public void disconnect() throws IOException {
+        // Way to take over readHeadHandler in its thread
+        this.stopFlag = true;
+        this.socket.close();
     }
 
     @Override
@@ -40,12 +47,15 @@ public class Session extends Thread {
                     break;
                 }
             } catch (Exception ex) {
-                Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, ex);
                 try {
                     is.close();
                 } catch (IOException e) {
                     Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, e);
                 }
+
+                if (this.stopFlag) return;
+
+                Logger.getLogger(Session.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
     }
@@ -143,8 +153,7 @@ public class Session extends Thread {
         } catch (IOException ex) {
             String msg = "Problems ocurried when reading"
                     + " frame header from socket";
-            Logger.getLogger(Session.class.getName()).log(Level.SEVERE, null, msg);
-            throw new SessionError(ex.getMessage());
+            throw new SessionError(msg);
         }
 
         if (res < 0) rc = res;

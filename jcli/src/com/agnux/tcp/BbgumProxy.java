@@ -5,6 +5,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BbgumProxy {
 
@@ -13,34 +15,22 @@ public class BbgumProxy {
     public static final byte EVENT_HELLO = (byte) 0x30;
     private Session session;
 
-    public BbgumProxy(final String serverAddress, final int port) throws BbgumProxyError {
+    public BbgumProxy() throws BbgumProxyError {
         BasicFactory<Byte, EventController> factory = new BasicFactory<Byte, EventController>();
         factory.subscribe(EVENT_POST_RAW_BUFFER, PostRawBuffer.class);
         factory.subscribe(EVENT_BUFFER_TRANSFER, BufferTransfer.class);
-        factory.subscribe(EVENT_HELLO, Hello.class);
+        this.session = new Session(factory);
+    }
+
+
+    public ServerReply uploadBuff(final String serverAddress, final int port, final byte[] buff) throws BbgumProxyError {
         try {
-            this.session = new Session(serverAddress, port, factory);
+            this.session.connect(serverAddress, port);
         } catch (IOException ex) {
             throw new BbgumProxyError(
-                    "The session with server could not be established: " +
+                    "protocol session connection not completed: " +
                     ex.toString());
         }
-    }
-
-    public int sayHello() throws BbgumProxyError {
-        ServerReply rc = null;
-        try {
-            byte[] data = "HELLO".getBytes("US-ASCII");
-            rc = this.session.pushBuffer(EVENT_HELLO, data, true);
-        } catch (Exception ex) {
-            throw new BbgumProxyError(
-                    "Unexpected protocol session error when saying hello: " +
-                    ex.toString());
-        }
-        return rc.getReplyCode();
-    }
-
-    public ServerReply uploadBuff(final byte[] buff) throws BbgumProxyError {
         try {
             // Run state machine to transfer the buffer
             return this.runSmBuffTransfer(buff);
@@ -52,6 +42,15 @@ public class BbgumProxy {
             throw new BbgumProxyError(
                     "Unexpected IO error during upload: " +
                     ex.toString());
+        }
+        finally {
+            try {
+                this.session.disconnect();
+            } catch (IOException ex) {
+                throw new BbgumProxyError(
+                    "protocol session disconnection not completed: " +
+                    ex.toString());
+            }
         }
     }
 
