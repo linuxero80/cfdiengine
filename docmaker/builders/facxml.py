@@ -263,12 +263,13 @@ class FacXml(BuilderGen):
             })
         return rowset
 
-    def __q_pk_attrs(self, conn, usr_id):
+    def __q_sign_params(self, conn, usr_id):
         '''
-        Consulta el password de la llave privada en dbms
+        Consulta parametros requeridos para firmado cfdi
         '''
         SQL = """SELECT fac_cfds_conf.password_llave as passwd,
-            fac_cfds_conf.archivo_llave as pk
+            fac_cfds_conf.archivo_llave as pk,
+            fac_cfds_conf.archivo_xsl as xslt
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
             LEFT JOIN fac_cfds_conf ON fac_cfds_conf.gral_suc_id = SUC.id
@@ -276,8 +277,9 @@ class FacXml(BuilderGen):
         for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             # Just taking first row of query result
             return {
-                'FILENAME': row['pk'],
-                'PASSWD': row['passwd']
+                'PKNAME': row['pk'],
+                'PKPASSWD': row['passwd'],
+                'XSLTNAME': row['xslt']
             }
 
     def __q_cert_file(self, conn, usr_id):
@@ -304,11 +306,12 @@ class FacXml(BuilderGen):
             raise DocBuilderStepError("prefact id not fed")
 
         ed = self.__q_emisor(conn, usr_id)
-        pk = self.__q_pk_attrs(conn, usr_id)
+        sp = self.__q_sign_params(conn, usr_id)
 
+        #dirs with full emisor rfc path
         output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
         sslrfc_dir = os.path.join(d_rdirs['ssl'], ed['RFC'])
-        xslt_dir = os.path.join(d_rdirs['cfdi_xslt'], ed['RFC'])
+        xsltrfc_dir = os.path.join(d_rdirs['cfdi_xslt'], ed['RFC'])
 
         cert_file = os.path.join(
                        sslrfc_dir, self.__q_cert_file(conn, usr_id))
@@ -324,8 +327,9 @@ class FacXml(BuilderGen):
         return {
             'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
             'CERT_B64': certb64,
-            'KEY_PRIVATE': os.path.join(sslrfc_dir, pk['FILENAME']),
-            'KEY_PASSWD': pk['PASSWD'],
+            'KEY_PRIVATE': os.path.join(sslrfc_dir, sp['PKNAME']),
+            'KEY_PASSWD': sp['PKPASSWD'],
+            'XSLT_SCRIPT': os.path.join(xsltrfc_dir, sp['XSLTNAME']),
             'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
