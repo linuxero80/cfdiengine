@@ -263,6 +263,20 @@ class FacXml(BuilderGen):
             })
         return rowset
 
+    def __q_key_passwd(self, conn, usr_id):
+        '''
+        Consulta el password de la llave privada en dbms
+        '''
+        SQL = """SELECT fac_cfds_conf.password_llave as passwd
+            FROM gral_suc AS SUC
+            LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
+            LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
+            LEFT JOIN fac_cfds_conf ON fac_cfds_conf.empresa_id = EMP.id
+            WHERE USR_SUC.gral_usr_id="""
+        for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
+            # Just taking first row of query result
+            return row['passwd']
+
     def __q_cert_file(self, conn, usr_id):
         '''
         Consulta el certificado que usa el usuario en dbms
@@ -303,6 +317,7 @@ class FacXml(BuilderGen):
         return {
             'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
             'CERT_B64': certb64,
+            'KEY_PASSWD': self.__q_key_passwd(conn, usr_id)
             'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
