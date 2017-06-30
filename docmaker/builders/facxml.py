@@ -3,7 +3,8 @@ import base64
 import datetime
 import pyxb
 import psycopg2.extras
-
+from docmaker.error import DocBuilderStepError
+from misc.tricks import truncate
 from docmaker.gen import BuilderGen
 from sat.v33 import Comprobante
 from sat.requirement import writedom_cfdi
@@ -31,7 +32,26 @@ class FacXml(BuilderGen):
         for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             # Just taking first row of query result
             return row['numero_certificado']
-
+        
+    def __q_serie_folio(self, conn, usr_id):
+        """
+        Consulta la serie y folio a usar en dbms
+        """
+        SQL = """select fac_cfds_conf_folios.serie as serie,
+            fac_cfds_conf_folios.folio_actual as folio 
+            FROM gral_suc AS SUC
+            LEFT JOIN fac_cfds_conf ON fac_cfds_conf.gral_suc_id = SUC.id
+            LEFT JOIN fac_cfds_conf_folios ON fac_cfds_conf_folios.fac_cfds_conf_id = fac_cfds_conf.id
+            LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
+            WHERE fac_cfds_conf_folios.proposito = 'FAC'
+            AND USR_SUC.gral_usr_id="""
+        for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
+            # Just taking first row of query result
+            return {
+                'SERIE': row['serie'],
+                'FOLIO': row['folio']
+            }
+        
     def __q_emisor(self, conn, usr_id):
         '''
         Consulta el emisor en dbms
@@ -308,7 +328,7 @@ class FacXml(BuilderGen):
         ed = self.__q_emisor(conn, usr_id)
         sp = self.__q_sign_params(conn, usr_id)
 
-        #dirs with full emisor rfc path
+        # dirs with full emisor rfc path
         output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
         sslrfc_dir = os.path.join(d_rdirs['ssl'], ed['RFC'])
         xsltrfc_dir = os.path.join(d_rdirs['cfdi_xslt'], ed['RFC'])
@@ -344,6 +364,8 @@ class FacXml(BuilderGen):
     def format_wrt(self, output_file, dat):
         self.logger.debug('dumping contents of dat: {}'.format(repr(dat)))
 
+        account_trunc = lambda m: truncate(m, 2)
+
         c = Comprobante()
         c.Version = '3.3'
         c.Folio = "test attribute" #optional
@@ -352,10 +374,10 @@ class FacXml(BuilderGen):
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = dat['CERT_B64']
-        c.SubTotal = dat['TOTALES']['IMPORTE_SUM']
-        c.Total = dat['TOTALES']['MONTO_TOTAL']
+        c.SubTotal = account_trunc(dat['TOTALES']['IMPORTE_SUM'])
+        c.Total = account_trunc(dat['TOTALES']['MONTO_TOTAL'])
         c.Moneda = dat['MONEDA']['ISO_4217']
-        c.TipoCambio = dat['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
+        c.TipoCambio = account_trunc(dat['MONEDA']['TIPO_DE_CAMBIO']) #optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
     #    c.metodoDePago = "NO IDENTIFICADO" #optional
         c.LugarExpedicion = dat['LUGAR_EXPEDICION']
