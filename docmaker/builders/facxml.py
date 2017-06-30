@@ -3,6 +3,7 @@ import base64
 import datetime
 import pyxb
 import psycopg2.extras
+from docmaker.error import DocBuilderStepError
 from misc.tricks import truncate
 from docmaker.gen import BuilderGen
 from sat.v33 import Comprobante
@@ -308,7 +309,7 @@ class FacXml(BuilderGen):
         ed = self.__q_emisor(conn, usr_id)
         sp = self.__q_sign_params(conn, usr_id)
 
-        #dirs with full emisor rfc path
+        # dirs with full emisor rfc path
         output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
         sslrfc_dir = os.path.join(d_rdirs['ssl'], ed['RFC'])
         xsltrfc_dir = os.path.join(d_rdirs['cfdi_xslt'], ed['RFC'])
