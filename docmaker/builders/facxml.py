@@ -32,7 +32,26 @@ class FacXml(BuilderGen):
         for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             # Just taking first row of query result
             return row['numero_certificado']
-
+        
+    def __q_serie_folio(self, conn, usr_id):
+        """
+        Consulta la serie y folio a usar en dbms
+        """
+        SQL = """select fac_cfds_conf_folios.serie as serie,
+            fac_cfds_conf_folios.folio_actual as folio 
+            FROM gral_suc AS SUC
+            LEFT JOIN fac_cfds_conf ON fac_cfds_conf.gral_suc_id = SUC.id
+            LEFT JOIN fac_cfds_conf_folios ON fac_cfds_conf_folios.fac_cfds_conf_id = fac_cfds_conf.id
+            LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
+            WHERE fac_cfds_conf_folios.proposito = 'FAC'
+            AND USR_SUC.gral_usr_id="""
+        for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
+            # Just taking first row of query result
+            return {
+                'SERIE': row['serie'],
+                'FOLIO': row['folio']
+            }
+        
     def __q_emisor(self, conn, usr_id):
         '''
         Consulta el emisor en dbms
