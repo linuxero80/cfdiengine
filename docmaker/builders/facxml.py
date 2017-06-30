@@ -344,6 +344,8 @@ class FacXml(BuilderGen):
     def format_wrt(self, output_file, dat):
         self.logger.debug('dumping contents of dat: {}'.format(repr(dat)))
 
+        account_round = lambda m: round(m, 2)
+
         c = Comprobante()
         c.Version = '3.3'
         c.Folio = "test attribute" #optional
@@ -352,10 +354,10 @@ class FacXml(BuilderGen):
         c.FormaPago = "01" #optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = dat['CERT_B64']
-        c.SubTotal = dat['TOTALES']['IMPORTE_SUM']
-        c.Total = dat['TOTALES']['MONTO_TOTAL']
+        c.SubTotal = account_round(dat['TOTALES']['IMPORTE_SUM'])
+        c.Total = account_round(dat['TOTALES']['MONTO_TOTAL'])
         c.Moneda = dat['MONEDA']['ISO_4217']
-        c.TipoCambio = dat['MONEDA']['TIPO_DE_CAMBIO'] #optional (requerido en ciertos casos)
+        c.TipoCambio = account_round(dat['MONEDA']['TIPO_DE_CAMBIO']) #optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
     #    c.metodoDePago = "NO IDENTIFICADO" #optional
         c.LugarExpedicion = dat['LUGAR_EXPEDICION']
