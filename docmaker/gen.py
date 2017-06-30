@@ -1,5 +1,7 @@
 from abc import ABCMeta, abstractmethod
+from docmaker.error import DocBuilderStepError
 import psycopg2
+
 
 class BuilderGen(metaclass=ABCMeta):
     """
