@@ -373,7 +373,7 @@ class FacXml(BuilderGen):
         c.Conceptos = pyxb.BIND()
         for i in dat['CONCEPTOS']:
             c.Conceptos.append(pyxb.BIND(
-                Cantidad = 1, # i['CANTIDAD'],
+                Cantidad = i['CANTIDAD'],
                 ClaveUnidad ='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
                 ClaveProdServ ='01010101', # se deben usar las claves del catalogo sat producto-servicios
                 Descripcion = i['DESCRIPCION'],
