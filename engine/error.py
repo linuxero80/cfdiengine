@@ -9,8 +9,10 @@ class ErrorCode(enum.Enum):
     SUCCESS = 0
     # values from 1 up to 200 are reserved
     # for answers of business handlers
-    REQUEST_INCOMPLETE = 199
-    DOCMAKER_ERROR = 200
+    ETL_ISSUES = 197          # ETL means extract, transform, and load
+    REQUEST_INCOMPLETE = 198  # Denotes a missing value in request
+    DOCMAKER_ERROR = 199      # Problems related to docmaker stuff
+    THIRD_PARTY_ISSUES = 200  # Lack interacting with third party entities
 
     # values from 201 up to 255 are reserved
     # for answers of engine mechanism

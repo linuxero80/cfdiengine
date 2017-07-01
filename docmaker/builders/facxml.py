@@ -7,6 +7,7 @@ from docmaker.error import DocBuilderStepError
 from misc.tricks import truncate
 from docmaker.gen import BuilderGen
 from sat.v33 import Comprobante
+from crypto.signer import Signer, SignerError
 from sat.requirement import writedom_cfdi
 
 
