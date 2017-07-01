@@ -128,7 +128,7 @@ class FacXml(BuilderGen):
         """
         SQL = """SELECT upper(inv_prod.sku) as sku,
             upper(inv_prod.descripcion) as descripcion,
-            upper(inv_prod_unidades.titulo) AS unidad,
+            upper(cfdi_claveunidad.clave) AS unidad,
             erp_prefacturas_detalles.cant_facturar AS cantidad,
             erp_prefacturas_detalles.precio_unitario,
             (
@@ -161,6 +161,7 @@ class FacXml(BuilderGen):
             JOIN erp_prefacturas_detalles on erp_prefacturas_detalles.prefacturas_id=erp_prefacturas.id
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
             LEFT JOIN inv_prod_unidades on inv_prod_unidades.id = erp_prefacturas_detalles.inv_prod_unidad_id
+            LEFT JOIN cfdi_claveunidad on inv_prod_unidades.cfdi_unidad_id = cfdi_claveunidad.id
             WHERE erp_prefacturas_detalles.prefacturas_id="""
         rowset = []
         for row in self.pg_query(conn, "{0}{1}".format(SQL, prefact_id)):
@@ -402,7 +403,7 @@ class FacXml(BuilderGen):
         for i in dat['CONCEPTOS']:
             c.Conceptos.append(pyxb.BIND(
                 Cantidad = i['CANTIDAD'],
-                ClaveUnidad ='C81', # se deben usar las claves del catalogo sat sobre medidas estandarizadas
+                ClaveUnidad = i['UNIDAD'],
                 ClaveProdServ ='01010101', # se deben usar las claves del catalogo sat producto-servicios
                 Descripcion = i['DESCRIPCION'],
                 ValorUnitario = i['PRECIO_UNITARIO'],
