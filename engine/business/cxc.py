@@ -1,5 +1,4 @@
 from docmaker.pipeline import DocPipeLine
-from misc.helperxml import HelperXml
 from misc.tricks import dump_exception
 from custom.profile import ProfileReader
 from engine.error import ErrorCode

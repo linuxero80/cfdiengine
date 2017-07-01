@@ -3,6 +3,7 @@ import base64
 import datetime
 import pyxb
 import psycopg2.extras
+from misc.helperxml import HelperXml
 from docmaker.error import DocBuilderStepError
 from misc.tricks import truncate
 from docmaker.gen import BuilderGen
