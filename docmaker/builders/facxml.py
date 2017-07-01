@@ -3,10 +3,12 @@ import base64
 import datetime
 import pyxb
 import psycopg2.extras
+from misc.helperxml import HelperXml
 from docmaker.error import DocBuilderStepError
 from misc.tricks import truncate
 from docmaker.gen import BuilderGen
 from sat.v33 import Comprobante
+from crypto.signer import Signer, SignerError
 from sat.requirement import writedom_cfdi
 
 
@@ -21,9 +23,9 @@ class FacXml(BuilderGen):
         super().__init__(logger)
 
     def __q_no_certificado(self, conn, usr_id):
-        '''
+        """
         Consulta el numero de certificado en dbms
-        '''
+        """
         SQL =  """select CFDI_CONF.numero_certificado
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
@@ -38,7 +40,7 @@ class FacXml(BuilderGen):
         Consulta la serie y folio a usar en dbms
         """
         SQL = """select fac_cfds_conf_folios.serie as serie,
-            fac_cfds_conf_folios.folio_actual as folio 
+            fac_cfds_conf_folios.folio_actual::character varying as folio
             FROM gral_suc AS SUC
             LEFT JOIN fac_cfds_conf ON fac_cfds_conf.gral_suc_id = SUC.id
             LEFT JOIN fac_cfds_conf_folios ON fac_cfds_conf_folios.fac_cfds_conf_id = fac_cfds_conf.id
@@ -53,9 +55,9 @@ class FacXml(BuilderGen):
             }
         
     def __q_emisor(self, conn, usr_id):
-        '''
+        """
         Consulta el emisor en dbms
-        '''
+        """
         SQL = """select upper(EMP.rfc) as rfc, upper(EMP.titulo) as titulo,
             upper(REG.numero_control) as numero_control
             FROM gral_suc AS SUC
@@ -72,9 +74,9 @@ class FacXml(BuilderGen):
             }
 
     def __q_lugar_expedicion(self, conn, usr_id):
-        '''
+        """
         Consulta el lugar de expedicion en dbms
-        '''
+        """
         SQL = """select SUC.cp
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc as USR_SUC ON USR_SUC.gral_suc_id=SUC.id
@@ -84,9 +86,9 @@ class FacXml(BuilderGen):
             return row['cp']
 
     def __q_moneda(self, conn, prefact_id):
-        '''
+        """
         Consulta la moneda de la prefactura en dbms
-        '''
+        """
         SQL = """SELECT
             upper(gral_mon.iso_4217) AS moneda_iso_4217,
             upper(gral_mon.simbolo) AS moneda_simbolo,
@@ -103,9 +105,9 @@ class FacXml(BuilderGen):
             }
 
     def __q_receptor(self, conn, prefact_id):
-        '''
+        """
         Consulta el cliente de la prefactura en dbms
-        '''
+        """
         SQL = """SELECT
             upper(cxc_clie.razon_social) as razon_social,
             upper(cxc_clie.rfc) as rfc
@@ -121,9 +123,9 @@ class FacXml(BuilderGen):
             }
 
     def __q_conceptos(self, conn, prefact_id):
-        '''
+        """
         Consulta los conceptos de la prefactura en dbms
-        '''
+        """
         SQL = """SELECT upper(inv_prod.sku) as sku,
             upper(inv_prod.descripcion) as descripcion,
             upper(inv_prod_unidades.titulo) AS unidad,
@@ -206,7 +208,9 @@ class FacXml(BuilderGen):
         return totales
 
     def __calc_traslados(self, l_items, l_ieps, l_iva):
-        """calcula los impuestos trasladados"""
+        """
+        Calcula los impuestos trasladados
+        """
         traslados = []
 
         for tax in l_iva:
@@ -247,9 +251,9 @@ class FacXml(BuilderGen):
         return traslados
 
     def __q_ivas(self, conn):
-        '''
+        """
         Consulta el total de IVA activos en dbms
-        '''
+        """
         SQL = """SELECT id, descripcion AS titulo, iva_1 AS tasa
             FROM gral_imptos
             WHERE borrado_logico=false"""
@@ -263,9 +267,9 @@ class FacXml(BuilderGen):
         return rowset
 
     def __q_ieps(self, conn, usr_id):
-        '''
+        """
         Consulta el total de lo IEPS activos en dbms
-        '''
+        """
         SQL = """SELECT gral_ieps.id as id,
             gral_ieps.titulo as desc, gral_ieps.tasa as tasa
             FROM gral_suc AS SUC
@@ -284,9 +288,9 @@ class FacXml(BuilderGen):
         return rowset
 
     def __q_sign_params(self, conn, usr_id):
-        '''
+        """
         Consulta parametros requeridos para firmado cfdi
-        '''
+        """
         SQL = """SELECT fac_cfds_conf.password_llave as passwd,
             fac_cfds_conf.archivo_llave as pk,
             fac_cfds_conf.archivo_xsl as xslt
@@ -303,9 +307,9 @@ class FacXml(BuilderGen):
             }
 
     def __q_cert_file(self, conn, usr_id):
-        '''
+        """
         Consulta el certificado que usa el usuario en dbms
-        '''
+        """
         SQL = """select fac_cfds_conf.archivo_certificado as cert_file
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc ON gral_usr_suc.gral_suc_id = SUC.id
@@ -346,6 +350,7 @@ class FacXml(BuilderGen):
 
         return {
             'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
+            'CONTROL': self.__q_serie_folio(conn, usr_id),
             'CERT_B64': certb64,
             'KEY_PRIVATE': os.path.join(sslrfc_dir, sp['PKNAME']),
             'KEY_PASSWD': sp['PKPASSWD'],
@@ -368,7 +373,8 @@ class FacXml(BuilderGen):
 
         c = Comprobante()
         c.Version = '3.3'
-        c.Folio = "test attribute" #optional
+        c.Serie = dat['CONTROL']['SERIE']  # optional
+        c.Folio = dat['CONTROL']['FOLIO']  # optional
         c.Fecha = dat['TIME_STAMP']
         c.Sello = '__DIGITAL_SIGN_HERE__'
         c.FormaPago = "01" #optional

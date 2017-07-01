@@ -8,9 +8,6 @@ import os
 def facturar(logger, pt, req):
 
     def dm_exec(filename, resdir, usr_id, prefact_id):
-        if filename is None:
-            return ErrorCode.REQUEST_INCOMPLETE
-
         dm_builder = 'facxml'
         kwargs = {'usr_id': usr_id, 'prefact_id': prefact_id}
         try:
@@ -23,13 +20,41 @@ def facturar(logger, pt, req):
             logger.error(dump_exception())
             return ErrorCode.DOCMAKER_ERROR
 
-    logger.info("step in {} handler".format(__name__))
-    source = ProfileReader.get_content(
-                pt.source, ProfileReader.PNODE_UNIQUE)
-    resdir = os.path.abspath(os.path.join(
-                os.path.dirname(source), os.pardir))
-    logger.info(
-        'Passing to docmaker as resources directory {}'.format(resdir))
-    rc = dm_exec(req.get('filename', None), resdir, req.get('usr_id', None),
-                       req.get('prefact_id', None))
+    def pac_sign(filename, resdir):
+        try:
+            # Here it would be placed, code calling
+            # the pac connector mechanism
+            logger.info('calling pac connector')
+            return ErrorCode.SUCCESS, None
+        except:
+            logger.error(dump_exception())
+            return ErrorCode.THIRD_PARTY_ISSUES
+
+    def store(filename):
+        try:
+            # Here it would be placed, code for
+            # saving relevant info of newer cfdi in dbms
+            logger.info('saving relevant info of {} in dbms', filename)
+            return ErrorCode.SUCCESS
+        except:
+            logger.error(dump_exception())
+            return ErrorCode.ETL_ISSUES
+
+    logger.info("stepping in factura handler within {}".format(__name__))
+
+    source = ProfileReader.get_content(pt.source, ProfileReader.PNODE_UNIQUE)
+    resdir = os.path.abspath(os.path.join(os.path.dirname(source), os.pardir))
+    filename = req.get('filename', None)  # It shall must be a temporal file
+    usr_id = req.get('usr_id', None)
+    prefact_id = req.get('prefact_id', None)
+
+    logger.debug('Using as resources directory {}'.format(resdir))
+
+    rc = dm_exec(filename, resdir, usr_id, prefact_id)
+
+    if rc == ErrorCode.SUCCESS:
+        rc, outfile = pac_sign(filename, resdir)
+        if rc == ErrorCode.SUCCESS:
+            rc = store(outfile)
+
     return rc.value

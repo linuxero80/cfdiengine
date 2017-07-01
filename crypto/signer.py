@@ -1,13 +1,16 @@
 from misc.helperstr import HelperStr
 from misc.localexec import LocalExec
 from distutils.spawn import find_executable
-import tempfile, os
+import tempfile
+import os
+
 
 class SignerError(Exception):
     def __init__(self, message = None):
         self.message = message
     def __str__(self):
         return self.message
+
 
 class Signer(object):
     """
