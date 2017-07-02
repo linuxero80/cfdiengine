@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 
 class AdapterError(Exception):
-    def __init__(self, message = None):
+    def __init__(self, message=None):
         self.message = message
 
     def __str__(self):
