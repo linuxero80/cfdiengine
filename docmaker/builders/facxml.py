@@ -128,7 +128,8 @@ class FacXml(BuilderGen):
         """
         SQL = """SELECT upper(inv_prod.sku) as sku,
             upper(inv_prod.descripcion) as descripcion,
-            upper(cfdi_claveunidad.clave) AS unidad,
+            cfdi_claveprodserv.clave AS prodserv,
+            cfdi_claveunidad.clave AS unidad,
             erp_prefacturas_detalles.cant_facturar AS cantidad,
             erp_prefacturas_detalles.precio_unitario,
             (
@@ -161,7 +162,9 @@ class FacXml(BuilderGen):
             JOIN erp_prefacturas_detalles on erp_prefacturas_detalles.prefacturas_id=erp_prefacturas.id
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
             LEFT JOIN inv_prod_unidades on inv_prod_unidades.id = erp_prefacturas_detalles.inv_prod_unidad_id
+            LEFT JOIN inv_prod_tipos on inv_prod_tipos.id = inv_prod.tipo_de_producto_id
             LEFT JOIN cfdi_claveunidad on inv_prod_unidades.cfdi_unidad_id = cfdi_claveunidad.id
+            LEFT JOIN cfdi_claveprodserv on inv_prod_tipos.cfdi_prodserv_id = cfdi_claveprodserv.id
             WHERE erp_prefacturas_detalles.prefacturas_id="""
         rowset = []
         for row in self.pg_query(conn, "{0}{1}".format(SQL, prefact_id)):
@@ -169,6 +172,7 @@ class FacXml(BuilderGen):
                 'SKU': row['sku'],
                 'DESCRIPCION': row['descripcion'],
                 'UNIDAD': row['unidad'],
+                'PRODSERV': row['prodserv'],
                 'CANTIDAD': row['cantidad'],
                 'PRECIO_UNITARIO': row['precio_unitario'],
                 'IMPORTE': row['importe'],
@@ -404,7 +408,7 @@ class FacXml(BuilderGen):
             c.Conceptos.append(pyxb.BIND(
                 Cantidad = i['CANTIDAD'],
                 ClaveUnidad = i['UNIDAD'],
-                ClaveProdServ ='01010101', # se deben usar las claves del catalogo sat producto-servicios
+                ClaveProdServ = i['PRODSERV']
                 Descripcion = i['DESCRIPCION'],
                 ValorUnitario = i['PRECIO_UNITARIO'],
                 NoIdentificacion = i['SKU'], #opcional
