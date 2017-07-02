@@ -1,4 +1,5 @@
 from docmaker.pipeline import DocPipeLine
+from pac.connector import setup_pac
 from misc.tricks import dump_exception
 from custom.profile import ProfileReader
 from engine.error import ErrorCode
@@ -24,7 +25,10 @@ def facturar(logger, pt, req):
         try:
             # Here it would be placed, code calling
             # the pac connector mechanism
-            logger.info('calling pac connector')
+            logger.debug('Getting a pac connector as per config profile')
+            pac, err = setup_pac(logger, pt.tparty.pac)
+            if pac is None:
+                raise Exception(err)
             return ErrorCode.SUCCESS, None
         except:
             logger.error(dump_exception())
