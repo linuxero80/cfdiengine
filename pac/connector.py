@@ -17,9 +17,9 @@ class PacSupplierError(PacChannelError):
         super().__init__(message = message)
 
 
-def pac_channel(logger, conf, xml, **kwargs):
+def setup_pac(logger, conf):
     """
-    Produces a newer xml signed by a pac selected
+    Sets a pac up adapter as per configuration object
     """
     support = {
         'servisim': dict(test=(Servisim, conf.test), real=(Servisim, conf.real))
@@ -30,7 +30,6 @@ def pac_channel(logger, conf, xml, **kwargs):
     supplier = support.get(name.lower(), None)
 
     if supplier is not None:
-        adapter = None
         try:
             ic, settings = supplier[mode]
             return ic(
@@ -44,8 +43,5 @@ def pac_channel(logger, conf, xml, **kwargs):
         except KeyError:
             msg = "Such pac mode is not supported"
             raise PacSupplierError(msg)
-
-        adapter.stamp(xml, xid)
     else:
         raise PacSupplierError("Such pac is not supported yet")
-
