@@ -408,7 +408,7 @@ class FacXml(BuilderGen):
             c.Conceptos.append(pyxb.BIND(
                 Cantidad = i['CANTIDAD'],
                 ClaveUnidad = i['UNIDAD'],
-                ClaveProdServ = i['PRODSERV']
+                ClaveProdServ = i['PRODSERV'],
                 Descripcion = i['DESCRIPCION'],
                 ValorUnitario = i['PRECIO_UNITARIO'],
                 NoIdentificacion = i['SKU'], #opcional
