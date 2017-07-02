@@ -420,3 +420,49 @@ class FacXml(BuilderGen):
 
     def data_rel(self, dat):
         pass
+
+    def __tag_concepto(self, i):
+        concepto = pyxb.BIND(
+            Cantidad = i['CANTIDAD'],
+            ClaveUnidad = i['UNIDAD'],
+            ClaveProdServ = i['PRODSERV'],
+            Descripcion = i['DESCRIPCION'],
+            ValorUnitario = i['PRECIO_UNITARIO'],
+            NoIdentificacion = i['SKU'], #opcional
+            Importe = i['IMPORTE'],
+            Impuestos = self.__tag_impuestos(i)
+        )
+        return concepto
+
+    def __tag_traslados(self, i):
+        def traslado(b, c, imp):
+            return pyxb.BIND(
+                Base=b, TipoFactor='Tasa',
+                Impuesto=c, Importe=imp)
+
+        return pyxb.BIND(*tuple([
+            traslado(i['IMPORTE'], "002", i['IMPORTE_IMPUESTO'])
+        ]))
+
+    def __tag_retenciones(self, i):
+        def retencion(b, c, tc, imp):
+            return pyxb.BIND(
+                Base=b, TipoFactor='Tasa',
+                Impuesto=c, TasaOCuota=tc, Importe=imp)
+
+        return pyxb.BIND(*tuple([
+            retencion(i['IMPORTE'], "003", i['TASA_IEPS'], i['IMPORTE_IEPS'])
+        ]))
+
+    def __tag_impuestos(self, i):
+
+        notaxes = True
+        kwargs = {}
+        if i['IMPORTE_IMPUESTO'] > 0:
+            notaxes = False
+            kwargs['Traslados'] = self.__tag_traslados(i)
+        if i['IMPORTE_IEPS'] > 0:
+            notaxes = False
+            kwargs['Retenciones'] = self.__tag_retenciones(i)
+
+        return pyxb.BIND() if notaxes else pyxb.BIND(**kwargs)
