@@ -412,7 +412,8 @@ class FacXml(BuilderGen):
                 Descripcion = i['DESCRIPCION'],
                 ValorUnitario = i['PRECIO_UNITARIO'],
                 NoIdentificacion = i['SKU'], #opcional
-                Importe = i['IMPORTE']
+                Importe = i['IMPORTE'],
+                Impuestos = self.__tag_impuestos(i)
             ))
 
         writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS,
@@ -420,19 +421,6 @@ class FacXml(BuilderGen):
 
     def data_rel(self, dat):
         pass
-
-    def __tag_concepto(self, i):
-        concepto = pyxb.BIND(
-            Cantidad = i['CANTIDAD'],
-            ClaveUnidad = i['UNIDAD'],
-            ClaveProdServ = i['PRODSERV'],
-            Descripcion = i['DESCRIPCION'],
-            ValorUnitario = i['PRECIO_UNITARIO'],
-            NoIdentificacion = i['SKU'], #opcional
-            Importe = i['IMPORTE'],
-            Impuestos = self.__tag_impuestos(i)
-        )
-        return concepto
 
     def __tag_traslados(self, i):
         def traslado(b, c, imp):
