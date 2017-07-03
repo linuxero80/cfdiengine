@@ -1,14 +1,12 @@
+import math
 import os
 import base64
 import datetime
 import pyxb
-import psycopg2.extras
-from misc.helperxml import HelperXml
 from docmaker.error import DocBuilderStepError
 from misc.tricks import truncate
 from docmaker.gen import BuilderGen
 from sat.v33 import Comprobante
-from crypto.signer import Signer, SignerError
 from sat.requirement import writedom_cfdi
 
 
@@ -422,6 +420,17 @@ class FacXml(BuilderGen):
     def data_rel(self, dat):
         pass
 
+    def __place_tasa(self, x):
+        """
+        smart method to deal with a tasa less
+        than zero or greater than zero
+        """
+        try:
+            return x * 10 ** -2 if math.log10(x) >= 0 else x
+        except ValueError:
+            # Silent the error and just return value passed
+            return x
+
     def __tag_traslados(self, i):
         def traslado(b, c, tc, imp):
             return pyxb.BIND(
@@ -430,9 +439,9 @@ class FacXml(BuilderGen):
 
         taxes = []
         if i['IMPORTE_IMPUESTO'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "002", i['TASA_IMPUESTO'], i['IMPORTE_IMPUESTO']))
+            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), i['IMPORTE_IMPUESTO']))
         if i['IMPORTE_IEPS'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "003", i['TASA_IEPS'], i['IMPORTE_IEPS']))
+            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), i['IMPORTE_IEPS']))
         return pyxb.BIND(*tuple(taxes))
 
     def __tag_retenciones(self, i):
@@ -442,7 +451,7 @@ class FacXml(BuilderGen):
                 Impuesto=c, TasaOCuota=tc, Importe=imp)
 
         return pyxb.BIND(*tuple([
-            retencion(i['IMPORTE'], "001", i['TASA_RETENCION'], i['IMPORTE_RETENCION'])
+            retencion(i['IMPORTE'], "001", self.__place_tasa(i['TASA_RETENCION']), i['IMPORTE_RETENCION'])
         ]))
 
     def __tag_impuestos(self, i):
