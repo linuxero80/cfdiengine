@@ -1,13 +1,15 @@
 from misc.helperstr import HelperStr
 from misc.localexec import LocalExec
 from distutils.spawn import find_executable
+import subprocess
 import tempfile
 import os
 
 
 class SignerError(Exception):
-    def __init__(self, message = None):
+    def __init__(self, message=None):
         self.message = message
+
     def __str__(self):
         return self.message
 
@@ -35,7 +37,7 @@ class Signer(object):
             raise SignerError("it has not found {} binary".format(self.__SSL_BIN))
 
         self.logger = logger
-        self.le = LocalExec(self.logger)
+        self.le = LocalExec()
         self.cipher = self.__SUPPORTED[cipher]
         self.pem_pubkey = pem_pubkey
         self.pem_privkey = pem_privkey
@@ -81,8 +83,8 @@ class Signer(object):
         ]
 
         try:
-            self.le([self.ssl_bin] + base64_args, cmd_timeout = 10, ign_rcs = None)
-            self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10, ign_rcs = None)
+            self.le([self.ssl_bin] + base64_args, cmd_timeout=10, ign_rcs=None)
+            self.le([self.ssl_bin] + dgst_args, cmd_timeout=10, ign_rcs=None)
         except subprocess.CalledProcessError as e:
             self.logger.error("Command raised exception: " + str(e))
             raise SignerError("Output: " + str(e.output))
@@ -90,7 +92,6 @@ class Signer(object):
         os.remove(decoded_f)
         os.remove(signature_f)
         os.remove(verify_f)
-
 
     def __fetch_result(self, path):
         rs = None
@@ -100,7 +101,7 @@ class Signer(object):
             with open(path, 'r') as rf:
                 for line in rf:
                     rs = rs + line.replace("\n", "")
-        if rs == None:
+        if rs is None:
             SignerError("Unexpected ssl output!!!")
         return rs
 
@@ -139,8 +140,8 @@ class Signer(object):
         ]
 
         try:
-            self.le([self.ssl_bin] + dgst_args, cmd_timeout = 10, ign_rcs = None)
-            self.le([self.ssl_bin] + base64_args, cmd_timeout = 10, ign_rcs = None)
+            self.le([self.ssl_bin] + dgst_args, cmd_timeout=10, ign_rcs=None)
+            self.le([self.ssl_bin] + base64_args, cmd_timeout=10, ign_rcs=None)
         except subprocess.CalledProcessError as e:
             self.logger.error("Command raised exception: " + str(e))
             raise SignerError("Output: " + str(e.output))
