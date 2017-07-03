@@ -388,7 +388,7 @@ class FacXml(BuilderGen):
         c.Moneda = dat['MONEDA']['ISO_4217']
         c.TipoCambio = account_trunc(dat['MONEDA']['TIPO_DE_CAMBIO']) #optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
-    #    c.metodoDePago = "NO IDENTIFICADO" #optional
+        c.MetodoPago = "PUE" # optional and hardcode until ui can suply such value
         c.LugarExpedicion = dat['LUGAR_EXPEDICION']
 
         c.Emisor = pyxb.BIND()
