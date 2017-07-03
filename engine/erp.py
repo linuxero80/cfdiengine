@@ -33,7 +33,7 @@ def do_request(logger, pt, req, adapter=None):
         handler = getattr(m, action)
         return handler(logger, pt, args)
     except (ImportError, RuntimeError) as e:
-        logger.fatal("{0} support module failure".format(business_mod))
+        logger.fatal("support module failure {}".format(e))
         return ErrorCode.MOD_BUSINESS_NOT_LOADED.value
     except:
         logger.error(dump_exception())
