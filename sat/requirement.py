@@ -1,7 +1,9 @@
-import os
 
-def create_qrcode(as_usr, uuid, erfc, rrfc, total, chunk):
-    """creates qrcode as per cfdi v33"""
+
+def qrcode_cfdi(as_usr, uuid, erfc, rrfc, total, chunk):
+    """
+    creates qrcode as per cfdi v33 constrains
+    """
 
     import qrcode
     from misc.helperstr import HelperStr
@@ -32,7 +34,9 @@ def create_qrcode(as_usr, uuid, erfc, rrfc, total, chunk):
 
 
 def writedom_cfdi(d, propos, file_out):
-    """writes and makes up a cfdi's dom as per purpose"""
+    """
+    writes and makes up a cfdi's dom as per purpose
+    """
 
     import xml.etree.ElementTree as ET
     from pyxb.namespace import XMLSchema_instance as xsi
@@ -62,3 +66,24 @@ def writedom_cfdi(d, propos, file_out):
     t = ET.ElementTree(root)
     t.write(file_out, xml_declaration=True,
            encoding='utf-8', method="xml")
+
+
+def sign_cfdi(file_pk, file_xml, file_xslt):
+    """
+    signs either cfdi xml
+    """
+    import crypto.signer as cs
+    import misc.helperxml as hx
+
+    # it'll extract the original string as per xslt given
+    def extract():
+        return hx.HelperXml.run_xslt(file_xml, file_xslt)
+
+    with open(file_xml, 'r') as f:
+        try:
+            xml = f.read()
+            s = cs.Signer(cs.Signer.SHA256, None, file_pk)
+            sign = s.sign(extract())
+            return xml.replace('__DIGITAL_SIGN_HERE__', sign)
+        except cs.SignerError as e:
+            raise Exception(e)

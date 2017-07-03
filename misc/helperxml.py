@@ -1,15 +1,13 @@
-import lxml.etree as ET
-import random
-import string
-import re
+import lxml.etree as et
+
 
 class HelperXml(object):
 
     @staticmethod
-    def transform_xslt(xml_filename, xsl_filename):
+    def run_xslt(xml_filename, xsl_filename):
         """"""
-        dom = ET.parse(xml_filename)
-        xslt = ET.parse(xsl_filename)
-        transform = ET.XSLT(xslt)
+        dom = et.parse(xml_filename)
+        xslt = et.parse(xsl_filename)
+        transform = et.XSLT(xslt)
         newdom = transform(dom)
         return str(newdom)

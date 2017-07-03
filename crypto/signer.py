@@ -23,7 +23,7 @@ class Signer(object):
 
     SHA1, SHA256 = range(2)
 
-    def __init__(self, logger, cipher, pem_pubkey, pem_privkey):
+    def __init__(self, cipher, pem_pubkey, pem_privkey):
 
         # You must first extract the public key from the certificate:
         # openssl x509 -pubkey -noout -in cert.pem > pubkey.pem
@@ -36,7 +36,6 @@ class Signer(object):
                 return os.path.abspath(executable)
             raise SignerError("it has not found {} binary".format(self.__SSL_BIN))
 
-        self.logger = logger
         self.le = LocalExec()
         self.cipher = self.__SUPPORTED[cipher]
         self.pem_pubkey = pem_pubkey
@@ -86,8 +85,8 @@ class Signer(object):
             self.le([self.ssl_bin] + base64_args, cmd_timeout=10, ign_rcs=None)
             self.le([self.ssl_bin] + dgst_args, cmd_timeout=10, ign_rcs=None)
         except subprocess.CalledProcessError as e:
-            self.logger.error("Command raised exception: " + str(e))
-            raise SignerError("Output: " + str(e.output))
+            msg = "Command raised exception\nOutput: " + str(e.output)
+            raise SignerError(msg)
 
         os.remove(decoded_f)
         os.remove(signature_f)
@@ -143,8 +142,8 @@ class Signer(object):
             self.le([self.ssl_bin] + dgst_args, cmd_timeout=10, ign_rcs=None)
             self.le([self.ssl_bin] + base64_args, cmd_timeout=10, ign_rcs=None)
         except subprocess.CalledProcessError as e:
-            self.logger.error("Command raised exception: " + str(e))
-            raise SignerError("Output: " + str(e.output))
+            msg = "Command raised exception\nOutput: " + str(e.output)
+            raise SignerError(msg)
 
         rs = self.__fetch_result(result_f)
 
