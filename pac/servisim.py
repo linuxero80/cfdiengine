@@ -1,6 +1,7 @@
 from pac.adapter import Adapter, AdapterError
 from suds.client import Client
 from suds.transport import TransportError
+import suds
 import urllib.error
 
 
@@ -23,15 +24,16 @@ class Servisim(Adapter):
 
         def connect():
             try:
-                conn = Client(self.config['EP'])
+                connection = Client(self.config['EP'])
                 self.logger.debug(
                     "{0} adapter is up and ready to kick buttocks\n{1}".format(
-                        self.pac_name, self.conn))
-                return conn
+                        self.pac_name, connection))
+                return connection
             except (TransportError, urllib.error.HTTPError) as e:
-                self.logger.fatal(e)
                 raise AdapterError(
-                    'can not connect with end point{0}'.format(self.ep))
+                    'can not connect with end point {}: {}'.format(
+                        self.config['EP'], e)
+                )
 
         conn = connect()
         req = conn.factory.create(m)
@@ -55,8 +57,8 @@ class Servisim(Adapter):
                 "The following request for stamp will be sent\n{0}".format(req)
             )
             return conn.service.timbrarCFDI(req)
-        except (WebFault, Exception) as e:
-            raise AdapterError("Stamp experimenting problems")
+        except (suds.WebFault, Exception) as e:
+            raise AdapterError("Stamp experimenting problems: {}".format(e))
 
     def fetch(self, xid):
         """
@@ -70,12 +72,12 @@ class Servisim(Adapter):
             req.TipoPeticion = '2'  # TO EXPECT CFDI ALTERNATIVE ID
             req.Emisor = self.config['RFC']
             req.Identificador = xid
-            self.__logger.debug(
+            self.logger.debug(
                 "The following request for fetch will be sent\n{0}".format(req)
             )
             return conn.service.obtenerCFDI(req)
-        except (WebFault, Exception) as e:
-            raise AdapterError("Fetch experimenting problems")
+        except (suds.WebFault, Exception) as e:
+            raise AdapterError("Fetch experimenting problems: {}".format(e))
 
     def cancel(self, xml):
         """
@@ -91,5 +93,5 @@ class Servisim(Adapter):
             self.logger.debug(
                 "The following request for cancel will be sent\n{0}".format(req))
             return conn.service.cancelarCFDI(req)
-        except (WebFault, Exception) as e:
-            raise AdapterError("Cancel experimenting problems")
+        except (suds.WebFault, Exception) as e:
+            raise AdapterError("Cancel experimenting problems".format(e))

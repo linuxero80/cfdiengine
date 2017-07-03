@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from misc.helperpg import HelperPg
 from docmaker.error import DocBuilderStepError
 import psycopg2
 
@@ -15,16 +16,13 @@ class BuilderGen(metaclass=ABCMeta):
         return self.__class__.__name__
 
     def pg_query(self, conn, sql):
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         try:
-            cur.execute(sql)
-            rows = cur.fetchall()
-            if len(rows) > 0:
-                return rows
-            else:
-                raise DocBuilderStepError('There is not data retrieved')
+            self.logger.debug("Performing query: {}".format(sql))
+            return HelperPg.query(conn, sql)
         except psycopg2.Error as e:
-            raise DocBuilderStepError("an error occurred when executing query")
+            raise DocBuilderStepError("An error occurred when executing query: {}".format(e))
+        except Exception as e:
+            raise DocBuilderStepError(e)
 
     @abstractmethod
     def data_acq(self, conn, d_rdirs, **kwargs):

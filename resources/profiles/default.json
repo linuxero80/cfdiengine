@@ -9,6 +9,40 @@
                 "port" : " 5432"
             }           
         },
+        "tparty": {
+            "pac": {
+                "name": "servisim",
+                "mode": "test",
+                "real": [
+                    {
+                        "param": "end_point",
+                        "value": "http://noinfo.com/wstest/CFDI.svc?wsdl"
+                    },
+                    {
+                        "param": "login",
+                        "value": "11"
+                    },
+                    {
+                        "param": "passwd",
+                        "value": "Ch1ng4TuM4dr3"
+                    }
+                ],
+                "test": [
+                    {
+                        "param": "end_point",
+                        "value": "http://201.150.37.20/wstest/CFDI.svc?wsdl"
+                    },
+                    {
+                        "param": "login",
+                        "value": "1"
+                    },
+                    {
+                        "param": "passwd",
+                        "value": "Oryx216"
+                    }
+                ]
+            }
+        },
         "bbgum": {
             "controllers": [
                  {

@@ -128,7 +128,8 @@ class FacXml(BuilderGen):
         """
         SQL = """SELECT upper(inv_prod.sku) as sku,
             upper(inv_prod.descripcion) as descripcion,
-            upper(cfdi_claveunidad.clave) AS unidad,
+            cfdi_claveprodserv.clave AS prodserv,
+            cfdi_claveunidad.clave AS unidad,
             erp_prefacturas_detalles.cant_facturar AS cantidad,
             erp_prefacturas_detalles.precio_unitario,
             (
@@ -161,7 +162,9 @@ class FacXml(BuilderGen):
             JOIN erp_prefacturas_detalles on erp_prefacturas_detalles.prefacturas_id=erp_prefacturas.id
             LEFT JOIN inv_prod on inv_prod.id = erp_prefacturas_detalles.producto_id
             LEFT JOIN inv_prod_unidades on inv_prod_unidades.id = erp_prefacturas_detalles.inv_prod_unidad_id
+            LEFT JOIN inv_prod_tipos on inv_prod_tipos.id = inv_prod.tipo_de_producto_id
             LEFT JOIN cfdi_claveunidad on inv_prod_unidades.cfdi_unidad_id = cfdi_claveunidad.id
+            LEFT JOIN cfdi_claveprodserv on inv_prod_tipos.cfdi_prodserv_id = cfdi_claveprodserv.id
             WHERE erp_prefacturas_detalles.prefacturas_id="""
         rowset = []
         for row in self.pg_query(conn, "{0}{1}".format(SQL, prefact_id)):
@@ -169,6 +172,7 @@ class FacXml(BuilderGen):
                 'SKU': row['sku'],
                 'DESCRIPCION': row['descripcion'],
                 'UNIDAD': row['unidad'],
+                'PRODSERV': row['prodserv'],
                 'CANTIDAD': row['cantidad'],
                 'PRECIO_UNITARIO': row['precio_unitario'],
                 'IMPORTE': row['importe'],
@@ -404,11 +408,12 @@ class FacXml(BuilderGen):
             c.Conceptos.append(pyxb.BIND(
                 Cantidad = i['CANTIDAD'],
                 ClaveUnidad = i['UNIDAD'],
-                ClaveProdServ ='01010101', # se deben usar las claves del catalogo sat producto-servicios
+                ClaveProdServ = i['PRODSERV'],
                 Descripcion = i['DESCRIPCION'],
                 ValorUnitario = i['PRECIO_UNITARIO'],
                 NoIdentificacion = i['SKU'], #opcional
-                Importe = i['IMPORTE']
+                Importe = i['IMPORTE'],
+                Impuestos = self.__tag_impuestos(i)
             ))
 
         writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS,
@@ -416,3 +421,39 @@ class FacXml(BuilderGen):
 
     def data_rel(self, dat):
         pass
+
+    def __tag_traslados(self, i):
+        def traslado(b, c, tc, imp):
+            return pyxb.BIND(
+                Base=b, TipoFactor='Tasa',
+                Impuesto=c, TasaOCuota=tc, Importe=imp)
+
+        taxes = []
+        if i['IMPORTE_IMPUESTO'] > 0:
+            taxes.append(traslado(i['IMPORTE'], "002", i['TASA_IMPUESTO'], i['IMPORTE_IMPUESTO']))
+        if i['IMPORTE_IEPS'] > 0:
+            taxes.append(traslado(i['IMPORTE'], "003", i['TASA_IEPS'], i['IMPORTE_IEPS']))
+        return pyxb.BIND(*tuple(taxes))
+
+    def __tag_retenciones(self, i):
+        def retencion(b, c, tc, imp):
+            return pyxb.BIND(
+                Base=b, TipoFactor='Tasa',
+                Impuesto=c, TasaOCuota=tc, Importe=imp)
+
+        return pyxb.BIND(*tuple([
+            retencion(i['IMPORTE'], "001", i['TASA_RETENCION'], i['IMPORTE_RETENCION'])
+        ]))
+
+    def __tag_impuestos(self, i):
+
+        notaxes = True
+        kwargs = {}
+        if i['IMPORTE_IMPUESTO'] > 0 or i['IMPORTE_IEPS'] > 0:
+            notaxes = False
+            kwargs['Traslados'] = self.__tag_traslados(i)
+        if i['IMPORTE_RETENCION'] > 0:
+            notaxes = False
+            kwargs['Retenciones'] = self.__tag_retenciones(i)
+
+        return pyxb.BIND() if notaxes else pyxb.BIND(**kwargs)

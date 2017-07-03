@@ -3,14 +3,17 @@ import sys
 import os
 import psycopg2
 from docmaker.gen import BuilderGen
-from custom.profile import ProfileTree, ProfileReader
+from custom.profile import ProfileReader
+from misc.helperpg import HelperPg
 from docmaker.error import DocBuilderImptError, DocBuilderStepError, DocBuilderError
+
 
 sys.path.append(
     os.path.abspath(
         os.path.join(os.path.dirname(__file__), "builders")
     )
 )
+
 
 class DocPipeLine(object):
     """
@@ -101,15 +104,7 @@ class DocPipeLine(object):
     def __open_dbms_conn(self):
         """opens a connection to postgresql"""
         try:
-            conn_str = "dbname={0} user={1} host={2} password={3} port={4}".format(
-                ProfileReader.get_content(self.pgsql_conf.db, ProfileReader.PNODE_UNIQUE),
-                ProfileReader.get_content(self.pgsql_conf.user, ProfileReader.PNODE_UNIQUE),
-                ProfileReader.get_content(self.pgsql_conf.host, ProfileReader.PNODE_UNIQUE),
-                ProfileReader.get_content(self.pgsql_conf.passwd, ProfileReader.PNODE_UNIQUE),
-                ProfileReader.get_content(self.pgsql_conf.port, ProfileReader.PNODE_UNIQUE)
-            )
-
-            return psycopg2.connect(conn_str)
+            return HelperPg.connect(self.pgsql_conf)
         except psycopg2.Error as e:
             self.logger.error(e)
             raise DocBuilderError("dbms was not connected")
