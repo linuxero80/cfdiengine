@@ -1,5 +1,6 @@
 from custom.profile import ProfileReader
 import psycopg2
+import psycopg2.extras
 
 
 class HelperPg(object):
