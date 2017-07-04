@@ -2,12 +2,15 @@ import math
 import os
 import base64
 import datetime
+import tempfile
 import pyxb
+from misc.helperstr import HelperStr
 from docmaker.error import DocBuilderStepError
 from misc.tricks import truncate
 from docmaker.gen import BuilderGen
 from sat.v33 import Comprobante
-from sat.requirement import writedom_cfdi
+from sat.requirement import writedom_cfdi, sign_cfdi
+from sat.artifacts import CfdiType
 
 
 impt_class='FacXml'
@@ -15,7 +18,7 @@ impt_class='FacXml'
 
 class FacXml(BuilderGen):
 
-    __MAKEUP_PROPOS = 'FAC'
+    __MAKEUP_PROPOS = CfdiType.FAC
 
     def __init__(self, logger):
         super().__init__(logger)
@@ -336,7 +339,6 @@ class FacXml(BuilderGen):
         sp = self.__q_sign_params(conn, usr_id)
 
         # dirs with full emisor rfc path
-        output_dir = os.path.join(d_rdirs['cfdi_output'], ed['RFC'])
         sslrfc_dir = os.path.join(d_rdirs['ssl'], ed['RFC'])
         xsltrfc_dir = os.path.join(d_rdirs['cfdi_xslt'], ed['RFC'])
 
@@ -348,15 +350,15 @@ class FacXml(BuilderGen):
             certb64 = base64.b64encode(content).decode('ascii')
 
         conceptos = self.__q_conceptos(conn, prefact_id)
-        traslados = self.__calc_traslados(conceptos,
-            self.__q_ieps(conn, usr_id), self.__q_ivas(conn))
+
+        sp['PKNAME'] = sp['PKNAME'].replace('.key', '.pem')  # workaround to test
+        sp['XSLTNAME'] = "cadenaoriginal_3_3.xslt"  # workaround to test
 
         return {
             'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
             'CONTROL': self.__q_serie_folio(conn, usr_id),
             'CERT_B64': certb64,
             'KEY_PRIVATE': os.path.join(sslrfc_dir, sp['PKNAME']),
-            'KEY_PASSWD': sp['PKPASSWD'],
             'XSLT_SCRIPT': os.path.join(xsltrfc_dir, sp['XSLTNAME']),
             'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
@@ -364,15 +366,20 @@ class FacXml(BuilderGen):
             'MONEDA': self.__q_moneda(conn, prefact_id),
             'LUGAR_EXPEDICION': self.__q_lugar_expedicion(conn, usr_id),
             'CONCEPTOS': conceptos,
-            'TOTALES': self.__calc_totales(conceptos),
-            'OUTPUT_DIR': output_dir
+            'TOTALES': self.__calc_totales(conceptos)
         }
-
 
     def format_wrt(self, output_file, dat):
         self.logger.debug('dumping contents of dat: {}'.format(repr(dat)))
 
-        account_trunc = lambda m: truncate(m, 2)
+        def save(xo):
+            tmp_dir = tempfile.gettempdir()
+            f = os.path.join(tmp_dir, HelperStr.random_str())
+            writedom_cfdi(xo.toDOM(), self.__MAKEUP_PROPOS, f)
+            return f
+
+        def trunc(m):
+            return truncate(m, 2)
 
         c = Comprobante()
         c.Version = '3.3'
@@ -380,42 +387,44 @@ class FacXml(BuilderGen):
         c.Folio = dat['CONTROL']['FOLIO']  # optional
         c.Fecha = dat['TIME_STAMP']
         c.Sello = '__DIGITAL_SIGN_HERE__'
-        c.FormaPago = "01" #optional
+        c.FormaPago = "01"  # optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = dat['CERT_B64']
-        c.SubTotal = account_trunc(dat['TOTALES']['IMPORTE_SUM'])
-        c.Total = account_trunc(dat['TOTALES']['MONTO_TOTAL'])
+        c.SubTotal = trunc(dat['TOTALES']['IMPORTE_SUM'])
+        c.Total = trunc(dat['TOTALES']['MONTO_TOTAL'])
         c.Moneda = dat['MONEDA']['ISO_4217']
-        c.TipoCambio = account_trunc(dat['MONEDA']['TIPO_DE_CAMBIO']) #optional (requerido en ciertos casos)
+        c.TipoCambio = trunc(dat['MONEDA']['TIPO_DE_CAMBIO'])  # optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
-        c.MetodoPago = "PUE" # optional and hardcode until ui can suply such value
+        c.MetodoPago = "PUE"  # optional and hardcode until ui can suply such value
         c.LugarExpedicion = dat['LUGAR_EXPEDICION']
 
         c.Emisor = pyxb.BIND()
-        c.Emisor.Nombre = dat['EMISOR']['RAZON_SOCIAL'] #opcional
+        c.Emisor.Nombre = dat['EMISOR']['RAZON_SOCIAL']  # optional
         c.Emisor.Rfc = dat['EMISOR']['RFC']
         c.Emisor.RegimenFiscal = dat['EMISOR']['REGIMEN_FISCAL']
 
         c.Receptor = pyxb.BIND()
-        c.Receptor.Nombre = dat['RECEPTOR']['RAZON_SOCIAL'] #opcional
+        c.Receptor.Nombre = dat['RECEPTOR']['RAZON_SOCIAL']  # optional
         c.Receptor.Rfc = dat['RECEPTOR']['RFC']
         c.Receptor.UsoCFDI = dat['RECEPTOR']['USO_CFDI']
 
         c.Conceptos = pyxb.BIND()
         for i in dat['CONCEPTOS']:
             c.Conceptos.append(pyxb.BIND(
-                Cantidad = i['CANTIDAD'],
-                ClaveUnidad = i['UNIDAD'],
-                ClaveProdServ = i['PRODSERV'],
-                Descripcion = i['DESCRIPCION'],
-                ValorUnitario = i['PRECIO_UNITARIO'],
-                NoIdentificacion = i['SKU'], #opcional
-                Importe = i['IMPORTE'],
-                Impuestos = self.__tag_impuestos(i)
+                Cantidad=i['CANTIDAD'],
+                ClaveUnidad=i['UNIDAD'],
+                ClaveProdServ=i['PRODSERV'],
+                Descripcion=i['DESCRIPCION'],
+                ValorUnitario=i['PRECIO_UNITARIO'],
+                NoIdentificacion=i['SKU'],  # optional
+                Importe=i['IMPORTE'],
+                Impuestos=self.__tag_impuestos(i)
             ))
 
-        writedom_cfdi(c.toDOM(), self.__MAKEUP_PROPOS,
-                 os.path.join(dat['OUTPUT_DIR'], output_file))
+        tmp_file = save(c)
+        with open(output_file, 'w') as a:
+            a.write(sign_cfdi(dat['KEY_PRIVATE'], i['XSLT_SCRIPT'], tmp_file))
+        os.remove(tmp_file)
 
     def data_rel(self, dat):
         pass

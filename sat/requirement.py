@@ -37,7 +37,7 @@ def writedom_cfdi(d, propos, file_out):
     """
     writes and makes up a cfdi's dom as per purpose
     """
-
+    import sat.artifacts as sa
     import xml.etree.ElementTree as ET
     from pyxb.namespace import XMLSchema_instance as xsi
     from pyxb.namespace import XMLNamespaces as xmlns
@@ -55,7 +55,7 @@ def writedom_cfdi(d, propos, file_out):
 
     try:
         namespace_set = {
-            'FAC': makeup_fac
+            sa.CfdiType.FAC: makeup_fac
         }[propos]()
         for prefix, uri in namespace_set.items():
             ET.register_namespace(prefix, uri)
@@ -68,7 +68,7 @@ def writedom_cfdi(d, propos, file_out):
            encoding='utf-8', method="xml")
 
 
-def sign_cfdi(file_pk, file_xml, file_xslt):
+def sign_cfdi(file_pk, file_xslt, file_xml):
     """
     signs either cfdi xml
     """
