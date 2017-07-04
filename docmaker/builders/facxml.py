@@ -423,7 +423,7 @@ class FacXml(BuilderGen):
 
         tmp_file = save(c)
         with open(output_file, 'w') as a:
-            a.write(sign_cfdi(dat['KEY_PRIVATE'], i['XSLT_SCRIPT'], tmp_file))
+            a.write(sign_cfdi(dat['KEY_PRIVATE'], dat['XSLT_SCRIPT'], tmp_file))
         os.remove(tmp_file)
 
     def data_rel(self, dat):
