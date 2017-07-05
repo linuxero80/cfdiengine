@@ -312,8 +312,8 @@ class FacXml(BuilderGen):
         c.FormaPago = "01"  # optional
         c.NoCertificado = dat['NUMERO_CERTIFICADO']
         c.Certificado = dat['CERT_B64']
-        c.SubTotal = trunc(dat['TOTALES']['IMPORTE_SUM'])
-        c.Total = trunc(dat['TOTALES']['MONTO_TOTAL'])
+        c.SubTotal = dat['TOTALES']['IMPORTE_SUM']
+        c.Total = dat['TOTALES']['MONTO_TOTAL']
         if dat['MONEDA']['ISO_4217'] == 'MXN':
             c.TipoCambio = 1
         else:
@@ -367,9 +367,6 @@ class FacXml(BuilderGen):
 
     def __tag_traslados(self, i):
 
-        def trunc(m):
-            return truncate(m, 2)
-
         def traslado(b, c, tc, imp):
             return pyxb.BIND(
                 Base=b, TipoFactor='Tasa',
@@ -377,15 +374,12 @@ class FacXml(BuilderGen):
 
         taxes = []
         if i['IMPORTE_IMPUESTO'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), trunc(i['IMPORTE_IMPUESTO'])))
+            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), i['IMPORTE_IMPUESTO']))
         if i['IMPORTE_IEPS'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), trunc(i['IMPORTE_IEPS'])))
+            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), i['IMPORTE_IEPS']))
         return pyxb.BIND(*tuple(taxes))
 
     def __tag_retenciones(self, i):
-
-        def trunc(m):
-            return truncate(m, 2)
 
         def retencion(b, c, tc, imp):
             return pyxb.BIND(
@@ -393,7 +387,7 @@ class FacXml(BuilderGen):
                 Impuesto=c, TasaOCuota=tc, Importe=imp)
 
         return pyxb.BIND(*tuple([
-            retencion(i['IMPORTE'], "001", self.__place_tasa(i['TASA_RETENCION']), trunc(i['IMPORTE_RETENCION']))
+            retencion(i['IMPORTE'], "001", self.__place_tasa(i['TASA_RETENCION']), i['IMPORTE_RETENCION'])
         ]))
 
     def __tag_impuestos(self, i):
