@@ -48,6 +48,14 @@ class Servisim(Adapter):
             xml (str): xml de cfdi firmado por cliente
             xid (str): mi identificador alternativo de cfdi
         """
+        def check(r):
+            try:
+                if r['Codigo'] != 0:
+                    raise AdapterError(r['Descripcion'])
+                return r['Xml']
+            except KeyError:
+                raise AdapterError('unexpected format of PAC reply')
+
         try:
             req, conn = self.__setup_req('ns0:TimbradoCFDIRequest')
             req.TipoPeticion = '1'  # SIGNED BY CUSTOMER
@@ -56,7 +64,9 @@ class Servisim(Adapter):
             self.logger.debug(
                 "The following request for stamp will be sent\n{0}".format(req)
             )
-            return conn.service.timbrarCFDI(req)
+            return check(conn.service.timbrarCFDI(req))
+        except AdapterError:
+            raise
         except (suds.WebFault, Exception) as e:
             raise AdapterError("Stamp experimenting problems: {}".format(e))
 
