@@ -27,10 +27,13 @@ def facturar(logger, pt, req):
         try:
             # Here it would be placed, code calling
             # the pac connector mechanism
-            logger.info('Getting a pac connector as per config profile')
+            logger.debug('Getting a pac connector as per config profile')
             pac, err = setup_pac(logger, pt.tparty.pac)
             if pac is None:
                 raise Exception(err)
+            with open(f) as t:
+                signed = pac.stamp(t.read(), 'HARD_XID')
+                logger.debug(signed)
             return ErrorCode.SUCCESS, f
         except:
             logger.error(dump_exception())
@@ -40,7 +43,7 @@ def facturar(logger, pt, req):
         try:
             # Here it would be placed, code for
             # saving relevant info of newer cfdi in dbms
-            logger.info('saving relevant info of {} in dbms', f)
+            logger.debug('saving relevant info of {} in dbms', f)
             return ErrorCode.SUCCESS
         except:
             logger.error(dump_exception())
