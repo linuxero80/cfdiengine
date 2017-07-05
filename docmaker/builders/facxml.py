@@ -312,8 +312,11 @@ class FacXml(BuilderGen):
         c.Certificado = dat['CERT_B64']
         c.SubTotal = trunc(dat['TOTALES']['IMPORTE_SUM'])
         c.Total = trunc(dat['TOTALES']['MONTO_TOTAL'])
+        if dat['MONEDA']['ISO_4217'] == 'MXN':
+            c.TipoCambio = 1
+        else:
+            c.TipoCambio = trunc(dat['MONEDA']['TIPO_DE_CAMBIO'])  # optional (requerido en ciertos casos)
         c.Moneda = dat['MONEDA']['ISO_4217']
-        c.TipoCambio = trunc(dat['MONEDA']['TIPO_DE_CAMBIO'])  # optional (requerido en ciertos casos)
         c.TipoDeComprobante = 'I'
         c.MetodoPago = "PUE"  # optional and hardcode until ui can suply such value
         c.LugarExpedicion = dat['LUGAR_EXPEDICION']
