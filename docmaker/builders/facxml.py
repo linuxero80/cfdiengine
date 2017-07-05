@@ -196,19 +196,21 @@ class FacXml(BuilderGen):
             'IMPORTE_SUM': 0,
             'IMPORTE_SUM_IMPUESTO': 0,
             'IMPORTE_SUM_IEPS': 0,
-            'IMPORTE_SUM_RETENCION': 0
+            'IMPORTE_SUM_RETENCION': 0,
+            'TASA_RETENCION': 0
         }
+
         for item in l_items:
-            totales['IMPORTE_SUM'] += item['IMPORTE']
-            totales['IMPORTE_SUM_IMPUESTO'] += item['IMPORTE_IMPUESTO']
-            totales['IMPORTE_SUM_IEPS'] += item['IMPORTE_IEPS']
-            totales['IMPORTE_SUM_RETENCION'] += item['IMPORTE_RETENCION']
+            totales['IMPORTE_SUM'] += (item['IMPORTE'])
+            totales['IMPORTE_SUM_IEPS'] += (item['IMPORTE_IEPS'])
+            totales['IMPORTE_SUM_IMPUESTO'] += (item['IMPORTE_IMPUESTO'])
+            totales['TASA_RETENCION'] = item['TASA_RETENCION']
+            totales['IMPORTE_SUM_RETENCION'] += (item['IMPORTE_RETENCION'])
 
-            totales['MONTO_RETENCION'] += item['IMPORTE'] * item['TASA_RETENCION']
-            for label in ['IMPORTE', 'IMPORTE_IMPUESTO', 'IMPORTE_IEPS']:
-                totales['MONTO_TOTAL'] += item[label]
+        totales['MONTO_RETENCION'] = totales['IMPORTE_SUM'] * totales['TASA_RETENCION']
+        totales['MONTO_TOTAL'] = totales['IMPORTE_SUM'] + totales['IMPORTE_SUM_IEPS'] + totales['IMPORTE_SUM_IMPUESTO'] - totales['MONTO_RETENCION']
 
-        totales['MONTO_TOTAL'] -= totales['MONTO_RETENCION']
+        # Sumar el acumulado de retencion de las partidas
         totales['MONTO_RETENCION'] += totales['IMPORTE_SUM_RETENCION']
 
         return totales
@@ -364,6 +366,10 @@ class FacXml(BuilderGen):
             return x
 
     def __tag_traslados(self, i):
+
+        def trunc(m):
+            return truncate(m, 2)
+
         def traslado(b, c, tc, imp):
             return pyxb.BIND(
                 Base=b, TipoFactor='Tasa',
@@ -371,19 +377,23 @@ class FacXml(BuilderGen):
 
         taxes = []
         if i['IMPORTE_IMPUESTO'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), i['IMPORTE_IMPUESTO']))
+            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), trunc(i['IMPORTE_IMPUESTO'])))
         if i['IMPORTE_IEPS'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), i['IMPORTE_IEPS']))
+            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), trunc(i['IMPORTE_IEPS'])))
         return pyxb.BIND(*tuple(taxes))
 
     def __tag_retenciones(self, i):
+
+        def trunc(m):
+            return truncate(m, 2)
+
         def retencion(b, c, tc, imp):
             return pyxb.BIND(
                 Base=b, TipoFactor='Tasa',
                 Impuesto=c, TasaOCuota=tc, Importe=imp)
 
         return pyxb.BIND(*tuple([
-            retencion(i['IMPORTE'], "001", self.__place_tasa(i['TASA_RETENCION']), i['IMPORTE_RETENCION'])
+            retencion(i['IMPORTE'], "001", self.__place_tasa(i['TASA_RETENCION']), trunc(i['IMPORTE_RETENCION']))
         ]))
 
     def __tag_impuestos(self, i):
