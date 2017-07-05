@@ -31,6 +31,7 @@ def facturar(logger, pt, req):
             pac, err = setup_pac(logger, pt.tparty.pac)
             if pac is None:
                 raise Exception(err)
+            logger.debug('File to sign {}'.format(f))
             with open(f) as t:
                 signed = pac.stamp(t.read(), 'HARD_XID')
                 logger.debug(signed)
