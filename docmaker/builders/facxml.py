@@ -351,6 +351,8 @@ class FacXml(BuilderGen):
             certb64 = base64.b64encode(content).decode('ascii')
 
         conceptos = self.__q_conceptos(conn, prefact_id)
+        traslados = self.__calc_traslados(conceptos,
+            self.__q_ieps(conn, usr_id), self.__q_ivas(conn))
 
         sp['PKNAME'] = sp['PKNAME'].replace('.key', '.pem')  # workaround to test
         sp['XSLTNAME'] = "cadenaoriginal_3_3.xslt"  # workaround to test
