@@ -373,6 +373,7 @@ class FacXml(BuilderGen):
             'MONEDA': self.__q_moneda(conn, prefact_id),
             'LUGAR_EXPEDICION': self.__q_lugar_expedicion(conn, usr_id),
             'CONCEPTOS': conceptos,
+            'TRASLADOS': traslados,
             'TOTALES': self.__calc_totales(conceptos)
         }
 
@@ -430,6 +431,24 @@ class FacXml(BuilderGen):
                 Importe=i['IMPORTE'],
                 Impuestos=self.__tag_impuestos(i)
             ))
+
+        def traslado(c, tc, imp):
+            return pyxb.BIND(TipoFactor='Tasa',
+                Impuesto=c, TasaOCuota=tc, Importe=imp)
+
+        def zigma(v):
+            z = 0
+            for w in v:
+                z += w['importe']
+            return z
+
+        c.Impuestos = pyxb.BIND(
+            TotalImpuestosRetenidos=0,
+            TotalImpuestosTrasladados=zigma(dat['TRASLADOS']),
+            Traslados=pyxb.BIND(
+                *tuple([traslado(t['clave'], self.__place_tasa(t['tasa']), t['importe']) for t in dat['TRASLADOS']])
+            )
+        )
 
         tmp_file = save(c)
         with open(output_file, 'w') as a:
