@@ -234,6 +234,7 @@ class FacXml(BuilderGen):
             if impto_id > 0:
                 traslados.append({
                     'impuesto': 'IVA',
+                    'clave': '002',
                     'importe': importe_sum,
                     'tasa': tasa
                 })
@@ -252,6 +253,7 @@ class FacXml(BuilderGen):
             if impto_id > 0:
                 traslados.append({
                     'impuesto': 'IEPS',
+                    'clave': '003',
                     'importe': importe_sum,
                     'tasa': tasa
                 })
@@ -277,7 +279,7 @@ class FacXml(BuilderGen):
         """
         Consulta el total de lo IEPS activos en dbms
         """
-        SQL = """SELECT gral_ieps.id as id, cci.clave as sat_clave,
+        SQL = """SELECT gral_ieps.id as id, cci.clave as clave,
             gral_ieps.titulo as desc, gral_ieps.tasa as tasa
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
@@ -290,7 +292,7 @@ class FacXml(BuilderGen):
         for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             rowset.append({
                 'ID' : row['id'],
-                'SAT_CLAVE': row['sat_clave'],
+                'CLAVE': row['clave'],
                 'DESC': row['desc'],
                 'TASA': row['tasa']
             })
