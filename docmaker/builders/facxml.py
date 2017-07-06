@@ -290,6 +290,7 @@ class FacXml(BuilderGen):
         for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             rowset.append({
                 'ID' : row['id'],
+                'SAT_CLAVE': row['sat_clave'],
                 'DESC': row['desc'],
                 'TASA': row['tasa']
             })
