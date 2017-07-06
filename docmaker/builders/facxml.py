@@ -277,12 +277,13 @@ class FacXml(BuilderGen):
         """
         Consulta el total de lo IEPS activos en dbms
         """
-        SQL = """SELECT gral_ieps.id as id,
+        SQL = """SELECT gral_ieps.id as id, cci.clave as sat_clave,
             gral_ieps.titulo as desc, gral_ieps.tasa as tasa
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
             LEFT JOIN gral_emp AS EMP ON EMP.id = SUC.empresa_id
             LEFT JOIN gral_ieps ON gral_ieps.gral_emp_id = EMP.id
+            LEFT JOIN cfdi_c_impuesto AS cci ON cci.id = gral_ieps.cfdi_c_impuesto
             WHERE gral_ieps.borrado_logico=false AND
             USR_SUC.gral_usr_id="""
         rowset = []
