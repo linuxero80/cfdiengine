@@ -23,7 +23,7 @@ def dict_params(l, k, v):
     return n
 
 
-def truncate(f, n):
+def truncate(f, n, strmode=False):
     """
     Truncates/pads a float f to n decimal places without rounding
     """
@@ -31,4 +31,5 @@ def truncate(f, n):
     if 'e' in s or 'E' in s:
         return '{0:.{1}f}'.format(f, n)
     i, p, d = s.partition('.')
-    return '.'.join([i, (d + '0' * n)[:n]])
+    result = '.'.join([i, (d + '0' * n)[:n]])
+    return result if strmode else float(result)
