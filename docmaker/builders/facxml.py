@@ -18,6 +18,7 @@ impt_class='FacXml'
 
 class FacXml(BuilderGen):
 
+    __NDECIMALS = 2
     __MAKEUP_PROPOS = CfdiType.FAC
 
     def __init__(self, logger):
@@ -212,7 +213,7 @@ class FacXml(BuilderGen):
 
         # Sumar el acumulado de retencion de las partidas
         totales['MONTO_RETENCION'] += totales['IMPORTE_SUM_RETENCION']
-        return totales
+        return {k: truncate(v, self.__NDECIMALS) for k, v in totales.items()}
 
     def __calc_traslados(self, l_items, l_ieps, l_iva):
         """
@@ -235,7 +236,7 @@ class FacXml(BuilderGen):
                 traslados.append({
                     'impuesto': 'IVA',
                     'clave': '002',
-                    'importe': importe_sum,
+                    'importe': truncate(importe_sum, self.__NDECIMALS),
                     'tasa': tasa
                 })
 
@@ -254,7 +255,7 @@ class FacXml(BuilderGen):
                 traslados.append({
                     'impuesto': 'IEPS',
                     'clave': '003',
-                    'importe': importe_sum,
+                    'importe': truncate(importe_sum, self.__NDECIMALS),
                     'tasa': tasa
                 })
         return traslados
@@ -386,9 +387,6 @@ class FacXml(BuilderGen):
             writedom_cfdi(xo.toDOM(), self.__MAKEUP_PROPOS, f)
             return f
 
-        def trunc(m):
-            return truncate(m, 2)
-
         c = Comprobante()
         c.Version = '3.3'
         c.Serie = dat['CONTROL']['SERIE']  # optional
@@ -403,7 +401,8 @@ class FacXml(BuilderGen):
         if dat['MONEDA']['ISO_4217'] == 'MXN':
             c.TipoCambio = 1
         else:
-            c.TipoCambio = trunc(dat['MONEDA']['TIPO_DE_CAMBIO'])  # optional (requerido en ciertos casos)
+            # optional (requerido en ciertos casos)
+            c.TipoCambio = truncate(dat['MONEDA']['TIPO_DE_CAMBIO'], self.__NDECIMALS)
         c.Moneda = dat['MONEDA']['ISO_4217']
         c.TipoDeComprobante = 'I'
         c.MetodoPago = "PUE"  # optional and hardcode until ui can suply such value
@@ -428,7 +427,7 @@ class FacXml(BuilderGen):
                 Descripcion=i['DESCRIPCION'],
                 ValorUnitario=i['PRECIO_UNITARIO'],
                 NoIdentificacion=i['SKU'],  # optional
-                Importe=i['IMPORTE'],
+                Importe=truncate(i['IMPORTE'], self.__NDECIMALS),
                 Impuestos=self.__tag_impuestos(i)
             ))
 
@@ -478,9 +477,9 @@ class FacXml(BuilderGen):
 
         taxes = []
         if i['IMPORTE_IMPUESTO'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), i['IMPORTE_IMPUESTO']))
+            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), truncate(i['IMPORTE_IMPUESTO'], self.__NDECIMALS)))
         if i['IMPORTE_IEPS'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), i['IMPORTE_IEPS']))
+            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), truncate(i['IMPORTE_IEPS'], self.__NDECIMALS)))
         return pyxb.BIND(*tuple(taxes))
 
     def __tag_retenciones(self, i):
