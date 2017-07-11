@@ -468,6 +468,9 @@ class FacXml(BuilderGen):
             # Silent the error and just return value passed
             return x
 
+    def __calc_imp_tax(self, imp, tasa):
+        return truncate(imp * tasa, self.__NDECIMALS)
+
     def __tag_traslados(self, i):
 
         def traslado(b, c, tc, imp):
@@ -477,9 +480,21 @@ class FacXml(BuilderGen):
 
         taxes = []
         if i['IMPORTE_IMPUESTO'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), truncate(i['IMPORTE_IMPUESTO'], self.__NDECIMALS)))
+            taxes.append(
+                traslado(
+                    i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), self.__calc_imp_tax(
+                        i['IMPORTE'], self.__place_tasa(i['TASA_IMPUESTO'])
+                    )
+                )
+            )
         if i['IMPORTE_IEPS'] > 0:
-            taxes.append(traslado(i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), truncate(i['IMPORTE_IEPS'], self.__NDECIMALS)))
+            taxes.append(
+                traslado(
+                    i['IMPORTE'], "003", self.__place_tasa(i['TASA_IEPS']), self.__calc_imp_tax(
+                        i['IMPORTE'], self.__place_tasa(i['TASA_IEPS'])
+                    )
+                )
+            )
         return pyxb.BIND(*tuple(taxes))
 
     def __tag_retenciones(self, i):
