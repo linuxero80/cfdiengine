@@ -207,8 +207,11 @@ class FacXml(BuilderGen):
                 item['IMPORTE'], self.__place_tasa(item['TASA_IEPS'])
             )
             totales['IMPORTE_SUM_IMPUESTO'] += self.__calc_imp_tax(
-                item['IMPORTE'], self.__place_tasa(item['TASA_IMPUESTO'])
+                self.__calc_base(item['IMPORTE'], self.__place_tasa(item['TASA_IEPS'])), self.__place_tasa(item['TASA_IMPUESTO'])
             )
+            # self.__calc_imp_tax(
+            #    item['IMPORTE'], self.__place_tasa(item['TASA_IMPUESTO'])
+            #)
             totales['TASA_RETENCION'] = item['TASA_RETENCION']
             totales['IMPORTE_SUM_RETENCION'] += (item['IMPORTE_RETENCION'])
 
@@ -236,7 +239,7 @@ class FacXml(BuilderGen):
                     impto_id = item['IMPUESTO_ID']
                     tasa = item['TASA_IMPUESTO']
                     importe_sum += self.__calc_imp_tax(
-                        item['IMPORTE'], self.__place_tasa(item['TASA_IMPUESTO'])
+                        self.__calc_base(item['IMPORTE'], self.__place_tasa(item['TASA_IEPS'])), self.__place_tasa(item['TASA_IMPUESTO'])
                     )
             if impto_id > 0:
                 traslados.append({
@@ -479,6 +482,9 @@ class FacXml(BuilderGen):
     def __calc_imp_tax(self, imp, tasa):
         return truncate(imp * tasa, self.__NDECIMALS)
 
+    def __calc_base(self, imp, tasa):
+        return imp + self.__calc_imp_tax(imp, tasa)
+
     def __tag_traslados(self, i):
 
         def traslado(b, c, tc, imp):
@@ -488,10 +494,11 @@ class FacXml(BuilderGen):
 
         taxes = []
         if i['IMPORTE_IMPUESTO'] > 0:
+            base = self.__calc_base(i['IMPORTE'], self.__place_tasa(i['TASA_IEPS']))
             taxes.append(
                 traslado(
-                    i['IMPORTE'], "002", self.__place_tasa(i['TASA_IMPUESTO']), self.__calc_imp_tax(
-                        i['IMPORTE'], self.__place_tasa(i['TASA_IMPUESTO'])
+                    base, "002", self.__place_tasa(i['TASA_IMPUESTO']), self.__calc_imp_tax(
+                        base, self.__place_tasa(i['TASA_IMPUESTO'])
                     )
                 )
             )
@@ -506,7 +513,7 @@ class FacXml(BuilderGen):
         return pyxb.BIND(*tuple(taxes))
 
     def __tag_retenciones(self, i):
-
+        # This function is never used
         def retencion(b, c, tc, imp):
             return pyxb.BIND(
                 Base=b, TipoFactor='Tasa',
