@@ -231,7 +231,9 @@ class FacXml(BuilderGen):
                 if tax['ID'] == item['IMPUESTO_ID']:
                     impto_id = item['IMPUESTO_ID']
                     tasa = item['TASA_IMPUESTO']
-                    importe_sum += item['IMPORTE_IMPUESTO']
+                    importe_sum += self.__calc_imp_tax(
+                        item['IMPORTE'], self.__place_tasa(item['TASA_IMPUESTO'])
+                    )
             if impto_id > 0:
                 traslados.append({
                     'impuesto': 'IVA',
@@ -250,7 +252,9 @@ class FacXml(BuilderGen):
                 if tax['ID'] == item['IEPS_ID']:
                     impto_id = item['IEPS_ID']
                     tasa = item['TASA_IEPS']
-                    importe_sum += item['IMPORTE_IEPS']
+                    importe_sum += self.__calc_imp_tax(
+                        item['IMPORTE'], self.__place_tasa(item['TASA_IEPS'])
+                    )
             if impto_id > 0:
                 traslados.append({
                     'impuesto': 'IEPS',
