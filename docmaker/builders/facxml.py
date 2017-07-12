@@ -143,10 +143,6 @@ class FacXml(BuilderGen):
               erp_prefacturas_detalles.valor_ieps
             ) AS importe_ieps,
             (
-              (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) *
-              erp_prefacturas_detalles.tasa_ret
-            ) AS importe_retencion,
-            (
               (
                 (erp_prefacturas_detalles.cant_facturar * erp_prefacturas_detalles.precio_unitario) +
                 (
@@ -156,7 +152,6 @@ class FacXml(BuilderGen):
               ) * erp_prefacturas_detalles.valor_imp
             ) AS importe_impuesto,
             (erp_prefacturas_detalles.valor_ieps * 100::double precision) AS tasa_ieps,
-            (erp_prefacturas_detalles.tasa_ret * 100::double precision) AS tasa_ret,
             (erp_prefacturas_detalles.valor_imp * 100::double precision) AS tasa_impuesto,
             erp_prefacturas_detalles.gral_ieps_id as ieps_id,
             erp_prefacturas_detalles.tipo_impuesto_id as impto_id
@@ -180,10 +175,8 @@ class FacXml(BuilderGen):
                 'IMPORTE': row['importe'],
                 # From this point onwards tax related elements
                 'IMPORTE_IEPS': row['importe_ieps'],
-                'IMPORTE_RETENCION': row['importe_retencion'],
                 'IMPORTE_IMPUESTO' : row['importe_impuesto'],
                 'TASA_IEPS': row['tasa_ieps'],
-                'TASA_RETENCION': row['tasa_ret'],
                 'TASA_IMPUESTO': row['tasa_impuesto'],
                 'IEPS_ID': row['ieps_id'],
                 'IMPUESTO_ID': row['impto_id']
@@ -193,12 +186,9 @@ class FacXml(BuilderGen):
     def __calc_totales(self, l_items):
         totales = {
             'MONTO_TOTAL': 0,
-            'MONTO_RETENCION': 0,
             'IMPORTE_SUM': 0,
             'IMPORTE_SUM_IMPUESTO': 0,
             'IMPORTE_SUM_IEPS': 0,
-            'IMPORTE_SUM_RETENCION': 0,
-            'TASA_RETENCION': 0
         }
 
         for item in l_items:
@@ -209,14 +199,8 @@ class FacXml(BuilderGen):
             totales['IMPORTE_SUM_IMPUESTO'] += self.__calc_imp_tax(
                 self.__calc_base(item['IMPORTE'], self.__place_tasa(item['TASA_IEPS'])), self.__place_tasa(item['TASA_IMPUESTO'])
             )
-            totales['TASA_RETENCION'] = item['TASA_RETENCION']
-            totales['IMPORTE_SUM_RETENCION'] += (item['IMPORTE_RETENCION'])
 
-        totales['MONTO_RETENCION'] = totales['IMPORTE_SUM'] * totales['TASA_RETENCION']
-        totales['MONTO_TOTAL'] = totales['IMPORTE_SUM'] + totales['IMPORTE_SUM_IEPS'] + totales['IMPORTE_SUM_IMPUESTO'] - totales['MONTO_RETENCION']
-
-        # Sumar el acumulado de retencion de las partidas
-        totales['MONTO_RETENCION'] += totales['IMPORTE_SUM_RETENCION']
+        totales['MONTO_TOTAL'] = totales['IMPORTE_SUM'] + totales['IMPORTE_SUM_IEPS'] + totales['IMPORTE_SUM_IMPUESTO']
         return {k: truncate(v, self.__NDECIMALS) for k, v in totales.items()}
 
     def __calc_traslados(self, l_items, l_ieps, l_iva):
@@ -311,8 +295,7 @@ class FacXml(BuilderGen):
         """
         Consulta parametros requeridos para firmado cfdi
         """
-        SQL = """SELECT fac_cfds_conf.password_llave as passwd,
-            fac_cfds_conf.archivo_llave as pk,
+        SQL = """SELECT fac_cfds_conf.archivo_llave as pk,
             fac_cfds_conf.archivo_xsl as xslt
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
@@ -322,7 +305,6 @@ class FacXml(BuilderGen):
             # Just taking first row of query result
             return {
                 'PKNAME': row['pk'],
-                'PKPASSWD': row['passwd'],
                 'XSLTNAME': row['xslt']
             }
 
@@ -509,26 +491,10 @@ class FacXml(BuilderGen):
             )
         return pyxb.BIND(*tuple(taxes))
 
-    def __tag_retenciones(self, i):
-        # This function is never used
-        def retencion(b, c, tc, imp):
-            return pyxb.BIND(
-                Base=b, TipoFactor='Tasa',
-                Impuesto=c, TasaOCuota=tc, Importe=imp)
-
-        return pyxb.BIND(*tuple([
-            retencion(i['IMPORTE'], "001", self.__place_tasa(i['TASA_RETENCION']), i['IMPORTE_RETENCION'])
-        ]))
-
     def __tag_impuestos(self, i):
-
         notaxes = True
         kwargs = {}
         if i['IMPORTE_IMPUESTO'] > 0 or i['IMPORTE_IEPS'] > 0:
             notaxes = False
             kwargs['Traslados'] = self.__tag_traslados(i)
-        if i['IMPORTE_RETENCION'] > 0:
-            notaxes = False
-            kwargs['Retenciones'] = self.__tag_retenciones(i)
-
         return pyxb.BIND() if notaxes else pyxb.BIND(**kwargs)
