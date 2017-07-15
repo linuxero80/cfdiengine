@@ -7,9 +7,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.units import cm 
-from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfgen import canvas
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 
 import misc.helperxml as xmltricks
 import misc.helperstr as strtricks
@@ -97,7 +95,7 @@ class FacPdf(BuilderGen):
             gral_mon.descripcion_abr AS currency_abr,
             cxc_clie.numero_control AS customer_control_id,
             fac_docs.observaciones,
-    		fac_docs.no_cuenta,
+            fac_docs.no_cuenta,
             (SELECT
                 ARRAY(
                     SELECT leyenda FROM gral_emp_leyenda
@@ -233,6 +231,9 @@ class FacPdf(BuilderGen):
         )
         doc.build(story, canvasmaker=NumberedCanvas)
         return
+
+    def data_rel(self, dat):
+        pass
 
     def __amount_section(self, dat):
 
@@ -577,11 +578,11 @@ class FacPdf(BuilderGen):
 
             t = Table(cont,
                 [
-                    5  * cm,
+                    5 * cm,
                 ],
                 [
                     0.40 * cm,
-                    0.37* cm,
+                    0.37 * cm,
                     0.37 * cm,
                     0.38 * cm,
                     0.38 * cm,
