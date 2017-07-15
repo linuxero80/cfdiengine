@@ -295,8 +295,7 @@ class FacXml(BuilderGen):
         """
         Consulta parametros requeridos para firmado cfdi
         """
-        SQL = """SELECT fac_cfds_conf.archivo_llave as pk,
-            fac_cfds_conf.archivo_xsl as xslt
+        SQL = """SELECT fac_cfds_conf.archivo_llave as pk
             FROM gral_suc AS SUC
             LEFT JOIN gral_usr_suc AS USR_SUC ON USR_SUC.gral_suc_id = SUC.id
             LEFT JOIN fac_cfds_conf ON fac_cfds_conf.gral_suc_id = SUC.id
@@ -304,8 +303,7 @@ class FacXml(BuilderGen):
         for row in self.pg_query(conn, "{0}{1}".format(SQL, usr_id)):
             # Just taking first row of query result
             return {
-                'PKNAME': row['pk'],
-                'XSLTNAME': row['xslt']
+                'PKNAME': row['pk']
             }
 
     def __q_cert_file(self, conn, usr_id):
@@ -336,7 +334,6 @@ class FacXml(BuilderGen):
 
         # dirs with full emisor rfc path
         sslrfc_dir = os.path.join(d_rdirs['ssl'], ed['RFC'])
-        xsltrfc_dir = os.path.join(d_rdirs['cfdi_xslt'], ed['RFC'])
 
         cert_file = os.path.join(
                        sslrfc_dir, self.__q_cert_file(conn, usr_id))
@@ -349,15 +346,12 @@ class FacXml(BuilderGen):
         traslados = self.__calc_traslados(conceptos,
             self.__q_ieps(conn, usr_id), self.__q_ivas(conn))
 
-        sp['PKNAME'] = sp['PKNAME'].replace('.key', '.pem')  # workaround to test
-        sp['XSLTNAME'] = "cadenaoriginal_3_3.xslt"  # workaround to test
-
         return {
             'TIME_STAMP': '{0:%Y-%m-%dT%H:%M:%S}'.format(datetime.datetime.now()),
             'CONTROL': self.__q_serie_folio(conn, usr_id),
             'CERT_B64': certb64,
-            'KEY_PRIVATE': os.path.join(sslrfc_dir, sp['PKNAME']),
-            'XSLT_SCRIPT': os.path.join(xsltrfc_dir, sp['XSLTNAME']),
+            'KEY_PRIVATE': os.path.join(sslrfc_dir, sp['PKNAME'].replace('.key', '.pem')),
+            'XSLT_SCRIPT': os.path.join(d_rdirs['cfdi_xslt'], "cadenaoriginal_3_3.xslt"),
             'EMISOR': ed,
             'NUMERO_CERTIFICADO': self.__q_no_certificado(conn, usr_id),
             'RECEPTOR': self.__q_receptor(conn, prefact_id),
