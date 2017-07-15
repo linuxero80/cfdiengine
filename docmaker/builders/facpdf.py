@@ -169,12 +169,9 @@ class FacPdf(BuilderGen):
         if not os.path.isfile(cedula_filename):
             raise DocBuilderStepError("cedula image {0} not found".format(cedula_filename))
 
-        f_xslt = os.path.join(
-            os.path.join(d_rdirs['cfdi_xslt'], rfc),
-            'cadena_original_timbre.xslt'
-        )
+        f_xslt = os.path.join(d_rdirs['cfdi_xslt'], 'cadenaoriginal_TFD_1_1.xslt')
         if not os.path.isfile(f_xslt):
-            raise DocBuilderStepError("cadena_original_timbre.xslt not found")
+            raise DocBuilderStepError("cadena_original_timbre xslt file not found")
 
         xml_parsed, original = fetch_info(f_xml, f_xslt)
 
