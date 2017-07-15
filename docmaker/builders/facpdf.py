@@ -12,6 +12,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 
 import misc.helperxml as xmltricks
+import misc.helperstr as strtricks
 import sat.reader as xmlreader
 import os
 
@@ -139,7 +140,7 @@ class FacPdf(BuilderGen):
             except xml.sax.SAXParseException as e:
                 raise DocBuilderStepError("cfdi xml could not be parsed : {}".format(e))
             except Exception as e:
-                raise DocBuilderStepError("xsl could not be applied : {}".format(e)
+                raise DocBuilderStepError("xsl could not be applied : {}".format(e))
 
         def extra(serie_folio, c):
             try:
@@ -266,9 +267,7 @@ class FacPdf(BuilderGen):
                 [
                     dat['CAP_LOADED']['TL_ART_SUBT'],
                     dat['EXTRA_INFO']['CURRENCY_ABR'],
-                    currency_format(
-                        __chomp_extra_zeroes(dat['XML_PARSED']['CFDI_SUBTOTAL'])
-                    )
+                    strtricks.HelperStr.format_currency(dat['XML_PARSED']['CFDI_SUBTOTAL'])
                 ]
             ]
 
@@ -281,13 +280,13 @@ class FacPdf(BuilderGen):
                         tasa
                     ),
                     dat['EXTRA_INFO']['CURRENCY_ABR'],
-                    currency_format(__chomp_extra_zeroes(imptras['IMPORTE']))
+                    strtricks.HelperStr.format_currency(imptras['IMPORTE'])
                 ]
                 cont.append(row)
 
             cont.append([
                 dat['CAP_LOADED']['TL_ART_TOTAL'], dat['EXTRA_INFO']['CURRENCY_ABR'],
-                currency_format(__chomp_extra_zeroes(dat['XML_PARSED']['CFDI_TOTAL']))
+                strtricks.HelperStr.format_currency(dat['XML_PARSED']['CFDI_TOTAL'])
             ])
             table_total = Table(cont,
                 [
@@ -347,9 +346,9 @@ class FacPdf(BuilderGen):
                 i['NOIDENTIFICACION'],
                 Paragraph(i['DESCRIPCION'], st),
                 i['UNIDAD'].upper(),
-                currency_format(__chomp_extra_zeroes(i['CANTIDAD'])),
-                add_currency_simbol(currency_format(__chomp_extra_zeroes(i['VALORUNITARIO']))),
-                add_currency_simbol(currency_format(__chomp_extra_zeroes(i['IMPORTE'])))
+                strtricks.HelperStr.format_currency(i['CANTIDAD']),
+                add_currency_simbol(strtricks.HelperStr.format_currency(i['VALORUNITARIO'])),
+                add_currency_simbol(strtricks.HelperStr.format_currency(i['IMPORTE']))
             ]
             cont_concepts.append(row)
 
