@@ -75,7 +75,7 @@
                 },
                 {
                     "name": "cfdi_xslt",
-                    "value": "schemas/xsl"
+                    "value": "xslt"
                 }
             ]
         }
