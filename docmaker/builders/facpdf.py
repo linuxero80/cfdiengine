@@ -11,6 +11,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfgen import canvas
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 
+import misc.helperxml as xmltricks
+import sat.reader as xmlreader
 import os
 
 
@@ -131,9 +133,9 @@ class FacPdf(BuilderGen):
     def data_acq(self, conn, d_rdirs, **kwargs):
 
         def fetch_info(f, xslt):
-            parser = CfdiReader()
-            try:
-                return parser(f) , __apply_xslt(f, xslt)
+            parser = xmlreader.SaxReader()
+            try:.
+                return parser(f) , xmltricks.HelperXml.run_xslt(f, xslt)
             except xml.sax.SAXParseException as e:
                 raise DocBuilderStepError("cfdi xml could not be parsed : {}".format(e))
             except Exception as e:
