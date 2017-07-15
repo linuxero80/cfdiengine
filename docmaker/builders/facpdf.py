@@ -194,6 +194,7 @@ class FacPdf(BuilderGen):
 
         story.append(self.__top_table(logo, dat))
         story.append(Spacer(1, 0.4 * cm))
+        story.append(self.__customer_table(dat))
 
         def fp_foot(c, d):
             c.saveState()
@@ -214,6 +215,98 @@ class FacPdf(BuilderGen):
         )
         doc.build(story, canvasmaker=NumberedCanvas)
         return
+
+    def __customer_table(self, dat):
+
+        def customer_sec():
+            c = []
+            c.append([ dat['CAP_LOADED']['TL_CUST_NAME'] ])
+            c.append([ dat['XML_PARSED']['RECEPTOR_NAME'].upper() ])
+            c.append([ dat['CAP_LOADED']['TL_CUST_REG'] ] )
+            c.append([ dat['XML_PARSED']['RECEPTOR_RFC'].upper() ])
+            c.append([ dat['CAP_LOADED']['TL_CUST_ADDR'] ])
+            c.append([ (
+                "{0} {1}".format(
+                    dat['XML_PARSED']['RECEPTOR_STREET'],
+                    dat['XML_PARSED']['RECEPTOR_STREET_NUMBER']
+            )).upper() ])
+            c.append([ dat['XML_PARSED']['RECEPTOR_SETTLEMENT'].upper() ])
+            c.append([ "{0}, {1}".format(
+                dat['XML_PARSED']['RECEPTOR_TOWN'],
+                dat['XML_PARSED']['RECEPTOR_STATE']
+            ).upper()])
+            c.append([ dat['XML_PARSED']['RECEPTOR_COUNTRY'].upper() ])
+            c.append([ "%s %s" % ( dat['CAP_LOADED']['TL_CUST_ZIPC'], dat['XML_PARSED']['RECEPTOR_CP']) ])
+            t = Table(c,
+                [
+                    8.6 * cm   # rowWitdhs
+                ],
+                [0.35*cm] * 10 # rowHeights
+            )
+            t.setStyle(TableStyle([
+                # Body and header look and feel (common)
+                ('ROWBACKGROUNDS', (0, 0), (-1, 4), [colors.sandybrown, colors.white]),
+                ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 7),
+                ('FONT', (0, 1), (-1, 1), 'Helvetica', 7),
+                ('FONT', (0, 2), (-1, 2), 'Helvetica-Bold', 7),
+                ('FONT', (0, 3), (-1, 3), 'Helvetica', 7),
+                ('FONT', (0, 4), (-1, 4), 'Helvetica-Bold', 7),
+                ('FONT', (0, 5), (-1, 9), 'Helvetica', 7),
+            ]))
+            return t
+
+        def addons():
+            c = []
+            c.append([dat['CAP_LOADED']['TL_CUST_NUM'], dat['CAP_LOADED']['TL_PAY_MET']])
+            c.append([dat['EXTRA_INFO']['CUSTOMER_CONTROL_ID'], dat['XML_PARSED']['METODO_PAGO']])
+            c.append([dat['CAP_LOADED']['TL_ORDER_NUM'], dat['CAP_LOADED']['TL_PAY_COND']])
+            c.append([dat['EXTRA_INFO']['PURCHASE_NUMBER'], dat['EXTRA_INFO']['PAYMENT_CONSTRAINT']])
+            c.append([dat['CAP_LOADED']['TL_BILL_CURR'], dat['CAP_LOADED']['TL_PAY_WAY']])
+            c.append([dat['EXTRA_INFO']['CURRENCY_ABR'], dat['XML_PARSED']['FORMA_PAGO']])
+            c.append([dat['CAP_LOADED']['TL_BILL_EXC_RATE'], dat['CAP_LOADED']['TL_ACC_NUM']])
+            c.append([dat['XML_PARSED']['MONEY_EXCHANGE'], dat['EXTRA_INFO']['NO_CUENTA']])
+            c.append([dat['CAP_LOADED']['TL_PAY_DATE'], dat['CAP_LOADED']['TL_SALE_MAN']])
+            c.append([dat['EXTRA_INFO']['PAYMENT_DATE'], dat['EXTRA_INFO']['SALES_MAN']])
+            t = Table(c,
+                [
+                    4.0 * cm,
+                    7.0 * cm  # rowWitdhs
+                ],
+                [0.35 * cm] * 10  # rowHeights
+            )
+            t.setStyle(TableStyle([
+                # Body and header look and feel (common)
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 7),
+                ('FONT', (0, 1), (-1, 1), 'Helvetica', 7),
+                ('FONT', (0, 2), (-1, 2), 'Helvetica-Bold', 7),
+                ('FONT', (0, 3), (-1, 3), 'Helvetica', 7),
+                ('FONT', (0, 4), (-1, 4), 'Helvetica-Bold', 7),
+                ('FONT', (0, 5), (-1, 5), 'Helvetica', 7),
+                ('FONT', (0, 6), (-1, 6), 'Helvetica-Bold', 7),
+                ('FONT', (0, 7), (-1, 7), 'Helvetica', 7),
+                ('FONT', (0, 8), (-1, 8), 'Helvetica-Bold', 7),
+                ('FONT', (0, 9), (-1, 9), 'Helvetica', 7),
+                ('ROWBACKGROUNDS', (0, 0), (-1, -1), [colors.sandybrown, colors.white]),
+                ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+            ]))
+            return t
+
+        table = Table([[customer_sec(), addons()]], [
+            8.4 * cm,
+            12 * cm
+        ])
+        table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+            ('ALIGN', (-1, -1), (-1, -1), 'RIGHT'),
+        ]))
+        return table
 
     def __top_table(self, logo, dat):
 
