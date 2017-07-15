@@ -195,6 +195,10 @@ class FacPdf(BuilderGen):
         story.append(self.__top_table(logo, dat))
         story.append(Spacer(1, 0.4 * cm))
         story.append(self.__customer_table(dat))
+        story.append(Spacer(1, 0.4 * cm))
+        story.append(self.__items_section(dat))
+        story.append(self.__amount_section(dat))
+        story.append(Spacer(1, 0.45 * cm))
 
         def fp_foot(c, d):
             c.saveState()
@@ -215,6 +219,179 @@ class FacPdf(BuilderGen):
         )
         doc.build(story, canvasmaker=NumberedCanvas)
         return
+
+    def __amount_section(self, dat):
+
+        def letra_section():
+            c = [[''], ["IMPORTE CON LETRA"]]
+            (c, d) = dat['XML_PARSED']['CFDI_TOTAL'].split('.')
+            n = numspatrans(c)
+            result = "{0} {1} {2}/100 {3}".format(
+                n.upper(),
+                dat['EXTRA_INFO']['CURRENCY_NAME'],
+                d,
+                dat['EXTRA_INFO']['CURRENCY_ABR']
+            )
+            # substitute multiple whitespace with single whitespace
+            c.append([' '.join(result.split())])
+            table_letra = Table(c,
+                [
+                    12.3 * cm  # rowWitdhs
+                ],
+                [0.4 * cm] * len(c)  # rowHeights
+            )
+            table_letra.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONT', (0, 1), (-1, 1), 'Helvetica-Bold', 7),
+                ('FONT', (0, 2), (-1, 2), 'Helvetica', 7),
+            ]))
+            return table_letra
+
+        def total_section():
+            cont = [
+                [
+                    dat['CAP_LOADED']['TL_ART_SUBT'],
+                    dat['EXTRA_INFO']['CURRENCY_ABR'],
+                    currency_format(
+                        __chomp_extra_zeroes(dat['XML_PARSED']['CFDI_SUBTOTAL'])
+                    )
+                ]
+            ]
+
+            for imptras in dat['XML_PARSED']['TAXES']['TRAS']['DETAILS']:
+                (tasa, _) = imptras['TASA'].split('.')
+
+                row = [
+                    "{0} {1}%".format(
+                        'TAX' if dat['CAP_LOADED']['TL_DOC_LANG'] == 'ENGLISH' else imptras['IMPUESTO'],
+                        tasa
+                    ),
+                    dat['EXTRA_INFO']['CURRENCY_ABR'],
+                    currency_format(__chomp_extra_zeroes(imptras['IMPORTE']))
+                ]
+                cont.append(row)
+
+            cont.append([
+                dat['CAP_LOADED']['TL_ART_TOTAL'], dat['EXTRA_INFO']['CURRENCY_ABR'],
+                currency_format(__chomp_extra_zeroes(dat['XML_PARSED']['CFDI_TOTAL']))
+            ])
+            table_total = Table(cont,
+                [
+                    3.8 * cm,
+                    1.28 * cm,
+                    2.5 * cm  # rowWitdhs
+                ],
+                [0.4 * cm] * len(cont)  # rowHeights
+            )
+            table_total.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+                ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+
+                ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 7),
+
+                ('BOX', (1, 0), (2, -1), 0.25, colors.black),
+
+                ('FONT', (1, 0), (1, 1), 'Helvetica', 7),
+                ('FONT', (1, 2), (1, 2), 'Helvetica-Bold', 7),
+                ('FONT', (-1, 0), (-1, -1), 'Helvetica-Bold', 7),
+            ]))
+            return table_total
+
+        cont = [[letra_section(), total_section()]]
+        table = Table(cont,
+            [
+               12.4 * cm,
+               8 * cm
+            ],
+            [1.31 * cm] * len(cont)  # rowHeights
+        )
+        table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+            ('ALIGN', (-1, -1), (-1, -1), 'RIGHT'),
+        ]))
+        return table
+
+    def __items_section(self, dat):
+        add_currency_simbol = lambda c: '${0:>40}'.format(c)
+
+        st = ParagraphStyle(
+            name='info',
+            fontName='Helvetica',
+            fontSize=7,
+            leading=8
+        )
+        header_concepts = (
+            dat['CAP_LOADED']['TL_ART_SKU'], dat['CAP_LOADED']['TL_ART_DES'],
+            dat['CAP_LOADED']['TL_ART_UNIT'], dat['CAP_LOADED']['TL_ART_QUAN'],
+            dat['CAP_LOADED']['TL_ART_UP'], dat['CAP_LOADED']['TL_ART_AMNT']
+        )
+
+        cont_concepts = []
+        for i in dat['XML_PARSED']['ARTIFACTS']:
+            row = [
+                i['NOIDENTIFICACION'],
+                Paragraph(i['DESCRIPCION'], st),
+                i['UNIDAD'].upper(),
+                currency_format(__chomp_extra_zeroes(i['CANTIDAD'])),
+                add_currency_simbol(currency_format(__chomp_extra_zeroes(i['VALORUNITARIO']))),
+                add_currency_simbol(currency_format(__chomp_extra_zeroes(i['IMPORTE'])))
+            ]
+            cont_concepts.append(row)
+
+        cont = [header_concepts] + cont_concepts
+
+        table = Table(cont,
+            [
+                2.2 * cm,
+                5.6 * cm,
+                2.3 * cm,
+                2.3 * cm,
+                3.8 * cm,
+                3.8 * cm
+            ]
+        )
+
+        table.setStyle( TableStyle([
+            #Body and header look and feel (common)
+            ('ALIGN', (0,0),(-1,0), 'CENTER'),
+            ('VALIGN', (0,0),(-1,-1), 'TOP'),
+            ('BOX', (0, 0), (-1, 0), 0.25, colors.black),
+            ('BACKGROUND', (0,0),(-1,0), colors.black),
+            ('TEXTCOLOR', (0,0),(-1,0), colors.white),
+            ('FONT', (0, 0), (-1, -1), 'Helvetica', 7),
+            ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 7),
+            ('ROWBACKGROUNDS', (0, 1),(-1, -1), [colors.white, colors.sandybrown]),
+            ('ALIGN', (0, 1),(1, -1), 'LEFT'),
+            ('ALIGN', (2, 0),(2, -1), 'CENTER'),
+            ('ALIGN', (3, 1),(-1, -1), 'RIGHT'),
+
+            #Clave column look and feel (specific)
+            ('BOX', (0, 1), (0, -1), 0.25, colors.black),
+
+            #Description column look and feel (specific)
+            ('BOX', (1, 1), (1, -1), 0.25, colors.black),
+
+            #Unit column look and feel (specific)
+            ('BOX', (2, 1), (2, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (3, 1),(3, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (4, 1),(4, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (5, 1),(5, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (6, 1),(6, -1), 0.25, colors.black),
+
+            #Amount column look and feel (specific)
+            ('BOX', (7, 1),(7, -1), 0.25, colors.black),
+        ]))
+        return table
 
     def __customer_table(self, dat):
 
