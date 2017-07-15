@@ -101,12 +101,6 @@ class FacPdf(BuilderGen):
                     SELECT leyenda FROM gral_emp_leyenda
                      WHERE gral_emp_id = cxc_clie.empresa_id
                 ) as legends
-            ),
-            (SELECT
-                ARRAY(
-                    SELECT leyenda_eng FROM gral_emp_leyenda
-                     WHERE gral_emp_id = cxc_clie.empresa_id
-                ) as legends_eng
             )
             FROM fac_docs
             LEFT JOIN cxc_clie_credias ON cxc_clie_credias.id = fac_docs.terminos_id
@@ -114,7 +108,7 @@ class FacPdf(BuilderGen):
             JOIN cxc_agen ON cxc_agen.id =  fac_docs.cxc_agen_id
             JOIN cxc_clie ON fac_docs.cxc_clie_id = cxc_clie.id
             WHERE fac_docs.serie_folio="""
-        for row in self.pg_query(conn, "{0}{1}".format(__EXTRA_INF_SQL, serie_folio)):
+        for row in self.pg_query(conn, "{0}'{1}'".format(__EXTRA_INF_SQL, serie_folio)):
             # Just taking first row of query result
             return {
                 'PURCHASE_NUMBER': row['purchase_number'] if row['purchase_number'] else 'N/D',
@@ -126,7 +120,7 @@ class FacPdf(BuilderGen):
                 'CURRENCY_NAME': row['currency_name'],
                 'NO_CUENTA': row['no_cuenta'],
                 'OBSERVACIONES': row['observaciones'],
-                'BILL_LEGENDS': row['legends'] if cap == 'SPA' else row['legends_eng']
+                'BILL_LEGENDS': row['legends']
             }
 
     def data_acq(self, conn, d_rdirs, **kwargs):
