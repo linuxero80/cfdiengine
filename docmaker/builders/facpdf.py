@@ -134,7 +134,7 @@ class FacPdf(BuilderGen):
 
         def fetch_info(f, xslt):
             parser = xmlreader.SaxReader()
-            try:.
+            try:
                 return parser(f) , xmltricks.HelperXml.run_xslt(f, xslt)
             except xml.sax.SAXParseException as e:
                 raise DocBuilderStepError("cfdi xml could not be parsed : {}".format(e))
@@ -147,10 +147,14 @@ class FacPdf(BuilderGen):
             except Exception as e:
                 raise DocBuilderStepError("loading extra info fails: {}".format(e))
 
+        rfc = kwargs.get('rfc', None)
+        if rfc is None:
+            raise DocBuilderStepError("rfc not found")
+
         xml = kwargs.get('xml', None)
         if xml is None:
             raise DocBuilderStepError("xml not found")
-        f_xml = os.path.join(d_rdirs['cfdi_output'], ed['RFC'], xml)
+        f_xml = os.path.join(d_rdirs['cfdi_output'], rfc, xml)
         if not os.path.isfile(f_xml):
             raise DocBuilderStepError("cfdi xml not found")
 
@@ -158,15 +162,22 @@ class FacPdf(BuilderGen):
         if not cap in self.__CAPTIONS:
             raise DocBuilderStepError("caption {0} not found".format(cap))
 
-        logo_filename = os.path.join(d_rdirs['images'], "{}_logo.png".format(ed['RFC']))
+        logo_filename = os.path.join(d_rdirs['images'], "{}_logo.png".format(rfc))
         if not os.path.isfile(logo_filename):
             raise DocBuilderStepError("logo image {0} not found".format(logo_filename))
 
-        cedula_filename = os.path.join(d_rdirs['images'], "{}_cedula.png".format(ed['rfc'])
+        cedula_filename = os.path.join(d_rdirs['images'], "{}_cedula.png".format(rfc))
         if not os.path.isfile(cedula_filename):
             raise DocBuilderStepError("cedula image {0} not found".format(cedula_filename))
 
-        xml_parsed, original = fetch_info(f_xml, xslt)
+        f_xslt = os.path.join(
+            os.path.join(d_rdirs['cfdi_xslt'], rfc),
+            'cadena_original_timbre.xslt'
+        )
+        if not os.path.isfile(f_xslt):
+            raise DocBuilderStepError("cadena_original_timbre.xslt not found")
+
+        xml_parsed, original = fetch_info(f_xml, f_xslt)
 
         return {
             'CAP_LOADED': self.__CAPTIONS[cap],
