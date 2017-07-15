@@ -20,6 +20,10 @@ class SaxReader(xml.sax.ContentHandler):
 
     def __reset(self):
         self.__ds = {
+            'INCEPTOR_NAME': None,
+            'INCEPTOR_RFC': None,
+            'RECEPTOR_NAME': None,
+            'RECEPTOR_RFC': None,
             'CFDI_CERT_NUMBER': None,
             'CFDI_DATE': None,
             'CFDI_SERIE': None,
@@ -39,6 +43,20 @@ class SaxReader(xml.sax.ContentHandler):
         }
 
     def startElement(self, name, attrs):
+
+        if name == "cfdi:Emisor":
+            for (k, v) in attrs.items():
+                if k == "Nombre":
+                    self.__ds['INCEPTOR_NAME'] = v
+                if k == "Rfc":
+                    self.__ds['INCEPTOR_RFC'] = v
+
+        if name == "cfdi:Receptor":
+            for (k, v) in attrs.items():
+                if k == "Nombre":
+                    self.__ds['RECEPTOR_NAME'] = v
+                if k == "Rfc":
+                    self.__ds['RECEPTOR_RFC'] = v
 
         if name == "cfdi:Comprobante":
             for (k, v) in attrs.items():
