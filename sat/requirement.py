@@ -4,7 +4,7 @@ def qrcode_cfdi(as_usr, uuid, erfc, rrfc, total, chunk):
     """
     creates qrcode as per cfdi v33 constrains
     """
-
+    import tempfile
     import qrcode
     from misc.helperstr import HelperStr
 
