@@ -259,6 +259,10 @@ class FacPdf(BuilderGen):
         story.append(self.__info_cert_extra(dat))
         story.append(Spacer(1, 0.6 * cm))
 
+        lt = self.__legend_section(dat)
+        if lt is not None:
+            story.append(lt)
+
         def fp_foot(c, d):
             c.saveState()
             width, height = letter
@@ -281,6 +285,29 @@ class FacPdf(BuilderGen):
 
     def data_rel(self, dat):
         pass
+
+    def __legend_section(self, dat):
+        if len(dat['EXTRA_INFO']['BILL_LEGENDS']) == 0:
+            return None
+
+        st = ParagraphStyle(name='info', alignment=TA_CENTER, fontName='Helvetica', fontSize=7, leading = 7)
+
+        cont = []
+        for l in dat['EXTRA_INFO']['BILL_LEGENDS']:
+            row = [
+                Paragraph(l, st)
+            ]
+            cont.append(row)
+        table = Table(cont,
+            [
+                20.0 * cm
+            ]
+        )
+        table.setStyle( TableStyle([
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        return table
 
     def __info_cert_section(self, dat):
         cont = [['INFORMACIÓN DEL TIMBRE FISCAL DIGITAL']]
