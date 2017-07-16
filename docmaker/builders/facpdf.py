@@ -123,7 +123,9 @@ class FacPdf(BuilderGen):
                 'RECEPTOR_COUNTRY': row['rpais'],
                 'RECEPTOR_STATE': row['restado'],
                 'RECEPTOR_TOWN': row['rcolonia'],
-                'RECEPTOR_CP': row['rcp']
+                'RECEPTOR_CP': row['rcp'],
+                'FORMA_PAGO': "XXX",
+                'METODO_PAGO': "XXX"
             }
 
     def __load_extra_info(self, conn, serie_folio, cap):
@@ -382,7 +384,7 @@ class FacPdf(BuilderGen):
             row = [
                 i['NOIDENTIFICACION'],
                 Paragraph(i['DESCRIPCION'], st),
-                i['UNIDAD'].upper(),
+                i['CLAVEUNIDAD'].upper(),
                 strtricks.HelperStr.format_currency(i['CANTIDAD']),
                 add_currency_simbol(strtricks.HelperStr.format_currency(i['VALORUNITARIO'])),
                 add_currency_simbol(strtricks.HelperStr.format_currency(i['IMPORTE']))
@@ -488,11 +490,11 @@ class FacPdf(BuilderGen):
         def addons():
             c = []
             c.append([dat['CAP_LOADED']['TL_CUST_NUM'], dat['CAP_LOADED']['TL_PAY_MET']])
-            c.append([dat['EXTRA_INFO']['CUSTOMER_CONTROL_ID'], dat['XML_PARSED']['METODO_PAGO']])
+            c.append([dat['EXTRA_INFO']['CUSTOMER_CONTROL_ID'], dat['XML_LACK']['METODO_PAGO']])
             c.append([dat['CAP_LOADED']['TL_ORDER_NUM'], dat['CAP_LOADED']['TL_PAY_COND']])
             c.append([dat['EXTRA_INFO']['PURCHASE_NUMBER'], dat['EXTRA_INFO']['PAYMENT_CONSTRAINT']])
             c.append([dat['CAP_LOADED']['TL_BILL_CURR'], dat['CAP_LOADED']['TL_PAY_WAY']])
-            c.append([dat['EXTRA_INFO']['CURRENCY_ABR'], dat['XML_PARSED']['FORMA_PAGO']])
+            c.append([dat['EXTRA_INFO']['CURRENCY_ABR'], dat['XML_LACK']['FORMA_PAGO']])
             c.append([dat['CAP_LOADED']['TL_BILL_EXC_RATE'], dat['CAP_LOADED']['TL_ACC_NUM']])
             c.append([dat['XML_PARSED']['MONEY_EXCHANGE'], dat['EXTRA_INFO']['NO_CUENTA']])
             c.append([dat['CAP_LOADED']['TL_PAY_DATE'], dat['CAP_LOADED']['TL_SALE_MAN']])
