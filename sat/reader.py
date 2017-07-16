@@ -22,6 +22,7 @@ class SaxReader(xml.sax.ContentHandler):
         self.__ds = {
             'INCEPTOR_NAME': None,
             'INCEPTOR_RFC': None,
+            'INCEPTOR_CP': None,
             'RECEPTOR_NAME': None,
             'RECEPTOR_RFC': None,
             'CFDI_CERT_NUMBER': None,

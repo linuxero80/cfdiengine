@@ -88,7 +88,8 @@ class FacPdf(BuilderGen):
             gral_emp.colonia as colonia,
             gral_emp.numero_exterior as no,
             gral_edo.titulo as estado,
-            gral_mun.titulo as municipio
+            gral_mun.titulo as municipio,
+            gral_mun.titulo || ', ' || gral_edo.titulo as lugar_exp
             FROM fac_docs
             JOIN cxc_clie ON fac_docs.cxc_clie_id = cxc_clie.id
             JOIN gral_emp ON gral_emp.id = cxc_clie.empresa_id
@@ -99,6 +100,7 @@ class FacPdf(BuilderGen):
         for row in self.pg_query(conn, "{0}'{1}'".format(SQL, serie_folio)):
             # Just taking first row of query result
             return {
+                'CFDI_ORIGIN_PLACE': row['lugar_exp'],
                 'INCEPTOR_REGIMEN': row['regimen'],
                 'INCEPTOR_TOWN': row['colonia'],
                 'INCEPTOR_SETTLEMENT': row['municipio'],
@@ -534,7 +536,7 @@ class FacPdf(BuilderGen):
                 town=dat['XML_LACK']['INCEPTOR_TOWN'].upper(),
                 cp=dat['XML_PARSED']['INCEPTOR_CP'].upper(),
                 regimen=dat['XML_LACK']['INCEPTOR_REGIMEN'].upper(),
-                op=dat['XML_PARSED']['CFDI_ORIGIN_PLACE'].upper(), fontSize='7', fontName='Helvetica'
+                op=dat['XML_LACK']['CFDI_ORIGIN_PLACE'].upper(), fontSize='7', fontName='Helvetica'
             )
             text = Paragraph(
                 '''
