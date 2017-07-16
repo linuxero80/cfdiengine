@@ -221,7 +221,10 @@ class FacPdf(BuilderGen):
         serie_folio = "%s%s" % (xml_parsed['CFDI_SERIE'], xml_parsed['CFDI_FOLIO'])
         lack = self.__cover_xml_lacks(conn, serie_folio, cap)
         einfo = extra(serie_folio, cap)
-        f_qr = qrcode_cfdi(self.__VERIFICATION_URL, xml_parsed['UUID'], xml_parsed['INCEPTOR_RFC'], xml_parsed['RECEPTOR_RFC'], xml_parsed['CFDI_TOTAL'], '12345')
+        f_qr = qrcode_cfdi(self.__VERIFICATION_URL, xml_parsed['UUID'],
+            xml_parsed['INCEPTOR_RFC'], xml_parsed['RECEPTOR_RFC'],
+            xml_parsed['CFDI_TOTAL'], xml_parsed['CFD_SEAL'][-8:]
+        )
 
         return {
             'CAP_LOADED': self.__CAPTIONS[cap],
@@ -736,9 +739,9 @@ class FacPdf(BuilderGen):
             context = dict(
                 inceptor=dat['XML_PARSED']['INCEPTOR_NAME'], rfc=dat['XML_PARSED']['INCEPTOR_RFC'],
                 phone=dat['CUSTOMER_PHONE'], www=dat['CUSTOMER_WWW'],
-                street=dat['XML_LACK']['INCEPTOR_STREET'],
+                street=dat['XML_LACK']['INCEPTOR_STREET'].upper(),
                 number=dat['XML_LACK']['INCEPTOR_STREET_NUMBER'],
-                settlement=dat['XML_LACK']['INCEPTOR_SETTLEMENT'],
+                settlement=dat['XML_LACK']['INCEPTOR_SETTLEMENT'].upper(),
                 state=dat['XML_LACK']['INCEPTOR_STATE'].upper(),
                 town=dat['XML_LACK']['INCEPTOR_TOWN'].upper(),
                 cp=dat['XML_PARSED']['INCEPTOR_CP'].upper(),
