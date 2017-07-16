@@ -318,11 +318,11 @@ class FacPdf(BuilderGen):
                 ],
                 [
                     0.4 * cm,
-                    0.9 * cm,
+                    1.0 * cm,
                     0.4 * cm,
-                    0.6 * cm,
+                    0.92 * cm,
                     0.4 * cm,
-                    0.6 * cm
+                    1.15 * cm
                 ]
             )
             t.setStyle( TableStyle([
@@ -340,7 +340,7 @@ class FacPdf(BuilderGen):
                 16.0 * cm
             ],
             [
-                4.0 * cm
+                4.5 * cm
             ]
         )
 
