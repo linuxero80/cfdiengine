@@ -30,6 +30,7 @@ class SaxReader(xml.sax.ContentHandler):
             'CFDI_FOLIO': None,
             'CFDI_SUBTOTAL': None,
             'CFDI_TOTAL': None,
+            'ARTIFACTS': [],
             'TAXES': {
                 'RET': {
                     'DETAILS': [],
@@ -74,6 +75,23 @@ class SaxReader(xml.sax.ContentHandler):
                     self.__ds['CFDI_DATE'] = v
                 if k == "NoCertificado":
                     self.__ds['CFDI_CERT_NUMBER'] = v
+
+        if name == "cfdi:Concepto":
+            c = {}
+            for (k, v) in attrs.items():
+                if k == "Cantidad":
+                    c[k.upper()] = v
+                if k == "Descripcion":
+                    c[k.upper()] = v
+                if k == "Importe":
+                    c[k.upper()] = v
+                if k == "NoIdentificacion":
+                    c[k.upper()] = v
+                if k == "ClaveUnidad":
+                    c[k.upper()] = v
+                if k == "ValorUnitario":
+                    c[k.upper()] = v
+            self.__ds['ARTIFACTS'].append(c)
 
         if name == "cfdi:Impuestos":
             for (k, v) in attrs.items():
