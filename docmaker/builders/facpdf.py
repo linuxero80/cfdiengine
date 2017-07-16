@@ -254,6 +254,10 @@ class FacPdf(BuilderGen):
         if ct is None:
             story.append(ct)
         story.append(Spacer(1, 0.6 * cm))
+        story.append(self.__info_cert_section(dat))
+
+        story.append(self.__info_cert_extra(dat))
+        story.append(Spacer(1, 0.6 * cm))
 
         def fp_foot(c, d):
             c.saveState()
@@ -277,6 +281,67 @@ class FacPdf(BuilderGen):
 
     def data_rel(self, dat):
         pass
+
+    def __info_cert_section(self, dat):
+        cont = [['INFORMACIÓN DEL TIMBRE FISCAL DIGITAL']]
+        st = ParagraphStyle(name='info', fontName='Helvetica', fontSize=6.5, leading = 8)
+        table = Table(cont,
+            [
+                20.0 * cm
+            ],
+            [
+                0.50 * cm,
+            ]
+        )
+        table.setStyle( TableStyle([
+            ('BOX', (0, 0), (0, 0), 0.25, colors.black),
+            ('VALIGN', (0, 0),(0, 0), 'MIDDLE'),
+            ('ALIGN', (0, 0),(0, 0), 'LEFT'),
+            ('FONT', (0, 0), (0, 0), 'Helvetica-Bold', 7),
+            ('BACKGROUND', (0, 0),(0, 0), colors.black),
+            ('TEXTCOLOR', (0, 0),(0, 0), colors.white)
+        ]))
+        return table
+
+    def __info_cert_extra(self, dat):
+
+        cont = []
+        st = ParagraphStyle(name='info', fontName='Helvetica', fontSize=6.7, leading = 8)
+
+        time_cert_info = {
+            'label': "FECHA Y HORA DE CERTIFICACIÓN:",
+            'scn': dat['XML_PARSED']['STAMP_DATE'],
+        }
+
+        no_cert_info = {
+            'label': "NO. CERTIFICADO DEL SAT:",
+            'scn': dat['XML_PARSED']['SAT_CERT_NUMBER'],
+        }
+
+        p_ti = '''<para align=center><b>%(label)s</b> %(scn)s</para>''' % time_cert_info
+        p_no = '''<para align=center><b>%(label)s</b> %(scn)s</para>''' % no_cert_info
+
+        cont.append([Paragraph(p_no, st), '', Paragraph(p_ti, st)])
+
+        table = Table(cont,
+            [
+                8.0 * cm,
+                1.0 * cm,
+                9.0 * cm,
+            ],
+            [
+                0.50*cm,
+            ]
+        )
+        table.setStyle( TableStyle([
+            ('BOX', (0, 0), (0, 0), 0.25, colors.black),
+
+            ('VALIGN', (0, 0),(-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0),(-1, -1), 'CENTER'),
+
+            ('BOX', (2, 0), (2, 0), 0.25, colors.black)
+        ]))
+        return table
 
     def __comments_section(self, dat):
         if not dat['EXTRA_INFO']['OBSERVACIONES']:
