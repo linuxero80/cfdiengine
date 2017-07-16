@@ -95,6 +95,7 @@ class FacPdf(BuilderGen):
             cxc_clie.colonia as rcolonia,
             re.titulo as restado,
             rm.titulo as rmunicipio,
+            cxc_clie.cp as rcp,
             rp.titulo as rpais
             FROM fac_docs
             JOIN cxc_clie ON fac_docs.cxc_clie_id = cxc_clie.id
@@ -121,7 +122,8 @@ class FacPdf(BuilderGen):
                 'RECEPTOR_SETTLEMENT': row['rmunicipio'],
                 'RECEPTOR_COUNTRY': row['rpais'],
                 'RECEPTOR_STATE': row['restado'],
-                'RECEPTOR_TOWN': row['rcolonia']
+                'RECEPTOR_TOWN': row['rcolonia'],
+                'RECEPTOR_CP': row['rcp']
             }
 
     def __load_extra_info(self, conn, serie_folio, cap):
@@ -460,7 +462,7 @@ class FacPdf(BuilderGen):
                 dat['XML_LACK']['RECEPTOR_STATE']
             ).upper()])
             c.append([ dat['XML_LACK']['RECEPTOR_COUNTRY'].upper() ])
-            c.append([ "%s %s" % ( dat['CAP_LOADED']['TL_CUST_ZIPC'], dat['XML_PARSED']['RECEPTOR_CP']) ])
+            c.append([ "%s %s" % ( dat['CAP_LOADED']['TL_CUST_ZIPC'], dat['XML_LACK']['RECEPTOR_CP']) ])
             t = Table(c,
                 [
                     8.6 * cm   # rowWitdhs
