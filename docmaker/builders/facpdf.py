@@ -89,7 +89,9 @@ class FacPdf(BuilderGen):
             gral_emp.numero_exterior as no,
             gral_edo.titulo as estado,
             gral_mun.titulo as municipio,
-            gral_mun.titulo || ', ' || gral_edo.titulo as lugar_exp
+            gral_mun.titulo || ', ' || gral_edo.titulo as lugar_exp,
+            cxc_clie.calle as rcalle,
+            cxc_clie.numero as rno
             FROM fac_docs
             JOIN cxc_clie ON fac_docs.cxc_clie_id = cxc_clie.id
             JOIN gral_emp ON gral_emp.id = cxc_clie.empresa_id
@@ -106,7 +108,9 @@ class FacPdf(BuilderGen):
                 'INCEPTOR_SETTLEMENT': row['municipio'],
                 'INCEPTOR_STATE': row['estado'],
                 'INCEPTOR_STREET': row['calle'],
-                'INCEPTOR_STREET_NUMBER': row['no']
+                'INCEPTOR_STREET_NUMBER': row['no'],
+                'RECEPTOR_STREET': row['rcalle'],
+                'RECEPTOR_STREET_NUMBER':  row['rno']
             }
 
     def __load_extra_info(self, conn, serie_folio, cap):
@@ -436,8 +440,8 @@ class FacPdf(BuilderGen):
             c.append([ dat['CAP_LOADED']['TL_CUST_ADDR'] ])
             c.append([ (
                 "{0} {1}".format(
-                    dat['XML_PARSED']['RECEPTOR_STREET'],
-                    dat['XML_PARSED']['RECEPTOR_STREET_NUMBER']
+                    dat['XML_LACK']['RECEPTOR_STREET'],
+                    dat['XML_LACK']['RECEPTOR_STREET_NUMBER']
             )).upper() ])
             c.append([ dat['XML_PARSED']['RECEPTOR_SETTLEMENT'].upper() ])
             c.append([ "{0}, {1}".format(

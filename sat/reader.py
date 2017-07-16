@@ -34,6 +34,7 @@ class SaxReader(xml.sax.ContentHandler):
             'CFDI_DATE': None,
             'CFDI_SERIE': None,
             'CFDI_FOLIO': None,
+            'MONEY_EXCHANGE': None,
             'CFDI_SUBTOTAL': None,
             'CFDI_TOTAL': None,
             'ARTIFACTS': [],
