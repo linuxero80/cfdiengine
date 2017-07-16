@@ -87,16 +87,20 @@ class FacPdf(BuilderGen):
             gral_emp.calle as calle,
             gral_emp.colonia as colonia,
             gral_emp.numero_exterior as no,
-            gral_edo.titulo as estado,
-            gral_mun.titulo as municipio,
-            gral_mun.titulo || ', ' || gral_edo.titulo as lugar_exp,
+            ee.titulo as estado,
+            em.titulo as municipio,
+            em.titulo || ', ' || ee.titulo as lugar_exp,
             cxc_clie.calle as rcalle,
-            cxc_clie.numero as rno
+            cxc_clie.numero as rno,
+            re.titulo as restado,
+            rm.titulo as rmunicipio
             FROM fac_docs
             JOIN cxc_clie ON fac_docs.cxc_clie_id = cxc_clie.id
             JOIN gral_emp ON gral_emp.id = cxc_clie.empresa_id
-            JOIN gral_edo ON gral_edo.id = cxc_clie.estado_id
-            JOIN gral_mun ON gral_mun.id = cxc_clie.municipio_id
+            JOIN gral_edo as re ON re.id = cxc_clie.estado_id
+            JOIN gral_mun as rm ON rm.id = cxc_clie.municipio_id
+            JOIN gral_edo as ee ON ee.id = gral_emp.estado_id
+            JOIN gral_mun as em ON em.id = gral_emp.municipio_id
             JOIN cfdi_regimenes ON gral_emp.regimen_fiscal = cfdi_regimenes.numero_control
             WHERE fac_docs.serie_folio="""
         for row in self.pg_query(conn, "{0}'{1}'".format(SQL, serie_folio)):
@@ -110,7 +114,9 @@ class FacPdf(BuilderGen):
                 'INCEPTOR_STREET': row['calle'],
                 'INCEPTOR_STREET_NUMBER': row['no'],
                 'RECEPTOR_STREET': row['rcalle'],
-                'RECEPTOR_STREET_NUMBER':  row['rno']
+                'RECEPTOR_STREET_NUMBER': row['rno'],
+                'RECEPTOR_SETTLEMENT': row['rmunicipio'],
+                'RECEPTOR_STATE': row['restado']
             }
 
     def __load_extra_info(self, conn, serie_folio, cap):
@@ -443,10 +449,10 @@ class FacPdf(BuilderGen):
                     dat['XML_LACK']['RECEPTOR_STREET'],
                     dat['XML_LACK']['RECEPTOR_STREET_NUMBER']
             )).upper() ])
-            c.append([ dat['XML_PARSED']['RECEPTOR_SETTLEMENT'].upper() ])
+            c.append([ dat['XML_LACK']['RECEPTOR_SETTLEMENT'].upper() ])
             c.append([ "{0}, {1}".format(
                 dat['XML_PARSED']['RECEPTOR_TOWN'],
-                dat['XML_PARSED']['RECEPTOR_STATE']
+                dat['XML_LACK']['RECEPTOR_STATE']
             ).upper()])
             c.append([ dat['XML_PARSED']['RECEPTOR_COUNTRY'].upper() ])
             c.append([ "%s %s" % ( dat['CAP_LOADED']['TL_CUST_ZIPC'], dat['XML_PARSED']['RECEPTOR_CP']) ])
