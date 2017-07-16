@@ -84,14 +84,17 @@ class FacPdf(BuilderGen):
 
     def __cover_xml_lacks(self, conn, serie_folio, cap):
         SQL = """select gral_emp.calle as calle,
-            gral_emp.numero_exterior as no
+            gral_emp.numero_exterior as no,
+            gral_edo.titulo as estado
             FROM fac_docs
             JOIN cxc_clie ON fac_docs.cxc_clie_id = cxc_clie.id
             JOIN gral_emp ON gral_emp.id = cxc_clie.empresa_id
+            JOIN gral_edo ON gral_edo.id = cxc_clie.estado_id
             WHERE fac_docs.serie_folio="""
         for row in self.pg_query(conn, "{0}'{1}'".format(SQL, serie_folio)):
             # Just taking first row of query result
             return {
+                'INCEPTOR_STATE': row['estado'],
                 'INCEPTOR_STREET': row['calle'],
                 'INCEPTOR_STREET_NUMBER': row['no']
             }
@@ -519,7 +522,7 @@ class FacPdf(BuilderGen):
                 street=dat['XML_LACK']['INCEPTOR_STREET'],
                 number=dat['XML_LACK']['INCEPTOR_STREET_NUMBER'],
                 settlement=dat['XML_PARSED']['INCEPTOR_SETTLEMENT'],
-                state=dat['XML_PARSED']['INCEPTOR_STATE'].upper(),
+                state=dat['XML_LACK']['INCEPTOR_STATE'].upper(),
                 town=dat['XML_PARSED']['INCEPTOR_TOWN'].upper(), cp=dat['XML_PARSED']['INCEPTOR_CP'].upper(),
                 regimen=dat['XML_PARSED']['INCEPTOR_REGIMEN'].upper(),
                 op=dat['XML_PARSED']['CFDI_ORIGIN_PLACE'].upper(), fontSize='7', fontName='Helvetica'
