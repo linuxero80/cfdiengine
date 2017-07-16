@@ -276,8 +276,8 @@ class FacPdf(BuilderGen):
     def __amount_section(self, dat):
 
         def letra_section():
-            c = [[''], ["IMPORTE CON LETRA"]]
-            (c, d) = dat['XML_PARSED']['CFDI_TOTAL'].split('.')
+            cont = [ [''], ["IMPORTE CON LETRA"] ]
+            (c,d) = dat['XML_PARSED']['CFDI_TOTAL'].split('.')
             n = numspatrans(c)
             result = "{0} {1} {2}/100 {3}".format(
                 n.upper(),
@@ -285,17 +285,20 @@ class FacPdf(BuilderGen):
                 d,
                 dat['EXTRA_INFO']['CURRENCY_ABR']
             )
+
             # substitute multiple whitespace with single whitespace
-            c.append([' '.join(result.split())])
-            table_letra = Table(c,
+            cont.append([ ' '.join(result.split()) ] )
+
+            table_letra = Table(cont,
                 [
                     12.3 * cm  # rowWitdhs
                 ],
-                [0.4 * cm] * len(c)  # rowHeights
+                [0.4*cm] * len(cont) # rowHeights
             )
-            table_letra.setStyle(TableStyle([
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+
+            table_letra.setStyle( TableStyle([
+                ('VALIGN', (0,0),(-1,-1), 'MIDDLE'),
+                ('ALIGN',  (0,0),(-1,-1), 'LEFT'),
                 ('FONT', (0, 1), (-1, 1), 'Helvetica-Bold', 7),
                 ('FONT', (0, 2), (-1, 2), 'Helvetica', 7),
             ]))
