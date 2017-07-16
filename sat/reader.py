@@ -20,6 +20,11 @@ class SaxReader(xml.sax.ContentHandler):
 
     def __reset(self):
         self.__ds = {
+            'STAMP_DATE': None,
+            'SAT_CERT_NUMBER': None,
+            'UUID': None,
+            'SAT_SEAL': None,
+            'CFD_SEAL': None,
             'INCEPTOR_NAME': None,
             'INCEPTOR_RFC': None,
             'INCEPTOR_CP': None,
@@ -102,3 +107,16 @@ class SaxReader(xml.sax.ContentHandler):
                     self.__ds['TAXES']['RET']['TOTAL'] = v
                 if k == "TotalImpuestosTrasladados":
                     self.__ds['TAXES']['TRAS']['TOTAL'] = v
+
+        if name == "tfd:TimbreFiscalDigital":
+            for (k, v) in attrs.items():
+                if k == "UUID":
+                    self.__ds['UUID'] = v
+                if k == "SelloSAT":
+                    self.__ds['SAT_SEAL'] = v
+                if k == "SelloCFD":
+                    self.__ds['CFD_SEAL'] = v
+                if k == "NoCertificadoSAT":
+                    self.__ds['SAT_CERT_NUMBER'] = v
+                if k == "FechaTimbrado":
+                    self.__ds['STAMP_DATE'] = v
