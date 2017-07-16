@@ -255,7 +255,7 @@ class FacPdf(BuilderGen):
             story.append(ct)
         story.append(Spacer(1, 0.6 * cm))
         story.append(self.__info_cert_section(dat))
-
+        story.append(self.__info_stamp_section(cedula, dat))
         story.append(self.__info_cert_extra(dat))
         story.append(Spacer(1, 0.6 * cm))
 
@@ -285,6 +285,65 @@ class FacPdf(BuilderGen):
 
     def data_rel(self, dat):
         pass
+
+    def __info_stamp_section(self, cedula, dat):
+
+        def seals():
+            c = []
+            st = ParagraphStyle(name='seal', fontName='Helvetica', fontSize=6.5, leading=8)
+            c.append(["CADENA ORIGINAL DEL TIMBRE:"])
+            c.append([Paragraph(dat['STAMP_ORIGINAL_STR'], st)])
+
+            c.append(["SELLO DIGITAL DEL EMISOR:"])
+            c.append([Paragraph(dat['XML_PARSED']['CFD_SEAL'], st)])
+
+            c.append(["SELLO DIGITAL DEL SAT:"])
+            c.append([Paragraph(dat['XML_PARSED']['SAT_SEAL'], st)])
+
+            t = Table(
+                c,
+                [
+                    15.5 * cm
+                ],
+                [
+                    0.4 * cm,
+                    0.9 * cm,
+                    0.4 * cm,
+                    0.6 * cm,
+                    0.4 * cm,
+                    0.6 * cm
+                ]
+            )
+            t.setStyle( TableStyle([
+                ('FONT', (0, 0), (0, 0), 'Helvetica-Bold', 6.5),
+                ('FONT', (0, 2), (0, 2), 'Helvetica-Bold', 6.5),
+                ('FONT', (0, 4), (0, 4), 'Helvetica-Bold', 6.5),
+            ]))
+            return t
+
+        cont = [[cedula, seals()]]
+
+        table = Table(cont,
+            [
+                4.0 * cm,
+                16.0 * cm
+            ],
+            [
+                4.0 * cm
+            ]
+        )
+
+        table.setStyle( TableStyle([
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+            ('VALIGN', (0, 0),(-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0),(0, 0), 'CENTER'),
+
+            ('ALIGN', (1, 0),(1, 0), 'LEFT'),
+            ('BACKGROUND', (1, 0),(1, 0), colors.sandybrown),
+            ('LINEBEFORE',(1,0),(1,0), 0.25, colors.black)
+        ]))
+
+        return table
 
     def __legend_section(self, dat):
         if len(dat['EXTRA_INFO']['BILL_LEGENDS']) == 0:
