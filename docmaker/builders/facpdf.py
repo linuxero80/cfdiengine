@@ -250,6 +250,11 @@ class FacPdf(BuilderGen):
         story.append(self.__amount_section(dat))
         story.append(Spacer(1, 0.45 * cm))
 
+        ct = self.__comments_section(dat)
+        if ct is None:
+            story.append(ct)
+        story.append(Spacer(1, 0.6 * cm))
+
         def fp_foot(c, d):
             c.saveState()
             width, height = letter
@@ -272,6 +277,27 @@ class FacPdf(BuilderGen):
 
     def data_rel(self, dat):
         pass
+
+    def __comments_section(self, dat):
+        if not dat['EXTRA_INFO']['OBSERVACIONES']:
+            return None
+        st = ParagraphStyle(name='info',fontName='Helvetica', fontSize=7, leading = 8)
+        cont = [[ dat['CAP_LOADED']['TL_DOC_OBS'] ]]
+        cont.append([ Paragraph( dat['EXTRA_INFO']['OBSERVACIONES'], st) ])
+        table = Table(cont,
+            [
+                20.0 * cm
+            ]
+        )
+        table.setStyle( TableStyle([
+            ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
+            ('VALIGN', (0, 0),(0, 0), 'MIDDLE'),
+            ('ALIGN', (0, 0),(0, 0), 'LEFT'),
+            ('FONT', (0, 0), (0, 0), 'Helvetica-Bold', 7),
+            ('BACKGROUND', (0, 0),(0, 0), colors.black),
+            ('TEXTCOLOR', (0, 0),(0, 0), colors.white),
+        ]))
+        return table
 
     def __amount_section(self, dat):
 
