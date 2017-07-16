@@ -182,7 +182,7 @@ class FacPdf(BuilderGen):
         def fetch_info(f, xslt):
             parser = xmlreader.SaxReader()
             try:
-                return parser(f), xmltricks.HelperXml.run_xslt(f, xslt)
+                return parser(f)
             except xml.sax.SAXParseException as e:
                 raise DocBuilderStepError("cfdi xml could not be parsed : {}".format(e))
             except Exception as e:
@@ -318,7 +318,7 @@ class FacPdf(BuilderGen):
                 ],
                 [
                     0.4 * cm,
-                    1.0 * cm,
+                    1.2 * cm,
                     0.4 * cm,
                     0.92 * cm,
                     0.4 * cm,

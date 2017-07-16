@@ -14,12 +14,14 @@ class SaxReader(xml.sax.ContentHandler):
         try:
             self.__reset()
             xml.sax.parse(xml_file_path, self)
-            return self.__ds
+            return self.__ds, self.__get_tos()
         except xml.sax.SAXParseException:
             raise
 
     def __reset(self):
         self.__ds = {
+            'TVER': None,
+            'PAC': None,
             'STAMP_DATE': None,
             'SAT_CERT_NUMBER': None,
             'UUID': None,
@@ -111,6 +113,8 @@ class SaxReader(xml.sax.ContentHandler):
 
         if name == "tfd:TimbreFiscalDigital":
             for (k, v) in attrs.items():
+                if k == "Version":
+                    self.__ds['TVER'] = v
                 if k == "UUID":
                     self.__ds['UUID'] = v
                 if k == "SelloSAT":
@@ -121,3 +125,15 @@ class SaxReader(xml.sax.ContentHandler):
                     self.__ds['SAT_CERT_NUMBER'] = v
                 if k == "FechaTimbrado":
                     self.__ds['STAMP_DATE'] = v
+                if k =='RfcProvCertif':
+                    self.__ds['PAC'] = v
+
+    def __get_tos(self):
+        return '||{}|{}|{}|{}|{}|{}||'.format(
+            self.__ds['TVER'],
+            self.__ds['UUID'],
+            self.__ds['STAMP_DATE'],
+            self.__ds['PAC'],
+            self.__ds['CFD_SEAL'],
+            self.__ds['SAT_CERT_NUMBER']
+        )
