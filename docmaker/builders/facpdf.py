@@ -82,6 +82,20 @@ class FacPdf(BuilderGen):
     def __init__(self, logger):
         super().__init__(logger)
 
+    def __cover_xml_lacks(self, conn, serie_folio, cap):
+        SQL = """select gral_emp.calle as calle,
+            gral_emp.numero_exterior as no
+            FROM fac_docs
+            JOIN cxc_clie ON fac_docs.cxc_clie_id = cxc_clie.id
+            JOIN gral_emp ON gral_emp.id = cxc_clie.empresa_id
+            WHERE fac_docs.serie_folio="""
+        for row in self.pg_query(conn, "{0}'{1}'".format(SQL, serie_folio)):
+            # Just taking first row of query result
+            return {
+                'INCEPTOR_STREET': row['calle'],
+                'INCEPTOR_STREET_NUMBER': row['no']
+            }
+
     def __load_extra_info(self, conn, serie_folio, cap):
 
         __EXTRA_INF_SQL = """SELECT  fac_docs.orden_compra AS purchase_number,
@@ -175,6 +189,7 @@ class FacPdf(BuilderGen):
             'CEDULA': cedula_filename,
             'STAMP_ORIGINAL_STR': original,
             'XML_PARSED': xml_parsed,
+            'XML_LACK': self.__cover_xml_lacks(conn, "%s%s" % (xml_parsed['CFDI_SERIE'], xml_parsed['CFDI_FOLIO']), cap),
             'CUSTOMER_WWW':'www.saar.com.mx',
             'CUSTOMER_PHONE':'83848025,8384-8085, 8384-8028',
             'FOOTER_ABOUT': "ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI",
@@ -501,8 +516,8 @@ class FacPdf(BuilderGen):
             context = dict(
                 inceptor=dat['XML_PARSED']['INCEPTOR_NAME'], rfc=dat['XML_PARSED']['INCEPTOR_RFC'],
                 phone=dat['CUSTOMER_PHONE'], www=dat['CUSTOMER_WWW'],
-                street=dat['XML_PARSED']['INCEPTOR_STREET'],
-                number=dat['XML_PARSED']['INCEPTOR_STREET_NUMBER'],
+                street=dat['XML_LACK']['INCEPTOR_STREET'],
+                number=dat['XML_LACK']['INCEPTOR_STREET_NUMBER'],
                 settlement=dat['XML_PARSED']['INCEPTOR_SETTLEMENT'],
                 state=dat['XML_PARSED']['INCEPTOR_STATE'].upper(),
                 town=dat['XML_PARSED']['INCEPTOR_TOWN'].upper(), cp=dat['XML_PARSED']['INCEPTOR_CP'].upper(),
