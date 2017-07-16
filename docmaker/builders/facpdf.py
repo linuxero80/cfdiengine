@@ -87,7 +87,8 @@ class FacPdf(BuilderGen):
         super().__init__(logger)
 
     def __cover_xml_lacks(self, conn, serie_folio, cap):
-        SQL = """select cfdi_regimenes.descripcion as regimen,
+        SQL = """select gral_emp.pagina_web as www,
+            cfdi_regimenes.descripcion as regimen,
             gral_emp.calle as calle,
             gral_emp.colonia as colonia,
             gral_emp.numero_exterior as no,
@@ -114,6 +115,7 @@ class FacPdf(BuilderGen):
         for row in self.pg_query(conn, "{0}'{1}'".format(SQL, serie_folio)):
             # Just taking first row of query result
             return {
+                'WWW': row['www'],
                 'CFDI_ORIGIN_PLACE': row['lugar_exp'],
                 'INCEPTOR_REGIMEN': row['regimen'],
                 'INCEPTOR_TOWN': row['colonia'],
@@ -226,7 +228,7 @@ class FacPdf(BuilderGen):
             'STAMP_ORIGINAL_STR': original,
             'XML_PARSED': xml_parsed,
             'XML_LACK': lack,
-            'CUSTOMER_WWW': 'www.saar.com.mx',
+            'CUSTOMER_WWW': lack['WWW'],
             'CUSTOMER_PHONE': '83848025,8384-8085, 8384-8028',
             'FOOTER_ABOUT': "ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI",
             'EXTRA_INFO': einfo
