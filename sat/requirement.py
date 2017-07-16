@@ -25,7 +25,7 @@ def qrcode_cfdi(as_usr, uuid, erfc, rrfc, total, chunk):
         border=4,
     )
     qr.add_data(
-        '{}{}{}{}{}{}'.format(
+        '{}?&id={}&re={}&rr={}&tt={}&fe={}'.format(
             as_usr, uuid, erfc, rrfc, total, chunk
         )
     )

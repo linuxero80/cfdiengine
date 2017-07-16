@@ -1,13 +1,15 @@
 from docmaker.gen import BuilderGen
 from docmaker.error import DocBuilderStepError
 from misc.numspatrans import numspatrans
+from sat.requirement import qrcode_cfdi
 
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.lib.units import cm 
+from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
+from reportlab.lib.enums import TA_CENTER
 
 import misc.helperxml as xmltricks
 import misc.helperstr as strtricks
@@ -19,6 +21,8 @@ impt_class='FacPdf'
 
 
 class FacPdf(BuilderGen):
+
+    __VERIFICATION_URL = 'https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx'
 
     __CAPTIONS = {
         'SPA': {
@@ -174,7 +178,7 @@ class FacPdf(BuilderGen):
         def fetch_info(f, xslt):
             parser = xmlreader.SaxReader()
             try:
-                return parser(f) , xmltricks.HelperXml.run_xslt(f, xslt)
+                return parser(f), xmltricks.HelperXml.run_xslt(f, xslt)
             except xml.sax.SAXParseException as e:
                 raise DocBuilderStepError("cfdi xml could not be parsed : {}".format(e))
             except Exception as e:
@@ -205,42 +209,42 @@ class FacPdf(BuilderGen):
         if not os.path.isfile(logo_filename):
             raise DocBuilderStepError("logo image {0} not found".format(logo_filename))
 
-        cedula_filename = os.path.join(d_rdirs['images'], "{}_cedula.png".format(rfc))
-        if not os.path.isfile(cedula_filename):
-            raise DocBuilderStepError("cedula image {0} not found".format(cedula_filename))
-
         f_xslt = os.path.join(d_rdirs['cfdi_xslt'], 'cadenaoriginal_TFD_1_1.xslt')
         if not os.path.isfile(f_xslt):
             raise DocBuilderStepError("cadena_original_timbre xslt file not found")
 
         xml_parsed, original = fetch_info(f_xml, f_xslt)
+        serie_folio = "%s%s" % (xml_parsed['CFDI_SERIE'], xml_parsed['CFDI_FOLIO'])
+        lack = self.__cover_xml_lacks(conn, serie_folio, cap)
+        einfo = extra(serie_folio, cap)
+        f_qr = qrcode_cfdi(self.__VERIFICATION_URL, xml_parsed['UUID'], xml_parsed['INCEPTOR_RFC'], xml_parsed['RECEPTOR_RFC'], xml_parsed['CFDI_TOTAL'], '12345')
 
         return {
             'CAP_LOADED': self.__CAPTIONS[cap],
+            'QRCODE': f_qr,
             'LOGO': logo_filename,
-            'CEDULA': cedula_filename,
             'STAMP_ORIGINAL_STR': original,
             'XML_PARSED': xml_parsed,
-            'XML_LACK': self.__cover_xml_lacks(conn, "%s%s" % (xml_parsed['CFDI_SERIE'], xml_parsed['CFDI_FOLIO']), cap),
-            'CUSTOMER_WWW':'www.saar.com.mx',
-            'CUSTOMER_PHONE':'83848025,8384-8085, 8384-8028',
+            'XML_LACK': lack,
+            'CUSTOMER_WWW': 'www.saar.com.mx',
+            'CUSTOMER_PHONE': '83848025,8384-8085, 8384-8028',
             'FOOTER_ABOUT': "ESTE DOCUMENTO ES UNA REPRESENTACIÓN IMPRESA DE UN CFDI",
-            'EXTRA_INFO': extra("%s%s" % (xml_parsed['CFDI_SERIE'], xml_parsed['CFDI_FOLIO']), cap)
+            'EXTRA_INFO': einfo
         }
 
     def format_wrt(self, output_file, dat):
         self.logger.debug('dumping contents of dat: {}'.format(repr(dat)))
 
         doc = BaseDocTemplate(output_file, pagesize=letter,
-            rightMargin=30,leftMargin=30, topMargin=30,bottomMargin=18,)
+            rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=18,)
         story = []
         logo = Image(dat['LOGO'])
         logo.drawHeight = 3.8*cm
         logo.drawWidth = 5.2*cm
 
-        cedula = Image(dat['CEDULA'])
-        cedula.drawHeight = 3.2*cm
-        cedula.drawWidth = 3.2*cm
+        qrcode = Image(dat['QRCODE'])
+        qrcode.drawHeight = 3.2*cm
+        qrcode.drawWidth = 3.2*cm
 
         story.append(self.__top_table(logo, dat))
         story.append(Spacer(1, 0.4 * cm))
@@ -255,7 +259,7 @@ class FacPdf(BuilderGen):
             story.append(ct)
         story.append(Spacer(1, 0.6 * cm))
         story.append(self.__info_cert_section(dat))
-        story.append(self.__info_stamp_section(cedula, dat))
+        story.append(self.__info_stamp_section(qrcode, dat))
         story.append(self.__info_cert_extra(dat))
         story.append(Spacer(1, 0.6 * cm))
 
@@ -284,7 +288,7 @@ class FacPdf(BuilderGen):
         return
 
     def data_rel(self, dat):
-        pass
+        os.remove(dat['QRCODE'])
 
     def __info_stamp_section(self, cedula, dat):
 
