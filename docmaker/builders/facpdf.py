@@ -251,7 +251,7 @@ class FacPdf(BuilderGen):
         story.append(Spacer(1, 0.45 * cm))
 
         ct = self.__comments_section(dat)
-        if ct is None:
+        if ct is not None:
             story.append(ct)
         story.append(Spacer(1, 0.6 * cm))
         story.append(self.__info_cert_section(dat))
@@ -436,11 +436,11 @@ class FacPdf(BuilderGen):
 
                 ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 7),
 
-                ('BOX', (1, 0), (2, -1), 0.25, colors.black),
+            #    ('BOX', (1, 0), (2, -1), 0.25, colors.black),
 
-                ('FONT', (1, 0), (1, 1), 'Helvetica', 7),
-                ('FONT', (1, 2), (1, 2), 'Helvetica-Bold', 7),
-                ('FONT', (-1, 0), (-1, -1), 'Helvetica-Bold', 7),
+            #    ('FONT', (1, 0), (1, 1), 'Helvetica', 7),
+            #    ('FONT', (1, 2), (1, 2), 'Helvetica-Bold', 7),
+            #    ('FONT', (-1, 0), (-1, -1), 'Helvetica-Bold', 7),
             ]))
             return table_total
 
