@@ -75,6 +75,8 @@ class SaxReader(xml.sax.ContentHandler):
                     self.__ds['CFDI_DATE'] = v
                 if k == "NoCertificado":
                     self.__ds['CFDI_CERT_NUMBER'] = v
+                if k == "LugarExpedicion":
+                    self.__ds['INCEPTOR_CP'] = v
 
         if name == "cfdi:Concepto":
             c = {}
