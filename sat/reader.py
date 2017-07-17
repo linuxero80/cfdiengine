@@ -111,6 +111,20 @@ class SaxReader(xml.sax.ContentHandler):
                 if k == "TotalImpuestosTrasladados":
                     self.__ds['TAXES']['TRAS']['TOTAL'] = v
 
+        if name == "cfdi:Traslado":
+            c = {}
+            if 'Base' in attrs:
+                pass
+            else:
+                for (k, v) in attrs.items():
+                    if k == "Importe":
+                        c[k.upper()] = v
+                    if k == "Impuesto":
+                        c[k.upper()] = v
+                    if k == "TasaOCuota":
+                        c[k.upper()] = v
+                self.__ds['TAXES']['TRAS']['DETAILS'].append(c)
+
         if name == "tfd:TimbreFiscalDigital":
             for (k, v) in attrs.items():
                 if k == "Version":
