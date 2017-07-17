@@ -11,7 +11,6 @@ from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 from reportlab.lib.enums import TA_CENTER
 
-import misc.helperxml as xmltricks
 import misc.helperstr as strtricks
 import sat.reader as xmlreader
 import os
@@ -317,7 +316,7 @@ class FacPdf(BuilderGen):
                     15.5 * cm
                 ],
                 [
-                    0.4 * cm,
+                    0.45 * cm,
                     1.2 * cm,
                     0.4 * cm,
                     0.92 * cm,
@@ -350,7 +349,7 @@ class FacPdf(BuilderGen):
             ('ALIGN', (0, 0),(0, 0), 'CENTER'),
 
             ('ALIGN', (1, 0),(1, 0), 'LEFT'),
-            ('BACKGROUND', (1, 0),(1, 0), colors.sandybrown),
+            ('BACKGROUND', (1, 0),(1, 0), colors.aliceblue),
             ('LINEBEFORE',(1,0),(1,0), 0.25, colors.black)
         ]))
 
@@ -604,7 +603,7 @@ class FacPdf(BuilderGen):
             ('TEXTCOLOR', (0,0),(-1,0), colors.white),
             ('FONT', (0, 0), (-1, -1), 'Helvetica', 7),
             ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 7),
-            ('ROWBACKGROUNDS', (0, 1),(-1, -1), [colors.white, colors.sandybrown]),
+            ('ROWBACKGROUNDS', (0, 1),(-1, -1), [colors.white, colors.aliceblue]),
             ('ALIGN', (0, 1),(1, -1), 'LEFT'),
             ('ALIGN', (2, 0),(2, -1), 'CENTER'),
             ('ALIGN', (3, 1),(-1, -1), 'RIGHT'),
@@ -664,7 +663,7 @@ class FacPdf(BuilderGen):
             )
             t.setStyle(TableStyle([
                 # Body and header look and feel (common)
-                ('ROWBACKGROUNDS', (0, 0), (-1, 4), [colors.sandybrown, colors.white]),
+                ('ROWBACKGROUNDS', (0, 0), (-1, 4), [colors.aliceblue, colors.white]),
                 ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('BOX', (0, 0), (-1, -1), 0.25, colors.black),
@@ -712,7 +711,7 @@ class FacPdf(BuilderGen):
                 ('FONT', (0, 7), (-1, 7), 'Helvetica', 7),
                 ('FONT', (0, 8), (-1, 8), 'Helvetica-Bold', 7),
                 ('FONT', (0, 9), (-1, 9), 'Helvetica', 7),
-                ('ROWBACKGROUNDS', (0, 0), (-1, -1), [colors.sandybrown, colors.white]),
+                ('ROWBACKGROUNDS', (0, 0), (-1, -1), [colors.aliceblue, colors.white]),
                 ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
             ]))
             return t
