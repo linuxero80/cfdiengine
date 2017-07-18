@@ -536,8 +536,8 @@ class FacPdf(BuilderGen):
 
                 ('BOX', (1, 0), (2, -1), 0.25, colors.black),
 
-                ('FONT', (1, 0), (1, 1), 'Helvetica', 7),
-                ('FONT', (1, 2), (1, 2), 'Helvetica-Bold', 7),
+                ('FONT', (1, 0), (1, -2), 'Helvetica', 7),
+                ('FONT', (1, -1), (1, -1), 'Helvetica-Bold', 7),
                 ('FONT', (-1, 0), (-1, -1), 'Helvetica-Bold', 7),
             ]))
             return table_total
@@ -548,7 +548,7 @@ class FacPdf(BuilderGen):
                12.4 * cm,
                8 * cm
             ],
-            [1.31 * cm] * len(cont)  # rowHeights
+            [1.685 * cm] * len(cont)  # rowHeights
         )
         table.setStyle(TableStyle([
             ('ALIGN', (0, 0), (0, 0), 'LEFT'),
